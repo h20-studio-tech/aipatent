@@ -1,0 +1,2 @@
+[console_scripts]
+marvin = marvin.cli:app
