@@ -1,0 +1,31 @@
+target_antigen,disease
+Spike Protein,COVID-19
+HER2,Breast Cancer
+Hepatitis B Surface Antigen,Hepatitis B
+Influenza Hemagglutinin,Influenza
+Targeted B-cell Antigen,B-cell Lymphoma
+PD-L1,"Lung Cancer, Melanoma"
+CEA,Colorectal Cancer
+PSA,Prostate Cancer
+RSV Fusion Protein,Respiratory Syncytial Virus
+Dengue Virus Envelope,Dengue
+Zika Virus Envelope,Zika Virus
+HIV-1 Envelope Protein,HIV/AIDS
+Anthrax Protective Antigen,Anthrax
+Tuberculosis Antigen 85B,Tuberculosis
+Ebola GP1 Protein,Ebola
+MUC1 Glycoprotein,Pancreatic Cancer
+Hepatitis C NS5B Polymerase,Hepatitis C
+TNF-alpha,"Rheumatoid Arthritis, Crohn's Disease"
+Plague F1 Antigen,Plague
+Malaria CSP,Malaria
+Norovirus Capsid Protein,Norovirus
+Bacillus Calmette–Guérin (BCG),Bladder Cancer
+Listeriolysin O,Listeriosis
+Botulinum Toxin,Botulism
+Lyme Borreliae Surface Protein,Lyme Disease
+Neisseria meningitidis Serogroup B,Meningitis
+Shiga Toxin,Hemolytic Uremic Syndrome
+Salmonella Typhi Vi Antigen,Typhoid Fever
+Varicella-Zoster Glycoprotein E,Shingles
+Yellow Fever Virus E Protein,Yellow Fever

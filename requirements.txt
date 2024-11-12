@@ -1,0 +1,9 @@
+langfuse
+marvin
+openai
+pydantic
+instructor
+shiny
+pandas
+asyncio
+python-dotenv
