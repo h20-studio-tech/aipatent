@@ -35,7 +35,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="d:\Work\Projects\aipatent\.venv"
+VIRTUAL_ENV="c:\Users\vtorr\Work\Projects\aipatent\.venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"

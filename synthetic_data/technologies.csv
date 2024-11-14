@@ -1,31 +1,31 @@
 target_antigen,disease
-Spike Protein,COVID-19
-HER2,Breast Cancer
+Avian Influenza Virus Hemagglutinin,Avian Influenza
+West Nile Virus Envelope Protein,West Nile Virus Infection
+Newcastle Disease Virus Fusion Protein,Newcastle Disease
+Escherichia coli Enterotoxins,E. coli Infection
+Rotavirus VP6 Protein,Rotavirus Infection
+Rabies Virus Glycoprotein,Rabies
+Salmonella Typhimurium Antigens,Salmonellosis
+Clostridium Perfringens Alpha Toxin,Clostridial Infections
+Staphylococcus Aureus Protein A,Staphylococcal Infections
+Influenza Virus Neuraminidase,Influenza
 Hepatitis B Surface Antigen,Hepatitis B
-Influenza Hemagglutinin,Influenza
-Targeted B-cell Antigen,B-cell Lymphoma
-PD-L1,"Lung Cancer, Melanoma"
-CEA,Colorectal Cancer
-PSA,Prostate Cancer
-RSV Fusion Protein,Respiratory Syncytial Virus
-Dengue Virus Envelope,Dengue
-Zika Virus Envelope,Zika Virus
-HIV-1 Envelope Protein,HIV/AIDS
-Anthrax Protective Antigen,Anthrax
-Tuberculosis Antigen 85B,Tuberculosis
-Ebola GP1 Protein,Ebola
-MUC1 Glycoprotein,Pancreatic Cancer
-Hepatitis C NS5B Polymerase,Hepatitis C
-TNF-alpha,"Rheumatoid Arthritis, Crohn's Disease"
-Plague F1 Antigen,Plague
-Malaria CSP,Malaria
-Norovirus Capsid Protein,Norovirus
-Bacillus Calmette–Guérin (BCG),Bladder Cancer
-Listeriolysin O,Listeriosis
-Botulinum Toxin,Botulism
-Lyme Borreliae Surface Protein,Lyme Disease
-Neisseria meningitidis Serogroup B,Meningitis
-Shiga Toxin,Hemolytic Uremic Syndrome
-Salmonella Typhi Vi Antigen,Typhoid Fever
-Varicella-Zoster Glycoprotein E,Shingles
+Norovirus Capsid Protein,Norovirus Infection
+African Swine Fever Virus Protein p30,African Swine Fever
 Yellow Fever Virus E Protein,Yellow Fever
+Lyme Disease Borrelia Burgdorferi Surface Protein,Lyme Disease
+Coxiella Burnetii Outer Membrane Protein,Q Fever
+Measles Virus Hemagglutinin,Measles
+Enterotoxigenic E. coli (ETEC) CF antigen,Traveler's Diarrhea
+Porcine Epidemic Diarrhea Virus (PEDV) Spike Protein,Porcine Epidemic Diarrhea
+Rabbit Hemorrhagic Disease Virus VP60 Protein,Rabbit Hemorrhagic Disease
+Canine Parvovirus VP2 Protein,Canine Parvovirus Infection
+Bacillus Anthracis Protective Antigen,Anthrax
+Feline Panleukopenia Virus VP2 Protein,Feline Panleukopenia
+Leptospira Outer Membrane Protein,Leptospirosis
+Tetanus Toxin C Fragment,Tetanus
+Ebola Virus Glycoprotein,Ebola Virus Disease
+Streptococcus pneumoniae Capsular Polysaccharide,Pneumococcal Disease
+Haemophilus influenzae Type b Polyribosylribitol Phosphate,Haemophilus influenzae Type b Infection
+Mumps Virus Fusion Protein,Mumps
+Listeria monocytogenes Internalin A,Listeriosis

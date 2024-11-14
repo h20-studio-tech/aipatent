@@ -33,7 +33,7 @@ class Assembler:
 
     def __init__(
         self,
-        high: int = 16,
+        high: int | None = None,
         low: int | None = None,
         pause: Callable[[], Any] = lambda: None,
         resume: Callable[[], Any] = lambda: None,
@@ -49,12 +49,15 @@ class Assembler:
         # call to Protocol.data_received() could produce thousands of frames,
         # which must be buffered. Instead, we pause reading when the buffer goes
         # above the high limit and we resume when it goes under the low limit.
-        if low is None:
+        if high is not None and low is None:
             low = high // 4
-        if low < 0:
-            raise ValueError("low must be positive or equal to zero")
-        if high < low:
-            raise ValueError("high must be greater than or equal to low")
+        if high is None and low is not None:
+            high = low * 4
+        if high is not None and low is not None:
+            if low < 0:
+                raise ValueError("low must be positive or equal to zero")
+            if high < low:
+                raise ValueError("high must be greater than or equal to low")
         self.high, self.low = high, low
         self.pause = pause
         self.resume = resume
@@ -69,10 +72,16 @@ class Assembler:
     def get_next_frame(self, timeout: float | None = None) -> Frame:
         # Helper to factor out the logic for getting the next frame from the
         # queue, while handling timeouts and reaching the end of the stream.
-        try:
-            frame = self.frames.get(timeout=timeout)
-        except queue.Empty:
-            raise TimeoutError(f"timed out in {timeout:.1f}s") from None
+        if self.closed:
+            try:
+                frame = self.frames.get(block=False)
+            except queue.Empty:
+                raise EOFError("stream of frames ended") from None
+        else:
+            try:
+                frame = self.frames.get(block=True, timeout=timeout)
+            except queue.Empty:
+                raise TimeoutError(f"timed out in {timeout:.1f}s") from None
         if frame is None:
             raise EOFError("stream of frames ended")
         return frame
@@ -87,7 +96,7 @@ class Assembler:
             queued = []
             try:
                 while True:
-                    queued.append(self.frames.get_nowait())
+                    queued.append(self.frames.get(block=False))
             except queue.Empty:
                 pass
             for frame in frames:
@@ -123,14 +132,12 @@ class Assembler:
 
         """
         with self.mutex:
-            if self.closed:
-                raise EOFError("stream of frames ended")
-
             if self.get_in_progress:
                 raise ConcurrencyError("get() or get_iter() is already running")
-
-            # Locking with get_in_progress ensures only one thread can get here.
             self.get_in_progress = True
+
+        # Locking with get_in_progress prevents concurrent execution
+        # until get() fetches a complete message or times out.
 
         try:
             deadline = Deadline(timeout)
@@ -193,17 +200,12 @@ class Assembler:
 
         """
         with self.mutex:
-            if self.closed:
-                raise EOFError("stream of frames ended")
-
             if self.get_in_progress:
                 raise ConcurrencyError("get() or get_iter() is already running")
-
-            # Locking with get_in_progress ensures only one coroutine can get here.
             self.get_in_progress = True
 
-        # Locking with get_in_progress prevents concurrent execution until
-        # get_iter() fetches a complete message or is cancelled.
+        # Locking with get_in_progress prevents concurrent execution
+        # until get_iter() fetches a complete message or times out.
 
         # If get_iter() raises an exception e.g. in decoder.decode(),
         # get_in_progress remains set and the connection becomes unusable.
@@ -261,7 +263,12 @@ class Assembler:
 
     def maybe_pause(self) -> None:
         """Pause the writer if queue is above the high water mark."""
+        # Skip if flow control is disabled
+        if self.high is None:
+            return
+
         assert self.mutex.locked()
+
         # Check for "> high" to support high = 0
         if self.frames.qsize() > self.high and not self.paused:
             self.paused = True
@@ -269,7 +276,12 @@ class Assembler:
 
     def maybe_resume(self) -> None:
         """Resume the writer if queue is below the low water mark."""
+        # Skip if flow control is disabled
+        if self.low is None:
+            return
+
         assert self.mutex.locked()
+
         # Check for "<= low" to support low = 0
         if self.frames.qsize() <= self.low and self.paused:
             self.paused = False
@@ -289,5 +301,6 @@ class Assembler:
 
             self.closed = True
 
-            # Unblock get() or get_iter().
-            self.frames.put(None)
+            if self.get_in_progress:
+                # Unblock get() or get_iter().
+                self.frames.put(None)

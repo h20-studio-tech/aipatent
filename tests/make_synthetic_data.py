@@ -1,6 +1,11 @@
+import sys
+import os
+# Add project root to Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import marvin
 import pandas as pd
-from app.models import Technology
+from app.models.llm import Technology
 
 async def generate_synthetic_data(
     model_class,
@@ -49,6 +54,23 @@ async def generate_synthetic_data(
     # Save to CSV
     if output_file is None:
       output_file = f"{model_class.__name__.lower()}.csv"
-    df.to_csv(f'synthetic_data/{output_file}', index=False)
+    df.to_csv(f'synthetic_data/{output_file}.csv', index=False)
     
     return df
+
+async def main():
+    # Read existing technologies data
+    tech_df = pd.read_csv("synthetic_data/technologies.csv")
+    
+    # Generate primary invention data
+    await generate_synthetic_data(
+        model_class=Technology,
+        n_samples=len(tech_df),
+        instructions="Generate 30 technologies",
+        output_file="technologies",
+        fields=["target_antigen", "disease"]
+    )
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(main())
