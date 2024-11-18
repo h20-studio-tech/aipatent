@@ -13,6 +13,7 @@ from utils.utils import values_to_json
 import uuid
 import sys
 
+trace_id = str(uuid.uuid4())
 client = instructor.from_openai(AsyncOpenAI())
 langfuse = Langfuse()
 
@@ -28,13 +29,13 @@ class ProgressTracker:
 
 progress_tracker = ProgressTracker()
 
-async def primary_invention(antigen: str, disease: str, model: str = "gpt-4o-mini") -> str:
+async def primary_invention(antigen: str, disease: str, model: str = "o1-mini") -> str:
     client = AsyncOpenAI()
     
     if not disease or not antigen:
         raise ValueError("Disease and antigen must be non-empty strings")
 
-    trace = langfuse.trace(name="generate_primary_invention", input=values_to_json(antigen=antigen, disease=disease), tags =["evaluation"])
+    trace = langfuse.trace(id=trace_id, name="generate_primary_invention", input=values_to_json(antigen=antigen, disease=disease), tags =["evaluation"])
     fetch_prompt = trace.span(name="fetch_prompt", start_time=datetime.now())
     raw_prompt = langfuse.get_prompt("generate_primary_invention")
     prompt = raw_prompt.compile(antigen=antigen, disease=disease)
