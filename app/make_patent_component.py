@@ -1,11 +1,11 @@
-import os
+import uuid
+import sys
 
 from datetime import datetime
-import pandas as pd
 
 from langfuse import Langfuse
 from openai import OpenAI
-from models.llm import (
+from app.models.llm import (
     PrimaryInvention,
     FieldOfInvention,
     BackgroundAndNeed,
@@ -16,9 +16,7 @@ from models.llm import (
     Uses,
 )
 
-from utils.utils import values_to_json
-import uuid
-import sys
+from app.utils.utils import values_to_json
 
 langfuse = Langfuse()
 
