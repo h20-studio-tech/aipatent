@@ -3,15 +3,15 @@ import os
 import logging
 from shiny import reactive, render, ui
 import shiny
-from app.make_patent_component import (
+from make_patent_component import (
     langfuse,
     generate_primary_invention,
     generate_field_of_invention,
-    generate_background_and_need,
-    generate_brief_summary,
+    generate_background,
+    generate_summary,
     generate_technology_platform,
     generate_description_of_invention,
-    generate_product_or_products,
+    generate_product,
     generate_uses,
 )
 
@@ -36,50 +36,51 @@ app_ui = ui.page_fluid(
             ),
             ui.input_action_button("generate", "Generate", class_="btn btn-primary"),
         ),
-        ui.card(
-            ui.output_ui("primary_invention_card", height="100%", padding="0"),
-            min_height="50%",
-            max_height="50%",
-            class_="p-0",  # Placeholder for dynamically generated cards
-        ),
-        ui.card(
-            ui.output_ui("field_of_invention_card", height="100%", padding="0"),
-            min_height="50%",
-            max_height="50%",
-            class_="p-0",  # Placeholder for dynamically generated cards
-        ),
+
         ui.card(
             ui.output_ui("background_card", height="100%", padding="0"),
             min_height="50%",
             max_height="50%",
             class_="p-0",  # Placeholder for dynamically generated cards
         ),
+
+        ui.card(
+            ui.output_ui("field_of_invention_card", height="100%", padding="0"),
+            min_height="50%",
+            max_height="50%",
+            class_="p-0",  # Placeholder for dynamically generated cards
+        ),
+
         ui.card(
             ui.output_ui("summary_card", height="100%", padding="0"),
             min_height="50%",
             max_height="50%",
             class_="p-0",  # Placeholder for dynamically generated cards
         ),
+
+        ui.card(
+            ui.output_ui("primary_invention_card", height="100%", padding="0"),
+            min_height="50%",
+            max_height="50%",
+            class_="p-0",  # Placeholder for dynamically generated cards
+        ),
+
         ui.card(
             ui.output_ui("technology_card", height="100%", padding="0"),
             min_height="50%",
             max_height="50%",
             class_="p-0",  # Placeholder for dynamically generated cards
         ),
+
         ui.card(
             ui.output_ui("description_card", height="100%", padding="0"),
             min_height="50%",
             max_height="50%",
             class_="p-0",  # Placeholder for dynamically generated cards
         ),
+
         ui.card(
             ui.output_ui("product_card", height="100%", padding="0"),
-            min_height="50%",
-            max_height="50%",
-            class_="p-0",  # Placeholder for dynamically generated cards
-        ),
-        ui.card(
-            ui.output_ui("uses_card", height="100%", padding="0"),
             min_height="50%",
             max_height="50%",
             class_="p-0",  # Placeholder for dynamically generated cards
@@ -96,7 +97,7 @@ def generate_card_content(response_text, generation_step):
     response_text = str(response_text)
     step_id = generation_step.lower().replace(" ", "_")
 
-    if generation_step == "uses":
+    if generation_step == "product":
         return ui.div(
             ui.div(
                 ui.input_text_area(
@@ -265,14 +266,13 @@ def generate_card_content(response_text, generation_step):
 
 
 shared_state = {
-    "primary_invention_trace": None,
+    "background_trace": None,
     "field_of_invention_trace": None,
-    "background_and_need_trace": None,
-    "brief_summary_trace": None,
-    "technology_platform_trace": None,
-    "description_of_invention_trace": None,
-    "product_or_products_trace": None,
-    "uses_trace": None,
+    "summary_trace": None,
+    "primary_invention_trace": None,
+    "technology_trace": None,
+    "description_trace": None,
+    "product_trace": None,
 }
 
 
@@ -282,25 +282,24 @@ def server(input, output, session):
     server function for shiny app
     """
     # Create a reactive value to store the generated primary invention
-    generated_primary_invention = reactive.Value("")
-    generated_field_of_invention = reactive.Value("")
     generated_background = reactive.Value("")
+    generated_field_of_invention = reactive.Value("")
     generated_summary = reactive.Value("")
+    generated_primary_invention = reactive.Value("")
     generated_technology = reactive.Value("")
     generated_description = reactive.Value("")
     generated_product = reactive.Value("")
-    generated_uses = reactive.Value("")
 
     @reactive.Effect
     @reactive.event(input.generate)
-    def on_generate():
+    def on_start_generation():
         # Collect input values
         antigen = input.antigen()
         disease = input.disease()
 
-        ui.update_action_button("thumbs_up_primary_invention", disabled=False)
-        ui.update_action_button("thumbs_down_primary_invention", disabled=False)
-        ui.update_action_button("primary_invention_continue", disabled=False)
+        ui.update_action_button("thumbs_up_background", disabled=False)
+        ui.update_action_button("thumbs_down_background", disabled=False)
+        ui.update_action_button("background_continue", disabled=False)
 
         if not antigen and not disease:
             ui.notification_show(
@@ -320,44 +319,40 @@ def server(input, output, session):
 
         if ENVIRONMENT == "development":
             response = f"Antigen: {antigen} and Disease: {disease}"
-            generated_primary_invention.set(response)
+            generated_background.set(response)
         else:
-            response = generate_primary_invention(antigen, disease)
+            response = generate_background(antigen, disease)
 
-            shared_state["primary_invention_trace"] = langfuse.trace(
+            shared_state["background_trace"] = langfuse.trace(
                 id=response.trace_id
             )
 
             # Debugging: Log the response
-            logging.info("Generated primary invention")
+            logging.info("Generated Background")
 
-            generated_primary_invention.set(response.prediction)
+            generated_background.set(response.prediction)
 
     @reactive.Effect
-    @reactive.event(input.primary_invention_continue)
-    def on_primary_invention_continue():
-        primary_invention_edit = input.primary_invention()
+    @reactive.event(input.background_continue)
+    def on_background_continue():
+        background_edit = input.background()
         antigen = input.antigen()
         disease = input.disease()
+
         if ENVIRONMENT == "development":
             response = f"Antigen: {antigen} and Disease: {disease}"
             generated_field_of_invention.set(response)
 
-            ui.update_action_button("primary_invention_continue", disabled=True)
+            ui.update_action_button("background_continue", disabled=True)
             ui.update_action_button("field_of_invention_continue", disabled=False)
+        
         else:
-            response = generate_field_of_invention(
-                primary_invention=primary_invention_edit,
-                antigen=antigen,
-                disease=disease,
-            )
+            response = generate_field_of_invention(background_edit, antigen, disease)
 
-            shared_state["field_of_invention_trace"] = langfuse.trace(
-                id=response.trace_id
-            )
+            shared_state["field_of_invention_trace"] = langfuse.trace(id=response.trace_id)
 
-            logging.info("Generated field of invention")
-            ui.update_action_button("primary_invention_continue", disabled=True)
+            logging.info("Generated Field of Invention")
+            ui.update_action_button("background_continue", disabled=True)
             ui.update_action_button("field_of_invention_continue", disabled=False)
             generated_field_of_invention.set(response.prediction)
 
@@ -370,46 +365,24 @@ def server(input, output, session):
 
         if ENVIRONMENT == "development":
             response = f"Antigen: {antigen} and Disease: {disease}"
-            generated_background.set(response)
+            generated_summary.set(response)
 
             ui.update_action_button("field_of_invention_continue", disabled=True)
-            ui.update_action_button("background_continue", disabled=False)
+            ui.update_action_button("summary_continue", disabled=False)
         else:
-            response = generate_background_and_need(
+            response = generate_summary(
                 field_of_invention_edit, antigen, disease
             )
 
-            shared_state["background_and_need_trace"] = langfuse.trace(
+            shared_state["summary_trace"] = langfuse.trace(
                 id=response.trace_id
             )
 
-            logging.info("Generated background and need")
+            logging.info("Generated Summary")
             ui.update_action_button("field_of_invention_continue", disabled=True)
-            ui.update_action_button("background_continue", disabled=False)
-            generated_background.set(response.prediction)
-
-    @reactive.Effect
-    @reactive.event(input.background_continue)
-    def on_background_continue():
-        background_edit = input.background()
-        antigen = input.antigen()
-        disease = input.disease()
-
-        if ENVIRONMENT == "development":
-            response = f"Antigen: {antigen} and Disease: {disease}"
-            generated_summary.set(response)
-
-            ui.update_action_button("background_continue", disabled=True)
-            ui.update_action_button("summary_continue", disabled=False)
-        else:
-            response = generate_brief_summary(background_edit, antigen, disease)
-
-            shared_state["brief_summary_trace"] = langfuse.trace(id=response.trace_id)
-
-            logging.info("Generated brief summary")
-            ui.update_action_button("background_continue", disabled=True)
             ui.update_action_button("summary_continue", disabled=False)
             generated_summary.set(response.prediction)
+
 
     @reactive.Effect
     @reactive.event(input.summary_continue)
@@ -420,19 +393,47 @@ def server(input, output, session):
 
         if ENVIRONMENT == "development":
             response = f"Antigen: {antigen} and Disease: {disease}"
-            generated_technology.set(response)
+            generated_primary_invention.set(response)
 
             ui.update_action_button("summary_continue", disabled=True)
-            ui.update_action_button("technology_continue", disabled=False)
+            ui.update_action_button("primary_invention_continue", disabled=False)
         else:
-            response = generate_technology_platform(summary_edit, antigen, disease)
+            response = generate_primary_invention(summary_edit, antigen, disease)
 
-            shared_state["technology_platform_trace"] = langfuse.trace(
+            shared_state["primary_invention_trace"] = langfuse.trace(
                 id=response.trace_id
             )
 
-            logging.info("Generated technology platform")
+            logging.info("Generated Primary Invention")
             ui.update_action_button("summary_continue", disabled=True)
+            ui.update_action_button("primary_invention_continue", disabled=False)
+            generated_primary_invention.set(response.prediction)
+
+    @reactive.Effect
+    @reactive.event(input.primary_invention_continue)
+    def on_primary_invention_continue():
+        primary_invention_edit = input.primary_invention()
+        antigen = input.antigen()
+        disease = input.disease()
+        if ENVIRONMENT == "development":
+            response = f"Antigen: {antigen} and Disease: {disease}"
+            generated_technology.set(response)
+
+            ui.update_action_button("primary_invention_continue", disabled=True)
+            ui.update_action_button("technology_continue", disabled=False)
+        else:
+            response = generate_technology_platform(
+                primary_invention_edit,
+                antigen,
+                disease,
+            )
+
+            shared_state["technology_trace"] = langfuse.trace(
+                id=response.trace_id
+            )
+
+            logging.info("Generated Technology")
+            ui.update_action_button("primary_invention_continue", disabled=True)
             ui.update_action_button("technology_continue", disabled=False)
             generated_technology.set(response.prediction)
 
@@ -454,11 +455,11 @@ def server(input, output, session):
                 technology_edit, antigen, disease
             )
 
-            shared_state["description_of_invention_trace"] = langfuse.trace(
+            shared_state["description_trace"] = langfuse.trace(
                 id=response.trace_id
             )
 
-            logging.info("Generated description of invention")
+            logging.info("Generated Description Of Invention")
             ui.update_action_button("technology_continue", disabled=True)
             ui.update_action_button("description_continue", disabled=False)
             generated_description.set(response.prediction)
@@ -475,61 +476,38 @@ def server(input, output, session):
             generated_product.set(response)
 
             ui.update_action_button("description_continue", disabled=True)
-            ui.update_action_button("product_continue", disabled=False)
+            ui.update_action_button("product_retry", disabled=False)
         else:
-            response = generate_product_or_products(description_edit, antigen, disease)
+            response = generate_product(description_edit, antigen, disease)
 
-            shared_state["product_or_products_trace"] = langfuse.trace(
+            shared_state["product_trace"] = langfuse.trace(
                 id=response.trace_id
             )
 
             logging.info("Generated product or products")
             ui.update_action_button("description_continue", disabled=True)
-            ui.update_action_button("product_continue", disabled=False)
+            ui.update_action_button("product_retry", disabled=False)
             generated_product.set(response.prediction)
 
     @reactive.Effect
-    @reactive.event(input.product_continue)
+    @reactive.event(input.product_retry)
     def on_product_continue():
-        product_edit = input.product()
-        antigen = input.antigen()
-        disease = input.disease()
-        if ENVIRONMENT == "development":
-            response = f"Antigen: {antigen} and Disease: {disease}"
-            generated_uses.set(response)
-
-            ui.update_action_button("product_continue", disabled=True)
-            ui.update_action_button("uses_retry", disabled=False)
-        else:
-            response = generate_uses(product_edit, antigen, disease)
-
-            shared_state["uses_trace"] = langfuse.trace(id=response.trace_id)
-
-            logging.info("Generated uses")
-            ui.update_action_button("product_continue", disabled=True)
-            ui.update_action_button("uses_retry", disabled=False)
-            generated_uses.set(response.prediction)
-
-    @reactive.Effect
-    @reactive.event(input.uses_retry)
-    def on_uses_retry():
         """
         Clean up all the output cards
         """
-        generated_primary_invention.unset()
-        generated_field_of_invention.unset()
         generated_background.unset()
+        generated_field_of_invention.unset()
         generated_summary.unset()
+        generated_primary_invention.unset()
         generated_technology.unset()
         generated_description.unset()
-        generated_product.unset()
-        generated_uses.unset()
+        generated_product.unset()              
 
-    # Use render.ui to auto-refresh content when generated_content changes
     @output
     @render.ui
-    def primary_invention_card():
-        return generate_card_content(generated_primary_invention(), "primary_invention")
+    def background_card():
+        return generate_card_content(generated_background(), "background")
+    
 
     # UI renderers
     @output
@@ -541,19 +519,19 @@ def server(input, output, session):
 
     @output
     @render.ui
-    def background_card():
-        return generate_card_content(generated_background(), "background")
-
-    @output
-    @render.ui
     def summary_card():
         return generate_card_content(generated_summary(), "summary")
 
     @output
     @render.ui
+    def primary_invention_card():
+        return generate_card_content(generated_primary_invention(), "primary_invention")
+
+    @output
+    @render.ui
     def technology_card():
         return generate_card_content(generated_technology(), "technology")
-
+    
     @output
     @render.ui
     def description_card():
@@ -564,14 +542,180 @@ def server(input, output, session):
     def product_card():
         return generate_card_content(generated_product(), "product")
 
-    @output
-    @render.ui
-    def uses_card():
-        return generate_card_content(generated_uses(), "uses")
+    # Background_and_need
+    @reactive.Effect
+    @reactive.event(input.thumbs_up_background)
+    def on_background_and_need_thumbs_up():
+        ui.update_action_button("thumbs_down_background", disabled=True)
+        ui.update_action_button("thumbs_up_background", disabled=True)
+        ui.notification_show("That's an Interesting Background!", duration=2, type="message")
+
+        trace = shared_state["background_trace"]
+
+        if trace:
+            trace.update(metadata={"feedback": "positive"})
+        print("thumbs up")
 
     @reactive.Effect
+    @reactive.event(input.thumbs_down_background)
+    def on_background_thumbs_down():
+        ui.update_action_button("thumbs_up_background", disabled=True)
+        ui.update_action_button("thumbs_down_background", disabled=True)
+        ui.notification_show("Not the best Background 🤷🏽‍♂️", duration=2, type="error")
+
+        trace = shared_state["background_trace"]
+        if trace:
+            trace.update(metadata={"feedback": "negative"})
+        print("thumbs down")
+
+    @reactive.Effect()
+    @reactive.event(input.background)
+    def on_background_and_need_editable_content():
+        print("watching changes...")
+        if input.background() != "":
+            print("content changed!")
+            ui.update_action_button("save_background", disabled=False)
+
+    @reactive.Effect
+    @reactive.event(input.save_background)
+    def on_save_background_and_need():
+        print("save")
+        ui.update_action_button("save_background", disabled=True)
+
+        background_edit = input.background()
+        if ENVIRONMENT == "development":
+            generated_background.set(background_edit)
+        else:
+            generated_background.set(background_edit)
+            trace = shared_state["background_trace"]
+            if trace:
+                trace.event(
+                    name="edit_background",
+                    input="The input to this event is the background_and_need generated by the LLM",
+                    output=background_edit,
+                )
+
+    @reactive.Effect
+    @reactive.event(input.save_reasoning_background)
+    def on_save_reasoning_background_and_need():
+        print("save reasoning")
+        reasoning = input.reasoning_background()
+
+        trace = shared_state["background_trace"]
+        if trace:
+            trace.event(
+                name="edit_reasoning_background",
+                input="the user comments on the background and the changes they made",
+                output=reasoning,
+            )
+
+        ui.update_action_button("save_reasoning_background", disabled=True)
+
+    @reactive.Effect
+    @reactive.event(input.save_reasoning_thumbs_down_background)
+    def on_save_reasoning_background_thumbs_down():
+        print("save thumbs down reasoning")
+        reasoning = input.reasoning_thumbs_down_background()
+        trace = shared_state["background_trace"]
+        if trace:
+            trace.event(
+                name="thumbs_down_reasoning_background",
+                input="the user provides negative feedback",
+                output=reasoning,
+            )
+        ui.update_action_button(
+            "save_reasoning_thumbs_down_background", disabled=True
+        )
+    
+    # Field of invention feedback logic
+    @reactive.Effect
+    @reactive.event(input.thumbs_up_field_of_invention)
+    def on_field_of_invention_thumbs_up():
+        ui.update_action_button("thumbs_down_field_of_invention", disabled=True)
+        ui.update_action_button("thumbs_up_field_of_invention", disabled=True)
+        ui.notification_show("thumbs up_field_of_invention", duration=2, type="message")
+
+        trace = shared_state["field_of_invention_trace"]
+
+        if trace:
+            trace.update(metadata={"feedback": "positive"})
+        print("thumbs up")
+
+    @reactive.Effect
+    @reactive.event(input.thumbs_down_field_of_invention)
+    def on_field_of_invention_thumbs_down():
+        ui.update_action_button("thumbs_up_field_of_invention", disabled=True)
+        ui.update_action_button("thumbs_down_field_of_invention", disabled=True)
+        ui.notification_show("thumbs down_field_of_invention", duration=2, type="error")
+
+        trace = shared_state["field_of_invention_trace"]
+        if trace:
+            trace.update(metadata={"feedback": "negative"})
+        print("thumbs down")
+
+    @reactive.Effect()
+    @reactive.event(input.field_of_invention)
+    def on_field_of_invention_editable_content():
+        print("watching changes...")
+        if input.field_of_invention() != "":
+            print("content changed!")
+            ui.update_action_button("save_field_of_invention", disabled=False)
+
+    @reactive.Effect
+    @reactive.event(input.save_field_of_invention)
+    def on_save_field_of_invention():
+        print("save")
+        ui.update_action_button("save_field_of_invention", disabled=True)
+
+        field_of_invention_edit = input.field_of_invention()
+        if ENVIRONMENT == "development":
+            generated_field_of_invention.set(field_of_invention_edit)
+        else:
+            generated_field_of_invention.set(field_of_invention_edit)
+            trace = shared_state["field_of_invention_trace"]
+            if trace:
+                trace.event(
+                    name="edit_field_of_invention",
+                    input="The input to this event is the field of invention generated by the LLM",
+                    output=field_of_invention_edit,
+                )
+
+    @reactive.Effect
+    @reactive.event(input.save_reasoning_field_of_invention)
+    def on_save_reasoning_field_of_invention():
+        print("save reasoning")
+        reasoning = input.reasoning_field_of_invention()
+
+        trace = shared_state["field_of_invention_trace"]
+        if trace:
+            trace.event(
+                name="edit_reasoning_primary_invention",
+                input="the user comments on the field of invention and the changes they made",
+                output=reasoning,
+            )
+
+        ui.update_action_button("save_reasoning_field_of_invention", disabled=True)
+
+    @reactive.Effect
+    @reactive.event(input.save_reasoning_thumbs_down_field_of_invention)
+    def on_save_reasoning_field_of_invention_thumbs_down():
+        print("save thumbs down reasoning")
+        reasoning = input.reasoning_thumbs_down_field_of_invention()
+        trace = shared_state["field_of_invention_trace"]
+        if trace:
+            trace.event(
+                name="thumbs_down_reasoning_field_of_invention",
+                input="the user provides negative feedback",
+                output=reasoning,
+            )
+        ui.update_action_button(
+            "save_reasoning_thumbs_down_field_of_invention", disabled=True
+        )
+    
+    # Primary invention feedback logic
+    @reactive.Effect
     @reactive.event(input.thumbs_up_primary_invention)
-    def on_thumbs_up():
+    def on_primary_invention_thumbs_up():
         ui.update_action_button("thumbs_down_primary_invention", disabled=True)
         ui.update_action_button("thumbs_up_primary_invention", disabled=True)
         ui.notification_show("thumbs up_primary_invention", duration=2, type="message")
@@ -584,7 +728,7 @@ def server(input, output, session):
 
     @reactive.Effect
     @reactive.event(input.thumbs_down_primary_invention)
-    def on_thumbs_down():
+    def on_primary_invention_thumbs_down():
         ui.update_action_button("thumbs_up_primary_invention", disabled=True)
         ui.update_action_button("thumbs_down_primary_invention", disabled=True)
         ui.notification_show("thumbs down_primary_invention", duration=2, type="error")
@@ -596,7 +740,7 @@ def server(input, output, session):
 
     @reactive.Effect()
     @reactive.event(input.primary_invention)
-    def on_editable_content():
+    def on_primary_invention_editable_content():
         print("watching changes...")
         if input.primary_invention() != "":
             print("content changed!")
@@ -639,7 +783,7 @@ def server(input, output, session):
 
     @reactive.Effect
     @reactive.event(input.save_reasoning_thumbs_down_primary_invention)
-    def on_save_reasoning_thumbs_down():
+    def on_save_reasoning_primary_invention_thumbs_down():
         print("save thumbs down reasoning")
         reasoning = input.reasoning_thumbs_down_primary_invention()
         trace = shared_state["primary_invention_trace"]
@@ -653,6 +797,7 @@ def server(input, output, session):
             "save_reasoning_thumbs_down_primary_invention", disabled=True
         )
 
+    
 
 # Run App
 app = shiny.App(app_ui, server)

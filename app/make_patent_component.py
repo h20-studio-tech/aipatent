@@ -5,7 +5,7 @@ from datetime import datetime
 
 from langfuse import Langfuse
 from openai import OpenAI
-from app.models.llm import (
+from models.llm import (
     PrimaryInvention,
     FieldOfInvention,
     BackgroundAndNeed,
@@ -16,7 +16,7 @@ from app.models.llm import (
     Uses,
 )
 
-from app.utils.utils import values_to_json
+from utils.utils import values_to_json
 
 langfuse = Langfuse()
 
@@ -39,7 +39,7 @@ progress_tracker = ProgressTracker()
 
 
 def generate_primary_invention(
-    antigen: str, disease: str, model: str = "o1-mini"
+    antigen: str, disease: str, model: str = "o1-preview"
 ) -> PrimaryInvention:
     client = OpenAI()
 
@@ -49,7 +49,7 @@ def generate_primary_invention(
     trace_id = str(uuid.uuid4())
     trace = langfuse.trace(
         id=trace_id,
-        name="generate_primary_invention",
+        name=f"generate_primary_invention_{model}",
         input=values_to_json(antigen=antigen, disease=disease),
         tags=["evaluation"],
     )
@@ -91,7 +91,7 @@ def generate_primary_invention(
 
 
 def generate_field_of_invention(
-    primary_invention: str, antigen: str, disease: str, model: str = "o1-mini"
+    primary_invention: str, antigen: str, disease: str, model: str = "o1-preview"
 ) -> FieldOfInvention:
     client = OpenAI()
 
@@ -101,7 +101,7 @@ def generate_field_of_invention(
     trace_id = str(uuid.uuid4())
     trace = langfuse.trace(
         id=trace_id,
-        name="generate_field_of_invention",
+        name=f"generate_field_of_invention_{model}",
         input=primary_invention,
         antigen=antigen,
         disease=disease,
@@ -154,8 +154,8 @@ def generate_field_of_invention(
     )
 
 
-def generate_background_and_need(
-    field_of_invention: str, antigen: str, disease: str, model: str = "o1-mini"
+def generate_background(
+    field_of_invention: str, antigen: str, disease: str, model: str = "o1-preview"
 ) -> BackgroundAndNeed:
 
     client = OpenAI()
@@ -165,7 +165,7 @@ def generate_background_and_need(
     trace_id = str(uuid.uuid4())
     trace = langfuse.trace(
         id=trace_id,
-        name="generate_background_and_need",
+        name=f"generate_background_and_need_{model}",
         input=values_to_json(
             field_of_invention=field_of_invention, antigen=antigen, disease=disease
         ),
@@ -211,8 +211,8 @@ def generate_background_and_need(
     )
 
 
-def generate_brief_summary(
-    background: str, antigen: str, disease: str, model: str = "o1-mini"
+def generate_summary(
+    background: str, antigen: str, disease: str, model: str = "o1-preview"
 ) -> BriefSummary:
     client = OpenAI()
     if not antigen or not disease:
@@ -221,7 +221,7 @@ def generate_brief_summary(
     trace_id = str(uuid.uuid4())
     trace = langfuse.trace(
         id=trace_id,
-        name="generate_brief_summary",
+        name=f"generate_brief_summary_{model}",
         input=values_to_json(background=background, antigen=antigen, disease=disease),
         tags=["evaluation"],
     )
@@ -264,7 +264,7 @@ def generate_brief_summary(
 
 
 def generate_technology_platform(
-    summary: str, antigen: str, disease: str, model: str = "o1-mini"
+    summary: str, antigen: str, disease: str, model: str = "o1-preview"
 ) -> TechnologyPlatform:
     client = OpenAI()
     if not antigen or not disease:
@@ -287,7 +287,7 @@ def generate_technology_platform(
     )
 
     generation = trace.generation(
-        name="technology_platform",
+        name=f"technology_platform_{model}",
         input=prompt,
         completion_start_time=datetime.now(),
         model=model,
@@ -315,7 +315,7 @@ def generate_technology_platform(
 
 
 def generate_description_of_invention(
-    technology_platform: str, antigen: str, disease: str, model: str = "o1-mini"
+    technology_platform: str, antigen: str, disease: str, model: str = "o1-preview"
 ) -> DescriptionOfInvention:
     client = OpenAI()
     if not antigen or not disease:
@@ -372,8 +372,8 @@ def generate_description_of_invention(
     )
 
 
-def generate_product_or_products(
-    description_of_invention: str, antigen: str, disease: str, model: str = "o1-mini"
+def generate_product(
+    description_of_invention: str, antigen: str, disease: str, model: str = "o1-preview"
 ) -> ProductOrProducts:
     client = OpenAI()
     if not antigen or not disease:
@@ -433,7 +433,7 @@ def generate_product_or_products(
 
 
 def generate_uses(
-    product: str, antigen: str, disease: str, model: str = "o1-mini"
+    product: str, antigen: str, disease: str, model: str = "o1-preview"
 ) -> Uses:
     client = OpenAI()
     if not antigen or not disease:
