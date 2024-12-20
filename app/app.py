@@ -97,6 +97,7 @@ def generate_card_content(response_text, generation_step):
     response_text = str(response_text)
     step_id = generation_step.lower().replace(" ", "_")
 
+    print(generation_step)
     if generation_step == "product":
         return ui.div(
             ui.div(
@@ -147,7 +148,7 @@ def generate_card_content(response_text, generation_step):
                 ui.popover(
                     ui.input_action_button(
                         f"save_{step_id}",
-                        "💾 ",
+                        "💾",
                         class_="btn btn-secondary p-0",
                         width="3vw",
                         disabled=True,
@@ -180,6 +181,8 @@ def generate_card_content(response_text, generation_step):
             ),
             class_="card h-100 p-0",
         )
+
+    assert step_id != None
 
     return ui.div(
         ui.div(
@@ -230,27 +233,26 @@ def generate_card_content(response_text, generation_step):
             ui.popover(
                 ui.input_action_button(
                     f"save_{step_id}",
-                    "💾 ",
-                    class_="btn btn-secondary p-0",
+                    "💾",
+                    class_="btn btn-primary p-0",
                     width="3vw",
-                    disabled=True,
+                    disabled=False,
                 ),
                 ui.input_text_area(
-                    f"reasoning_{step_id}",
-                    generation_step,
-                    height="30vh",
-                    width="30vw",
+                    f"{step_id}_comment",
+                    "comment on your changes",
+                    placeholder="e.g, I edited the 'example' section because it did not accurately describe the process",
+                    rows=10,
+                    cols=5,
                     resize="none",
-                    spellcheck=True,
-                    placeholder="Please provide reasoning for your edits and/or feedback if applicable. this will help us improve the quality of our LLM",
                 ),
                 ui.input_action_button(
-                    f"save_reasoning_{step_id}",
+                    f"save_{step_id}_comment",
                     "📝",
                     class_="btn btn-secondary p-0",
-                    width="3vw",
+                    width="3vw"
                 ),
-                id=f"{step_id}_popover",
+                id=f"{step_id}_save_popover"
             ),
             ui.input_action_button(
                 f"{step_id}_continue",
@@ -343,8 +345,13 @@ def server(input, output, session):
             response = f"Antigen: {antigen} and Disease: {disease}"
             generated_field_of_invention.set(response)
 
+            ui.update_action_button("save_background", disabled=True)
             ui.update_action_button("background_continue", disabled=True)
+            
             ui.update_action_button("field_of_invention_continue", disabled=False)
+
+            ui.update_action_button("thumbs_down_field_of_invention", disabled=False)
+            ui.update_action_button("thumbs_up_field_of_invention", disabled=False)
         
         else:
             response = generate_field_of_invention(background_edit, antigen, disease)
@@ -352,8 +359,15 @@ def server(input, output, session):
             shared_state["field_of_invention_trace"] = langfuse.trace(id=response.trace_id)
 
             logging.info("Generated Field of Invention")
+
+            ui.update_action_button("save_background", disabled=True)
             ui.update_action_button("background_continue", disabled=True)
+            
             ui.update_action_button("field_of_invention_continue", disabled=False)
+            
+            ui.update_action_button("thumbs_down_field_of_invention", disabled=False)
+            ui.update_action_button("thumbs_up_field_of_invention", disabled=False)
+
             generated_field_of_invention.set(response.prediction)
 
     @reactive.Effect
@@ -367,8 +381,14 @@ def server(input, output, session):
             response = f"Antigen: {antigen} and Disease: {disease}"
             generated_summary.set(response)
 
+
+            ui.update_action_button("save_field_of_invention", disabled=True)
             ui.update_action_button("field_of_invention_continue", disabled=True)
+            
             ui.update_action_button("summary_continue", disabled=False)
+
+            ui.update_action_button("thumbs_down_summary", disabled=False)
+            ui.update_action_button("thumbs_up_summary", disabled=False)
         else:
             response = generate_summary(
                 field_of_invention_edit, antigen, disease
@@ -379,8 +399,15 @@ def server(input, output, session):
             )
 
             logging.info("Generated Summary")
+
+            ui.update_action_button("save_field_of_invention", disabled=True)
             ui.update_action_button("field_of_invention_continue", disabled=True)
+            
             ui.update_action_button("summary_continue", disabled=False)
+
+            ui.update_action_button("thumbs_down_summary", disabled=False)
+            ui.update_action_button("thumbs_up_summary", disabled=False)
+            
             generated_summary.set(response.prediction)
 
 
@@ -395,8 +422,14 @@ def server(input, output, session):
             response = f"Antigen: {antigen} and Disease: {disease}"
             generated_primary_invention.set(response)
 
+            ui.update_action_button("save_summary", disabled=True)
             ui.update_action_button("summary_continue", disabled=True)
+
             ui.update_action_button("primary_invention_continue", disabled=False)
+        
+            ui.update_action_button("thumbs_down_primary_invention", disabled=False)
+            ui.update_action_button("thumbs_up_primary_invention", disabled=False)
+
         else:
             response = generate_primary_invention(summary_edit, antigen, disease)
 
@@ -405,8 +438,14 @@ def server(input, output, session):
             )
 
             logging.info("Generated Primary Invention")
+            ui.update_action_button("save_summary", disabled=True)
             ui.update_action_button("summary_continue", disabled=True)
+
             ui.update_action_button("primary_invention_continue", disabled=False)
+
+            ui.update_action_button("thumbs_down_primary_invention", disabled=False)
+            ui.update_action_button("thumbs_up_primary_invention", disabled=False)
+
             generated_primary_invention.set(response.prediction)
 
     @reactive.Effect
@@ -419,8 +458,14 @@ def server(input, output, session):
             response = f"Antigen: {antigen} and Disease: {disease}"
             generated_technology.set(response)
 
+            ui.update_action_button("save_primary_invention", disabled=True)
+
             ui.update_action_button("primary_invention_continue", disabled=True)
             ui.update_action_button("technology_continue", disabled=False)
+
+            ui.update_action_button("thumbs_down_technology", disabled=False)
+            ui.update_action_button("thumbs_up_technology", disabled=False)
+
         else:
             response = generate_technology_platform(
                 primary_invention_edit,
@@ -433,8 +478,14 @@ def server(input, output, session):
             )
 
             logging.info("Generated Technology")
+            
+            ui.update_action_button("save_primary_invention", disabled=True)
             ui.update_action_button("primary_invention_continue", disabled=True)
             ui.update_action_button("technology_continue", disabled=False)
+
+            ui.update_action_button("thumbs_down_technology", disabled=False)
+            ui.update_action_button("thumbs_up_technology", disabled=False)
+
             generated_technology.set(response.prediction)
 
     @reactive.Effect
@@ -448,8 +499,14 @@ def server(input, output, session):
             response = f"Antigen: {antigen} and Disease: {disease}"
             generated_description.set(response)
 
+            ui.update_action_button("save_technology", disabled=True)
             ui.update_action_button("technology_continue", disabled=True)
+
             ui.update_action_button("description_continue", disabled=False)
+
+            ui.update_action_button("thumbs_down_description", disabled=False)
+            ui.update_action_button("thumbs_up_description", disabled=False)
+
         else:
             response = generate_description_of_invention(
                 technology_edit, antigen, disease
@@ -460,8 +517,14 @@ def server(input, output, session):
             )
 
             logging.info("Generated Description Of Invention")
+
+            ui.update_action_button("save_technology", disabled=True)
             ui.update_action_button("technology_continue", disabled=True)
             ui.update_action_button("description_continue", disabled=False)
+
+            ui.update_action_button("thumbs_down_description", disabled=False)
+            ui.update_action_button("thumbs_up_description", disabled=False)
+
             generated_description.set(response.prediction)
 
     @reactive.Effect
@@ -475,8 +538,13 @@ def server(input, output, session):
             response = f"Antigen: {antigen} and Disease: {disease}"
             generated_product.set(response)
 
+            ui.update_action_button("save_description", disabled=True)
+
             ui.update_action_button("description_continue", disabled=True)
             ui.update_action_button("product_retry", disabled=False)
+
+            ui.update_action_button("thumbs_down_product", disabled=False)
+            ui.update_action_button("thumbs_up_product", disabled=False)
         else:
             response = generate_product(description_edit, antigen, disease)
 
@@ -485,8 +553,15 @@ def server(input, output, session):
             )
 
             logging.info("Generated product or products")
+
+            ui.update_action_button("save_description", disabled=True)
+
             ui.update_action_button("description_continue", disabled=True)
             ui.update_action_button("product_retry", disabled=False)
+
+            ui.update_action_button("thumbs_down_product", disabled=False)
+            ui.update_action_button("thumbs_up_product", disabled=False)
+
             generated_product.set(response.prediction)
 
     @reactive.Effect
@@ -495,13 +570,13 @@ def server(input, output, session):
         """
         Clean up all the output cards
         """
-        generated_background.unset()
-        generated_field_of_invention.unset()
-        generated_summary.unset()
-        generated_primary_invention.unset()
-        generated_technology.unset()
-        generated_description.unset()
-        generated_product.unset()              
+        generated_background.set("")
+        generated_field_of_invention.set("")
+        generated_summary.set("")
+        generated_primary_invention.set("")
+        generated_technology.set("")
+        generated_description.set("")
+        generated_product.set("")              
 
     @output
     @render.ui
@@ -542,10 +617,10 @@ def server(input, output, session):
     def product_card():
         return generate_card_content(generated_product(), "product")
 
-    # Background_and_need
+    # Background
     @reactive.Effect
     @reactive.event(input.thumbs_up_background)
-    def on_background_and_need_thumbs_up():
+    def on_background_thumbs_up():
         ui.update_action_button("thumbs_down_background", disabled=True)
         ui.update_action_button("thumbs_up_background", disabled=True)
         ui.notification_show("That's an Interesting Background!", duration=2, type="message")
@@ -570,18 +645,16 @@ def server(input, output, session):
 
     @reactive.Effect()
     @reactive.event(input.background)
-    def on_background_and_need_editable_content():
+    def on_background_editable_content():
         print("watching changes...")
         if input.background() != "":
             print("content changed!")
             ui.update_action_button("save_background", disabled=False)
 
-    @reactive.Effect
     @reactive.event(input.save_background)
-    def on_save_background_and_need():
+    def on_save_background():
         print("save")
-        ui.update_action_button("save_background", disabled=True)
-
+        
         background_edit = input.background()
         if ENVIRONMENT == "development":
             generated_background.set(background_edit)
@@ -591,13 +664,13 @@ def server(input, output, session):
             if trace:
                 trace.event(
                     name="edit_background",
-                    input="The input to this event is the background_and_need generated by the LLM",
+                    input="The input to this event is the background generated by the LLM",
                     output=background_edit,
                 )
 
     @reactive.Effect
-    @reactive.event(input.save_reasoning_background)
-    def on_save_reasoning_background_and_need():
+    @reactive.event(input.save_background_comment)
+    def on_save_background_comment():
         print("save reasoning")
         reasoning = input.reasoning_background()
 
@@ -609,7 +682,7 @@ def server(input, output, session):
                 output=reasoning,
             )
 
-        ui.update_action_button("save_reasoning_background", disabled=True)
+        ui.update_action_button("save_background_comment", disabled=True)
 
     @reactive.Effect
     @reactive.event(input.save_reasoning_thumbs_down_background)
@@ -661,7 +734,6 @@ def server(input, output, session):
             print("content changed!")
             ui.update_action_button("save_field_of_invention", disabled=False)
 
-    @reactive.Effect
     @reactive.event(input.save_field_of_invention)
     def on_save_field_of_invention():
         print("save")
@@ -681,15 +753,15 @@ def server(input, output, session):
                 )
 
     @reactive.Effect
-    @reactive.event(input.save_reasoning_field_of_invention)
-    def on_save_reasoning_field_of_invention():
+    @reactive.event(input.save_field_of_invention_comment)
+    def on_save_field_of_invention_comment():
         print("save reasoning")
         reasoning = input.reasoning_field_of_invention()
 
         trace = shared_state["field_of_invention_trace"]
         if trace:
             trace.event(
-                name="edit_reasoning_primary_invention",
+                name="edit_reasoning_field_of_invention",
                 input="the user comments on the field of invention and the changes they made",
                 output=reasoning,
             )
@@ -711,6 +783,92 @@ def server(input, output, session):
         ui.update_action_button(
             "save_reasoning_thumbs_down_field_of_invention", disabled=True
         )
+
+    # Summary
+
+    @reactive.Effect
+    @reactive.event(input.thumbs_up_summary)
+    def on_summary_thumbs_up():
+        ui.update_action_button("thumbs_down_summary", disabled=True)
+        ui.update_action_button("thumbs_up_summary", disabled=True)
+        ui.notification_show("That's an Interesting Summary!", duration=2, type="message")
+
+        trace = shared_state["summary_trace"]
+
+        if trace:
+            trace.update(metadata={"feedback": "positive"})
+        print("thumbs up")
+
+    @reactive.Effect
+    @reactive.event(input.thumbs_down_summary)
+    def on_summary_thumbs_down():
+        ui.update_action_button("thumbs_up_summary", disabled=True)
+        ui.update_action_button("thumbs_down_summary", disabled=True)
+        ui.notification_show("Not the best summary 🤷🏽‍♂️", duration=2, type="error")
+
+        trace = shared_state["summary_trace"]
+        if trace:
+            trace.update(metadata={"feedback": "negative"})
+        print("thumbs down")
+
+    @reactive.Effect()
+    @reactive.event(input.summary)
+    def on_summary_editable_content():
+        print("watching changes...")
+        if input.summary() != "":
+            print("content changed!")
+            ui.update_action_button("save_summary", disabled=False)
+
+    @reactive.event(input.save_summary)
+    def on_save_summary():
+        print("save")
+        
+        summary_edit = input.summary()
+        if ENVIRONMENT == "development":
+            generated_summary.set(summary_edit)
+        else:
+            generated_summary.set(summary_edit)
+            trace = shared_state["summary_trace"]
+            if trace:
+                trace.event(
+                    name="edit_summary",
+                    input="The input to this event is the summary generated by the LLM",
+                    output=summary_edit,
+                )
+        ui.update_action_button("save_summary", disabled=True)
+
+    @reactive.Effect
+    @reactive.event(input.save_summary_comment)
+    def on_save_summary_comment():
+        print("save reasoning")
+        reasoning = input.summary_comment()
+
+        trace = shared_state["summary_trace"]
+        if trace:
+            trace.event(
+                name="edit_reasoning_summary",
+                input="the user comments on the summary and the changes they made",
+                output=reasoning,
+            )
+
+        ui.update_action_button("save_summary_comment", disabled=True)
+
+    @reactive.Effect
+    @reactive.event(input.save_reasoning_thumbs_down_summary)
+    def on_save_reasoning_summary_thumbs_down():
+        print("save thumbs down reasoning")
+        reasoning = input.reasoning_thumbs_down_summary()
+        trace = shared_state["summary_trace"]
+        if trace:
+            trace.event(
+                name="thumbs_down_reasoning_summary",
+                input="the user provides negative feedback",
+                output=reasoning,
+            )
+        ui.update_action_button(
+            "save_reasoning_thumbs_down_summary", disabled=True
+        )
+
     
     # Primary invention feedback logic
     @reactive.Effect
@@ -746,7 +904,6 @@ def server(input, output, session):
             print("content changed!")
             ui.update_action_button("save_primary_invention", disabled=False)
 
-    @reactive.Effect
     @reactive.event(input.save_primary_invention)
     def on_save_primary_invention():
         print("save")
@@ -766,20 +923,20 @@ def server(input, output, session):
                 )
 
     @reactive.Effect
-    @reactive.event(input.save_reasoning_primary_invention)
-    def on_save_reasoning_primary_invention():
+    @reactive.event(input.save_primary_invention_comment)
+    def on_save_primary_invention_comment():
         print("save reasoning")
-        reasoning = input.reasoning_primary_invention()
+        reasoning = input.save_primary_invention_comment()
 
         trace = shared_state["primary_invention_trace"]
         if trace:
             trace.event(
-                name="edit_reasoning_primary_invention",
+                name="edit_primary_invention_comment",
                 input="the user comments on the primary invention and the changes they made",
                 output=reasoning,
             )
 
-        ui.update_action_button("save_reasoning_primary_invention", disabled=True)
+        ui.update_action_button("save_primary_invention_comment", disabled=True)
 
     @reactive.Effect
     @reactive.event(input.save_reasoning_thumbs_down_primary_invention)
@@ -795,6 +952,258 @@ def server(input, output, session):
             )
         ui.update_action_button(
             "save_reasoning_thumbs_down_primary_invention", disabled=True
+        )
+    
+    # Technology
+
+    @reactive.Effect
+    @reactive.event(input.thumbs_up_technology)
+    def on_technology_thumbs_up():
+        ui.update_action_button("thumbs_down_technology", disabled=True)
+        ui.update_action_button("thumbs_up_technology", disabled=True)
+        ui.notification_show("That's an Interesting Technology!", duration=2, type="message")
+
+        trace = shared_state["technology_trace"]
+
+        if trace:
+            trace.update(metadata={"feedback": "positive"})
+        print("thumbs up")
+
+    @reactive.Effect
+    @reactive.event(input.thumbs_down_technology)
+    def on_technology_thumbs_down():
+        ui.update_action_button("thumbs_up_technology", disabled=True)
+        ui.update_action_button("thumbs_down_technology", disabled=True)
+        ui.notification_show("Not the best technology 🤷🏽‍♂️", duration=2, type="error")
+
+        trace = shared_state["technology_trace"]
+        if trace:
+            trace.update(metadata={"feedback": "negative"})
+        print("thumbs down")
+
+    @reactive.Effect()
+    @reactive.event(input.technology)
+    def on_technology_editable_content():
+        print("watching changes...")
+        if input.technology() != "":
+            print("content changed!")
+            ui.update_action_button("save_technology", disabled=False)
+
+    @reactive.event(input.save_technology)
+    def on_save_technology():
+        print("save")
+        
+        technology_edit = input.technology()
+        if ENVIRONMENT == "development":
+            generated_technology.set(technology_edit)
+        else:
+            generated_technology.set(technology_edit)
+            trace = shared_state["technology_trace"]
+            if trace:
+                trace.event(
+                    name="edit_technology",
+                    input="The input to this event is the technology generated by the LLM",
+                    output=technology_edit,
+                )
+
+    @reactive.Effect
+    @reactive.event(input.save_technology_comment)
+    def on_save_technology_comment():
+        print("save reasoning")
+        reasoning = input.technology_comment()
+
+        trace = shared_state["technology_trace"]
+        if trace:
+            trace.event(
+                name="edit_reasoning_technology",
+                input="the user comments on the technology and the changes they made",
+                output=reasoning,
+            )
+
+        ui.update_action_button("save_technology_comment", disabled=True)
+
+    @reactive.Effect
+    @reactive.event(input.save_reasoning_thumbs_down_technology)
+    def on_save_reasoning_technology_thumbs_down():
+        print("save thumbs down reasoning")
+        reasoning = input.reasoning_thumbs_down_technology()
+        trace = shared_state["technology_trace"]
+        if trace:
+            trace.event(
+                name="thumbs_down_reasoning_technology",
+                input="the user provides negative feedback",
+                output=reasoning,
+            )
+        ui.update_action_button(
+            "save_reasoning_thumbs_down_technology", disabled=True
+        )
+
+    # description
+
+    @reactive.Effect
+    @reactive.event(input.thumbs_up_description)
+    def on_description_thumbs_up():
+        ui.update_action_button("thumbs_down_description", disabled=True)
+        ui.update_action_button("thumbs_up_description", disabled=True)
+        ui.notification_show("That's an Interesting Description!", duration=2, type="message")
+
+        trace = shared_state["description_trace"]
+
+        if trace:
+            trace.update(metadata={"feedback": "positive"})
+        print("thumbs up")
+
+    @reactive.Effect
+    @reactive.event(input.thumbs_down_description)
+    def on_description_thumbs_down():
+        ui.update_action_button("thumbs_up_description", disabled=True)
+        ui.update_action_button("thumbs_down_description", disabled=True)
+        ui.notification_show("Not the best description 🤷🏽‍♂️", duration=2, type="error")
+
+        trace = shared_state["description_trace"]
+        if trace:
+            trace.update(metadata={"feedback": "negative"})
+        print("thumbs down")
+
+    @reactive.Effect()
+    @reactive.event(input.description)
+    def on_description_editable_content():
+        print("watching changes...")
+        if input.description() != "":
+            print("content changed!")
+            ui.update_action_button("save_description", disabled=False)
+
+    @reactive.event(input.save_description)
+    def on_save_description():
+        print("save")
+        
+        description_edit = input.description()
+        if ENVIRONMENT == "development":
+            generated_description.set(description_edit)
+        else:
+            generated_description.set(description_edit)
+            trace = shared_state["description_trace"]
+            if trace:
+                trace.event(
+                    name="edit_description",
+                    input="The input to this event is the description generated by the LLM",
+                    output=description_edit,
+                )
+
+    @reactive.Effect
+    @reactive.event(input.save_description_comment)
+    def on_save_description_comment():
+        print("save reasoning")
+        reasoning = input.description_comment()
+
+        trace = shared_state["description_trace"]
+        if trace:
+            trace.event(
+                name="edit_reasoning_description",
+                input="the user comments on the description and the changes they made",
+                output=reasoning,
+            )
+
+        ui.update_action_button("save_description_comment", disabled=True)
+
+    @reactive.Effect
+    @reactive.event(input.save_reasoning_thumbs_down_description)
+    def on_save_reasoning_description_thumbs_down():
+        print("save thumbs down reasoning")
+        reasoning = input.reasoning_thumbs_down_description()
+        trace = shared_state["description_trace"]
+        if trace:
+            trace.event(
+                name="thumbs_down_reasoning_description",
+                input="the user provides negative feedback",
+                output=reasoning,
+            )
+        ui.update_action_button(
+            "save_reasoning_thumbs_down_description", disabled=True
+        )
+
+
+    # Product
+    @reactive.Effect
+    @reactive.event(input.thumbs_up_product)
+    def on_product_thumbs_up():
+        ui.update_action_button("thumbs_down_product", disabled=True)
+        ui.update_action_button("thumbs_up_product", disabled=True)
+        ui.notification_show("That's an Interesting Product!", duration=2, type="message")
+
+        trace = shared_state["product_trace"]
+
+        if trace:
+            trace.update(metadata={"feedback": "positive"})
+        print("thumbs up")
+
+    @reactive.Effect
+    @reactive.event(input.thumbs_down_product)
+    def on_product_thumbs_down():
+        ui.update_action_button("thumbs_up_product", disabled=True)
+        ui.update_action_button("thumbs_down_product", disabled=True)
+        ui.notification_show("Not the best product 🤷🏽‍♂️", duration=2, type="error")
+
+        trace = shared_state["product_trace"]
+        if trace:
+            trace.update(metadata={"feedback": "negative"})
+        print("thumbs down")
+
+    @reactive.Effect()
+    @reactive.event(input.product)
+    def on_product_editable_content():
+        print("watching changes...")
+        if input.product() != "":
+            print("content changed!")
+            ui.update_action_button("save_product", disabled=False)
+
+    @reactive.event(input.save_product)
+    def on_save_product():
+        print("save")
+        
+        product_edit = input.product()
+        if ENVIRONMENT == "development":
+            generated_product.set(product_edit)
+        else:
+            generated_product.set(product_edit)
+            trace = shared_state["product_trace"]
+            if trace:
+                trace.event(
+                    name="edit_product",
+                    input="The input to this event is the product generated by the LLM",
+                    output=product_edit,
+                )
+
+    @reactive.Effect
+    @reactive.event(input.save_product_comment)
+    def on_save_product_comment():
+        print("save reasoning")
+        reasoning = input.product_comment()
+
+        trace = shared_state["product_trace"]
+        if trace:
+            trace.event(
+                name="edit_reasoning_product",
+                input="the user comments on the product and the changes they made",
+                output=reasoning,
+            )
+
+        ui.update_action_button("save_product_comment", disabled=True)
+
+    @reactive.Effect
+    @reactive.event(input.save_reasoning_thumbs_down_product)
+    def on_save_reasoning_product_thumbs_down():
+        print("save thumbs down reasoning")
+        reasoning = input.reasoning_thumbs_down_product()
+        trace = shared_state["product_trace"]
+        if trace:
+            trace.event(
+                name="thumbs_down_reasoning_product",
+                input="the user provides negative feedback",
+                output=reasoning,
+            )
+        ui.update_action_button(
+            "save_reasoning_thumbs_down_product", disabled=True
         )
 
     

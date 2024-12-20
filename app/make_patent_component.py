@@ -155,7 +155,7 @@ def generate_field_of_invention(
 
 
 def generate_background(
-    field_of_invention: str, antigen: str, disease: str, model: str = "o1-preview"
+     antigen: str, disease: str, model: str = "o1-preview"
 ) -> BackgroundAndNeed:
 
     client = OpenAI()
@@ -167,19 +167,19 @@ def generate_background(
         id=trace_id,
         name=f"generate_background_and_need_{model}",
         input=values_to_json(
-            field_of_invention=field_of_invention, antigen=antigen, disease=disease
+         antigen=antigen, disease=disease
         ),
         tags=["evaluation"],
     )
     fetch_prompt = trace.span(name="fetch_prompt", start_time=datetime.now())
     raw_prompt = langfuse.get_prompt("generate_background")
     prompt = raw_prompt.compile(
-        field_of_invention=field_of_invention, antigen=antigen, disease=disease
+        antigen=antigen, disease=disease
     )
     fetch_prompt.end(
         end_time=datetime.now(),
         input=values_to_json(
-            field_of_invention=field_of_invention, antigen=antigen, disease=disease
+             antigen=antigen, disease=disease
         ),
         output=raw_prompt,
     )
