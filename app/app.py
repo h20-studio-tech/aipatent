@@ -35,54 +35,57 @@ app_ui = ui.page_fluid(
                 resize="vertical",
             ),
             ui.input_action_button("generate", "Generate", class_="btn btn-primary"),
+            width=900,
         ),
+        ui.h1("Detailed Description")
+        ,
 
         ui.card(
             ui.output_ui("background_card", height="100%", padding="0"),
-            min_height="50%",
-            max_height="50%",
+            min_height="100%",
+            max_height="100%",
             class_="p-0",  # Placeholder for dynamically generated cards
         ),
 
         ui.card(
             ui.output_ui("field_of_invention_card", height="100%", padding="0"),
-            min_height="50%",
-            max_height="50%",
+            min_height="100%",
+            max_height="100%",
             class_="p-0",  # Placeholder for dynamically generated cards
         ),
 
         ui.card(
             ui.output_ui("summary_card", height="100%", padding="0"),
-            min_height="50%",
-            max_height="50%",
+            min_height="100%",
+            max_height="100%",
             class_="p-0",  # Placeholder for dynamically generated cards
         ),
 
         ui.card(
             ui.output_ui("primary_invention_card", height="100%", padding="0"),
-            min_height="50%",
-            max_height="50%",
+            min_height="100%",
+            max_height="100%",
             class_="p-0",  # Placeholder for dynamically generated cards
         ),
 
         ui.card(
             ui.output_ui("technology_card", height="100%", padding="0"),
-            min_height="50%",
-            max_height="50%",
+            min_height="100%",
+            max_height="100%",
             class_="p-0",  # Placeholder for dynamically generated cards
         ),
 
         ui.card(
             ui.output_ui("description_card", height="100%", padding="0"),
-            min_height="50%",
-            max_height="50%",
+            min_height="100%",
+            max_height="100%",
             class_="p-0",  # Placeholder for dynamically generated cards
         ),
 
         ui.card(
             ui.output_ui("product_card", height="100%", padding="0"),
-            min_height="50%",
-            max_height="50%",
+            min_height="100%",
+            max_height="100%",
             class_="p-0",  # Placeholder for dynamically generated cards
         ),
         height="100vh",
@@ -107,7 +110,7 @@ def generate_card_content(response_text, generation_step):
                     value=response_text,
                     width="100%",
                     height="100%",
-                    rows=8,
+                    rows=22,
                     resize="none",
                 ),
                 class_="card-body h-100",
@@ -192,7 +195,7 @@ def generate_card_content(response_text, generation_step):
                 value=response_text,
                 width="100%",
                 height="100%",
-                rows=8,
+                rows=22,
                 resize="none",
             ),
             class_="card-body h-100",
