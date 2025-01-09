@@ -21,24 +21,69 @@ ENVIRONMENT = os.getenv("ENV")
 logging.basicConfig(level=logging.INFO)
 
 # Define UI
-app_ui = ui.page_fluid(
-    ui.layout_sidebar(
-        ui.sidebar(
-            ui.input_text_area(
-                "antigen",
-                "Enter Antigen",
-                resize="vertical",
+app_ui = ui.page_fixed(
+        ui.h1("Detailed description"),
+        ui.card(
+            ui.card_header(
+                ui.h3("Inputs")
             ),
-            ui.input_text_area(
-                "disease",
-                "Enter Disease",
-                resize="vertical",
+            ui.card_body(
+                ui.card(
+                    ui.card_header(
+                        ui.p("Antigen")
+                    ),
+                    ui.card_body(
+                        ui.input_text_area("antigen", "")
+                    ),
+                    height=150,
+                    min_height=150
+                ),
+                ui.card(
+                    ui.card_header(
+                        ui.p("Disease")
+                    ),
+                    ui.card_body(
+                        ui.input_text_area("disease", "",)
+                    ),
+                    height=150,
+                    min_height=150
+                ),
+                ui.card(
+                    ui.card_header(
+                        ui.p("Approach")
+                    ),
+                    ui.card_body(
+                        ui.input_text_area("approach", "", width="100%", height="100%", rows=5)
+                    ),
+                    height=200,
+                    min_height=200
+                ),
+                ui.card(
+                    ui.card_header(
+                        ui.p("Technology")
+                    ),
+                    ui.card_body(
+                        ui.input_text_area("technology", "", width="100%", height="100%", rows=5)
+                    ),
+                    height=200,
+                    min_height=200
+                ),
+                ui.card(
+                    ui.card_header(
+                        ui.p("Innovation")
+                    ),
+                    ui.card_body(
+                        ui.input_text_area("innovation", "", width="100%", height="100%", rows=5)
+                    ),
+                    height=200,
+                    min_height=200
+                ),
             ),
-            ui.input_action_button("generate", "Generate", class_="btn btn-primary"),
-            width=900,
+            ui.card_footer(
+                ui.input_action_button("generate", "generate", width="100%")
+            ),
+            height=600
         ),
-        ui.h1("Detailed Description")
-        ,
 
         ui.card(
             ui.output_ui("background_card", height="100%", padding="0"),
@@ -89,8 +134,8 @@ app_ui = ui.page_fluid(
             class_="p-0",  # Placeholder for dynamically generated cards
         ),
         height="100vh",
+        title="Detailed Description",
     )
-)
 
 
 def generate_card_content(response_text, generation_step):
