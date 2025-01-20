@@ -44,9 +44,40 @@ class Uses(BaseModel):
     prediction: str = Field(..., description="the redacted uses section for the patent draft")
     trace_id: str = Field(..., description="the langfuse trace id for the uses generation")
 
+class TargetOverview(BaseModel):
+    prediction: str = Field(..., description="the redacted target overview section for the patent draft")
+    trace_id: str = Field(..., description="the langfuse trace id for the target overview generation")
 
-                            
+class HighLevelConcept(BaseModel):
+    prediction: str = Field(..., description="the redacted high level concept section for the patent draft")
+    trace_id: str = Field(..., description="the langfuse trace id for the high level concept generation")
 
+class UnderlyingMechanism(BaseModel):
+    prediction: str = Field(..., description="the redacted underlying mechanism section for the patent draft")
+    trace_id: str = Field(..., description="the langfuse trace id for the underlying mechanism generation")
 
+class Embodiment(BaseModel):
+    prediction: str = Field(..., description="the redacted embodiment section for the patent draft")
+    trace_id: str = Field(..., description="the langfuse trace id for the embodiment generation")
 
+class Claims(BaseModel):
+    prediction: str = Field(..., description="the redacted claims section for the patent draft")
+    trace_id: str = Field(..., description="the langfuse trace id for the claims generation")
 
+class Abstract(BaseModel):
+    prediction: str = Field(..., description="the redacted abstract section for the patent draft")
+    trace_id: str = Field(..., description="the langfuse trace id for the abstract generation")
+
+class KeyTerms(BaseModel):
+    prediction: str = Field(..., description="the redacted key terms section for the patent draft")
+    trace_id: str = Field(..., description="the langfuse trace id for the key terms generation")
+
+class DiseaseOverview(BaseModel):
+    prediction: str = Field(
+        ..., 
+        description="the redacted disease overview section for the patent draft"
+    )
+    trace_id: str = Field(
+        ..., 
+        description="the langfuse trace id for the disease overview generation"
+    )

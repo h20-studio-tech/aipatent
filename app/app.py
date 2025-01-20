@@ -5,14 +5,17 @@ from shiny import reactive, render, ui
 import shiny
 from make_patent_component import (
     langfuse,
-    generate_primary_invention,
-    generate_field_of_invention,
     generate_background,
     generate_summary,
-    generate_technology_platform,
-    generate_description_of_invention,
-    generate_product,
-    generate_uses,
+    generate_field_of_invention,
+    generate_disease_overview,
+    generate_target_overview,
+    generate_high_level_concept,
+    generate_underlying_mechanism,
+    generate_embodiment,
+    generate_claims,
+    generate_abstract,
+    generate_key_terms,
 )
 
 
@@ -96,15 +99,8 @@ app_ui = ui.page_fixed(
         )
         ,
         ui.h3("Detailed description"),
-        ui.h4("1. Definitions and Methodology")
-        ,
-        ui.card(
-            ui.output_ui("key_terms_card", height="100%", padding="0"),
-            min_height="100%",
-            max_height="100%",
-            class_="p-0",  # Placeholder for dynamically generated cards
-        ),
-        ui.h4("2. Disease Background & Relevance")
+        
+        ui.h4("1. Disease Background & Relevance")
         ,
         ui.card(
             ui.output_ui("disease_overview_card", height="100%", padding="0"),
@@ -118,7 +114,7 @@ app_ui = ui.page_fixed(
             max_height="100%",
             class_="p-0",  # Placeholder for dynamically generated cards
         ),
-        ui.h4("3. Technology or Product Overview"),
+        ui.h4("2. Technology or Product Overview"),
         ui.input_selectize(id="copy_threshold", label="Configure the copy threshold:",choices={"100%":"100%", "50%":"50%", "0%":"0%"} ),   
         ui.card(
             ui.output_ui("high_level_concept_card", height="100%", padding="0"),
@@ -132,69 +128,16 @@ app_ui = ui.page_fixed(
             max_height="100%",
             class_="p-0",  # Placeholder for dynamically generated cards
         ),
-        ui.h4("4. Embodiments (Core of the Detailed Description)")
+        ui.h4("3. Embodiments (Core of the Detailed Description)")
         ,
         ui.card(
-            ui.card(
-                ui.card_header(ui.p("Embodiment")),
-                ui.card_body(ui.input_text_area("embodiment_text_1","",rows=8, cols=45)),
-                ui.card_footer(
-                    ui.input_action_button("embodiment_generate_1", "▶️", width="3vw", class_="btn btn-primary p-0"),
-                    ui.input_action_button("embodiment_approve_1", "Approve", width="6vw", class_="btn btn-secondary p-0"),
-                    ui.popover(
-                        ui.input_action_button("embodiment_retry_1", "Retry", width="3vw", class_="btn btn-danger p-0"),
-                        ui.input_text_area("embodiment_retry_critique_1", "What should change?", placeholder="Need more detail...", rows=5, resize="none"),
-                        ui.input_action_button("embodiment_retry_save_critique_1", "📝", class_="btn btn-secondary p-0")
-                        )
-                ),
-                height="35%", 
-                padding="0"),            
-            ui.card(
-                ui.card_header(ui.p("Embodiment")),
-                ui.card_body(ui.input_text_area("embodiment_text_2", "",rows=8, cols=45)),
-                ui.card_footer(
-                    ui.input_action_button("embodiment_generate_2", "▶️", width="3vw", class_="btn btn-primary p-0"),
-                    ui.input_action_button("embodiment_approve_2", "Approve", width="6vw", class_="btn btn-secondary p-0"),
-                    ui.popover(
-                        ui.input_action_button("embodiment_retry_2", "Retry", width="3vw", class_="btn btn-danger p-0"),
-                        ui.input_text_area("embodiment_retry_critique_2", "What should change?", placeholder="Need more detail...", rows=5, resize="none"),
-                        ui.input_action_button("embodiment_retry_save_critique_2", "📝", class_="btn btn-secondary p-0")
-                        )
-                ),
-                height="35%", 
-                padding="0"
-                ),        
-            ui.card(
-                ui.card_header(ui.p("Embodiment")),
-                ui.card_body(ui.input_text_area("embodiment_text_3","" ,rows=8, cols=45)),
-                ui.card_footer(
-                    ui.input_action_button("embodiment_generate_3", "▶️", width="3vw", class_="btn btn-primary p-0"),
-                    ui.input_action_button("embodiment_approve_3", "Approve", width="6vw", class_="btn btn-secondary p-0"),
-                    ui.popover(
-                        ui.input_action_button("embodiment_retry_3", "Retry", width="3vw", class_="btn btn-danger p-0"),
-                        ui.input_text_area("embodiment_retry_critique_3", "What should change?", placeholder="Need more detail...", rows=5, resize="none"),
-                        ui.input_action_button("embodiment_retry_save_critique_3", "📝", class_="btn btn-secondary p-0")
-                        )
-                ),
-                height="35%", 
-                padding="0"
-                ),         
-            ui.card(
-                ui.card_header(ui.p("Embodiment")),
-                ui.card_body(ui.input_text_area("embodiment_text_4", "", rows=8, cols=45)),
-                ui.card_footer(
-                    ui.input_action_button("embodiment_generate_4", "▶️", width="3vw", class_="btn btn-primary p-0"),
-                    ui.input_action_button("embodiment_approve_4", "Approve", width="6vw", class_="btn btn-secondary p-0"),
-                    ui.popover(
-                        ui.input_action_button("embodiment_retry_4", "Retry", width="3vw", class_="btn btn-danger p-0"),
-                        ui.input_text_area("embodiment_retry_critique_4", "What should change?", placeholder="Need more detail...", rows=5, resize="none"),
-                        ui.input_action_button("embodiment_retry_save_critique_4", "📝", class_="btn btn-secondary p-0")
-                        )
-                ),
-                height="35%", 
-                padding="0"
-                ),
-            height="150%"            
+            ui.output_ui("embodiment_card_1", height="25%", padding="0"),
+            ui.output_ui("embodiment_card_2", height="25%", padding="0"),
+            ui.output_ui("embodiment_card_3", height="25%", padding="0"),
+            ui.output_ui("embodiment_card_4", height="25%", padding="0"),
+            min_height="100%",
+            max_height="100%",
+            class_="p-0",  # Placeholder for dynamically generated cards
         ),
         ui.card(
             ui.output_ui("claims_card", height="100%", padding="0")
@@ -202,10 +145,31 @@ app_ui = ui.page_fixed(
         ui.card(
             ui.output_ui("abstract_card", height="100%", padding="0")
         ),
+        ui.card(
+            ui.output_ui("key_terms_card", height="100%", padding="0")
+        ),
 
         height="100vh",
         title="AI Patent",
     )
+
+def generate_embodiment_card(response_text,card_id):
+    return ui.card(
+        ui.card_header(ui.p("Embodiment")),
+        ui.card_body(ui.input_text_area(f"{card_id}_text", "", response_text, rows=8, cols=45)),
+        ui.card_footer(
+            ui.input_action_button(f"{card_id}_generate", "▶️", width="3vw", class_="btn btn-primary p-0"),
+            ui.input_action_button(f"{card_id}_approve", "Approve", width="6vw", class_="btn btn-secondary p-0"),
+            ui.popover(
+                ui.input_action_button(f"{card_id}_retry", "Retry", width="3vw", class_="btn btn-danger p-0"),
+                ui.input_text_area(f"{card_id}_retry_critique", "What should change?", placeholder="Need more detail...", rows=5, resize="none"),
+                ui.input_action_button(f"{card_id}_retry_save_critique", "📝", class_="btn btn-secondary p-0")
+            )
+        ),
+        height="35%", 
+        padding="0"
+    )
+
 
 def generate_technology(response_text, generation_step):
     response_text = str(response_text)
@@ -282,7 +246,7 @@ def generate_technology(response_text, generation_step):
                 id=f"{step_id}_save_popover"
             ),
             ui.input_action_button(
-                f"{step_id}_continue",
+                f"{step_id}_generate",
                 "▶️",
                 class_="btn btn-primary p-0",
                 width="3vw",
@@ -321,7 +285,7 @@ def generate_card_content(response_text, generation_step):
     step_id = generation_step.lower().replace(" ", "_")
 
     print(generation_step)
-    if generation_step == "Abstract":
+    if generation_step == "Key Terms":
         return ui.div(
             ui.div(
                 ui.input_text_area(
@@ -394,8 +358,8 @@ def generate_card_content(response_text, generation_step):
                     id=f"{step_id}_popover",
                 ),
                 ui.input_action_button(
-                    f"{step_id}_retry",
-                    "🔄",
+                    f"{step_id}_generate",
+                    "▶️",
                     class_="btn btn-primary p-0",
                     width="3vw",
                     disabled=True,
@@ -410,6 +374,13 @@ def generate_card_content(response_text, generation_step):
                         cols=5
                     ),
                     id=f"component_input_{step_id}_popover"
+                ),
+                ui.input_action_button(
+                    f"{step_id}_refresh",
+                    "🔄",
+                    class_="btn btn-primary p-0",
+                    width="3vw",
+                    disabled=True,
                 ),
                 class_="card-footer mt-2",
             ),
@@ -489,7 +460,7 @@ def generate_card_content(response_text, generation_step):
                 id=f"{step_id}_save_popover"
             ),
             ui.input_action_button(
-                f"{step_id}_continue",
+                f"{step_id}_generate",
                 "▶️",
                 class_="btn btn-primary p-0",
                 width="3vw",
@@ -513,6 +484,98 @@ def generate_card_content(response_text, generation_step):
         class_="card h-100 p-0",
     )
 
+def generate_background_card(response_text):
+
+    generation_step = "Background"
+
+    step_id = generation_step.lower()
+    return ui.div(
+        ui.div(
+            ui.input_text_area(
+                f"{step_id}",
+                generation_step,
+                value=response_text,
+                width="100%",
+                height="100%",
+                rows=22,
+                resize="none",
+            ),
+            class_="card-body h-100",
+        ),
+        ui.div(
+            ui.input_action_button(
+                f"thumbs_up_{step_id}",
+                "👍",
+                class_="btn btn-success p-0",
+                width="3vw",
+                disabled=True,
+            ),
+            ui.popover(
+                ui.input_action_button(
+                    f"thumbs_down_{step_id}",
+                    "👎",
+                    class_="btn btn-danger p-0",
+                    width="3vw",
+                    disabled=True,
+                ),
+                ui.input_text_area(
+                    f"reasoning_thumbs_down_{step_id}",
+                    "thumbs down feedback",
+                    height="30vh",
+                    width="30vw",
+                    resize="none",
+                    spellcheck=True,
+                    placeholder="Please provide your feedback about what you didn't like or what could be improved.",
+                ),
+                ui.input_action_button(
+                    f"save_reasoning_thumbs_down_{step_id}",
+                    "📝",
+                    class_="btn btn-secondary p-0",
+                    width="3vw",
+                ),
+                id=f"thumbs_down_popover_{step_id}",
+            ),
+            ui.popover(
+                ui.input_action_button(
+                    f"save_{step_id}",
+                    "💾",
+                    class_="btn btn-primary p-0",
+                    width="3vw",
+                    disabled=False,
+                ),
+                ui.input_text_area(
+                    f"{step_id}_comment",
+                    "comment on your changes",
+                    placeholder="e.g, I edited the 'example' section because it did not accurately describe the process",
+                    rows=10,
+                    cols=5,
+                    resize="none",
+                ),
+                ui.input_action_button(
+                    f"save_{step_id}_comment",
+                    "📝",
+                    class_="btn btn-secondary p-0",
+                    width="3vw"
+                ),
+                id=f"{step_id}_save_popover"
+            ),
+            ui.popover(
+            ui.input_action_button(f"add_component_input_{step_id}", "add input", width="6vw", class_="btn btn-secondary p-0"),
+            ui.input_text_area(
+                label=f"Extra input for {generation_step}",
+                id=f"component_input_{step_id}",
+                rows=15,
+                cols=25,
+                resize="none",
+
+            ),
+            style="width: 600px;",
+            id=f"component_input_{step_id}_popover"
+        ),
+        class_="card-footer mt-2",
+        ),
+        class_="card h-100 p-0",
+    )
 
 shared_state = {
     "background_trace": None,
@@ -532,12 +595,19 @@ def server(input, output, session):
     """
     # Create a reactive value to store the generated primary invention
     generated_background = reactive.Value("")
-    generated_field_of_invention = reactive.Value("")
     generated_summary = reactive.Value("")
-    generated_primary_invention = reactive.Value("")
-    generated_technology = reactive.Value("")
-    generated_description = reactive.Value("")
-    generated_product = reactive.Value("")
+    generated_field_of_invention = reactive.Value("")
+    generated_key_terms = reactive.Value("")
+    generated_disease_overview = reactive.Value("")
+    generated_target_overview = reactive.Value("")
+    generated_high_level_concept = reactive.Value("")
+    generated_underlying_mechanism = reactive.Value("")
+    generated_embodiment_1 = reactive.Value("")
+    generated_embodiment_2 = reactive.Value("")
+    generated_embodiment_3 = reactive.Value("")
+    generated_embodiment_4 = reactive.Value("")
+    generated_claims = reactive.Value("")
+    generated_abstract = reactive.Value("")
 
     @reactive.Effect
     @reactive.event(input.generate)
@@ -545,10 +615,13 @@ def server(input, output, session):
         # Collect input values
         antigen = input.antigen()
         disease = input.disease()
+        innovation = input.innovation()
+        technology = input.technology()
+        approach = input.approach()
 
         ui.update_action_button("thumbs_up_background", disabled=False)
         ui.update_action_button("thumbs_down_background", disabled=False)
-        ui.update_action_button("background_continue", disabled=False)
+        ui.update_action_button("summary_generate", disabled=False)
 
         if not antigen and not disease:
             ui.notification_show(
@@ -570,7 +643,7 @@ def server(input, output, session):
             response = f"Antigen: {antigen} and Disease: {disease}"
             generated_background.set(response)
         else:
-            response = generate_background(antigen, disease)
+            response = generate_background(innovation, technology, approach, antigen, disease,)
 
             shared_state["background_trace"] = langfuse.trace(
                 id=response.trace_id
@@ -582,323 +655,516 @@ def server(input, output, session):
             generated_background.set(response.prediction)
 
     @reactive.Effect
-    @reactive.event(input.background_continue)
-    def on_background_continue():
+    @reactive.event(input.summary_generate)
+    def on_summary_generate():
         background_edit = input.background()
         antigen = input.antigen()
         disease = input.disease()
+        innovation = input.innovation()
+        technology = input.technology()
+        approach = input.approach()
 
-        if ENVIRONMENT == "development":
-            response = f"Antigen: {antigen} and Disease: {disease}"
-            generated_field_of_invention.set(response)
+        ui.update_action_button("summary_generate", disabled=True)
 
-            ui.update_action_button("save_background", disabled=True)
-            ui.update_action_button("background_continue", disabled=True)
-            
-            ui.update_action_button("field_of_invention_continue", disabled=False)
+        ui.update_action_button("thumbs_down_summary", disabled=False)
+        ui.update_action_button("thumbs_up_summary", disabled=False)
 
-            ui.update_action_button("thumbs_down_field_of_invention", disabled=False)
-            ui.update_action_button("thumbs_up_field_of_invention", disabled=False)
-        
-        else:
-            response = generate_field_of_invention(background_edit, antigen, disease)
+        ui.update_action_button("field_of_invention_generate", disabled=False)
 
-            shared_state["field_of_invention_trace"] = langfuse.trace(id=response.trace_id)
-
-            logging.info("Generated Field of Invention")
-
-            ui.update_action_button("save_background", disabled=True)
-            ui.update_action_button("background_continue", disabled=True)
-            
-            ui.update_action_button("field_of_invention_continue", disabled=False)
-            
-            ui.update_action_button("thumbs_down_field_of_invention", disabled=False)
-            ui.update_action_button("thumbs_up_field_of_invention", disabled=False)
-
-            generated_field_of_invention.set(response.prediction)
-
-    @reactive.Effect
-    @reactive.event(input.field_of_invention_continue)
-    def on_field_of_invention_continue():
-        field_of_invention_edit = input.field_of_invention()
-        antigen = input.antigen()
-        disease = input.disease()
 
         if ENVIRONMENT == "development":
             response = f"Antigen: {antigen} and Disease: {disease}"
             generated_summary.set(response)
 
-
-            ui.update_action_button("save_field_of_invention", disabled=True)
-            ui.update_action_button("field_of_invention_continue", disabled=True)
-            
-            ui.update_action_button("summary_continue", disabled=False)
-
-            ui.update_action_button("thumbs_down_summary", disabled=False)
-            ui.update_action_button("thumbs_up_summary", disabled=False)
+        
         else:
-            response = generate_summary(
-                field_of_invention_edit, antigen, disease
-            )
-
-            shared_state["summary_trace"] = langfuse.trace(
-                id=response.trace_id
-            )
+            response = generate_summary(innovation, technology, approach, antigen, disease,)
+            ui.update_action_button("summary_generate", disabled=False)
+            shared_state["summary_trace"] = langfuse.trace(id=response.trace_id)
 
             logging.info("Generated Summary")
 
-            ui.update_action_button("save_field_of_invention", disabled=True)
-            ui.update_action_button("field_of_invention_continue", disabled=True)
-            
-            ui.update_action_button("summary_continue", disabled=False)
-
-            ui.update_action_button("thumbs_down_summary", disabled=False)
-            ui.update_action_button("thumbs_up_summary", disabled=False)
-            
-            generated_summary.set(response.prediction)
-
+            generated_field_of_invention.set(response.prediction)
 
     @reactive.Effect
-    @reactive.event(input.summary_continue)
-    def on_summary_continue():
-        summary_edit = input.summary()
+    @reactive.event(input.field_of_invention_generate)
+    def on_field_of_invention_generate():
+        summary_content = input.summary()
         antigen = input.antigen()
         disease = input.disease()
+        innovation = input.innovation()
+        technology = input.technology()
+        approach = input.approach()
+
+        ui.update_action_button("field_of_invention_generate", disabled=True)    
+
+        ui.update_action_button("thumbs_down_field_of_invention", disabled=False)
+        ui.update_action_button("thumbs_up_field_of_invention", disabled=False)
+
+        ui.update_action_button("disease_overview_generate", disabled=False)
 
         if ENVIRONMENT == "development":
             response = f"Antigen: {antigen} and Disease: {disease}"
-            generated_primary_invention.set(response)
+            generated_field_of_invention.set(response)
 
-            ui.update_action_button("save_summary", disabled=True)
-            ui.update_action_button("summary_continue", disabled=True)
+        else:
+            response = generate_field_of_invention(
+                innovation, technology, approach, antigen, disease,
+            )
 
-            ui.update_action_button("primary_invention_continue", disabled=False)
+            shared_state["field_of_invention_trace"] = langfuse.trace(
+                id=response.trace_id
+            )
+
+            logging.info("Generated field of invention")
+    
+            generated_field_of_invention.set(response.prediction)
+
+
+    @reactive.Effect
+    @reactive.event(input.disease_overview_generate)
+    def on_disease_overview_generate():
+        field_of_invention_content = input.field_of_invention()
+        antigen = input.antigen()
+        disease = input.disease()
+
+
+        ui.update_action_button("disease_overview_generate", disabled=True)
+
+        ui.update_action_button("thumbs_down_disease_overview", disabled=False)
+        ui.update_action_button("thumbs_up_disease_overview", disabled=False)
+
+        ui.update_action_button("target_overview_generate", disabled=False)
+
+        if ENVIRONMENT == "development":
+            response = f"Antigen: {antigen} and Disease: {disease}"
+            generated_disease_overview.set(response)
+
+        else:
+            response = generate_disease_overview(
+                disease
+            )
+
+            shared_state["disease_overview_trace"] = langfuse.trace(
+                id=response.trace_id
+            )
+
+            logging.info("Generated Disease Overview")
+    
+            generated_disease_overview.set(response.prediction)
+
+    @reactive.Effect
+    @reactive.event(input.target_overview_generate)
+    def on_target_overview_generate():
+        target_overview_content = input.target_overview()
+        antigen = input.antigen()
+        disease = input.disease()
+        innovation = input.innovation()
+        technology = input.technology()
+        approach = input.approach()
+
+        ui.update_action_button("target_overview_generate", disabled=True)
+
+        ui.update_action_button("thumbs_down_target_overview", disabled=False)
+        ui.update_action_button("thumbs_up_target_overview", disabled=False)
         
-            ui.update_action_button("thumbs_down_primary_invention", disabled=False)
-            ui.update_action_button("thumbs_up_primary_invention", disabled=False)
-
-        else:
-            response = generate_primary_invention(summary_edit, antigen, disease)
-
-            shared_state["primary_invention_trace"] = langfuse.trace(
-                id=response.trace_id
-            )
-
-            logging.info("Generated Primary Invention")
-            ui.update_action_button("save_summary", disabled=True)
-            ui.update_action_button("summary_continue", disabled=True)
-
-            ui.update_action_button("primary_invention_continue", disabled=False)
-
-            ui.update_action_button("thumbs_down_primary_invention", disabled=False)
-            ui.update_action_button("thumbs_up_primary_invention", disabled=False)
-
-            generated_primary_invention.set(response.prediction)
-
-    @reactive.Effect
-    @reactive.event(input.primary_invention_continue)
-    def on_primary_invention_continue():
-        primary_invention_edit = input.primary_invention()
-        antigen = input.antigen()
-        disease = input.disease()
-        if ENVIRONMENT == "development":
-            response = f"Antigen: {antigen} and Disease: {disease}"
-            generated_technology.set(response)
-
-            ui.update_action_button("save_primary_invention", disabled=True)
-
-            ui.update_action_button("primary_invention_continue", disabled=True)
-            ui.update_action_button("technology_continue", disabled=False)
-
-            ui.update_action_button("thumbs_down_technology", disabled=False)
-            ui.update_action_button("thumbs_up_technology", disabled=False)
-
-        else:
-            response = generate_technology_platform(
-                primary_invention_edit,
-                antigen,
-                disease,
-            )
-
-            shared_state["technology_trace"] = langfuse.trace(
-                id=response.trace_id
-            )
-
-            logging.info("Generated Technology")
-            
-            ui.update_action_button("save_primary_invention", disabled=True)
-            ui.update_action_button("primary_invention_continue", disabled=True)
-            ui.update_action_button("technology_continue", disabled=False)
-
-            ui.update_action_button("thumbs_down_technology", disabled=False)
-            ui.update_action_button("thumbs_up_technology", disabled=False)
-
-            generated_technology.set(response.prediction)
-
-    @reactive.Effect
-    @reactive.event(input.technology_continue)
-    def on_technology_continue():
-        technology_edit = input.technology()
-        antigen = input.antigen()
-        disease = input.disease()
+        ui.update_action_button("high_level_concept_generate", disabled=False)
 
         if ENVIRONMENT == "development":
             response = f"Antigen: {antigen} and Disease: {disease}"
-            generated_description.set(response)
-
-            ui.update_action_button("save_technology", disabled=True)
-            ui.update_action_button("technology_continue", disabled=True)
-
-            ui.update_action_button("description_continue", disabled=False)
-
-            ui.update_action_button("thumbs_down_description", disabled=False)
-            ui.update_action_button("thumbs_up_description", disabled=False)
+            generated_target_overview.set(response)
 
         else:
-            response = generate_description_of_invention(
-                technology_edit, antigen, disease
+            response = generate_target_overview(
+                innovation, technology, approach, antigen, disease,
             )
 
-            shared_state["description_trace"] = langfuse.trace(
+            shared_state["target_overview_trace"] = langfuse.trace(
                 id=response.trace_id
             )
 
-            logging.info("Generated Description Of Invention")
-
-            ui.update_action_button("save_technology", disabled=True)
-            ui.update_action_button("technology_continue", disabled=True)
-            ui.update_action_button("description_continue", disabled=False)
-
-            ui.update_action_button("thumbs_down_description", disabled=False)
-            ui.update_action_button("thumbs_up_description", disabled=False)
-
-            generated_description.set(response.prediction)
-
+            logging.info("Generated Target Overview")
+    
+            generated_target_overview.set(response.prediction)
+    
     @reactive.Effect
-    @reactive.event(input.description_continue)
-    def on_description_continue():
-        description_edit = input.description()
+    @reactive.event(input.high_level_concept_generate)
+    def on_high_level_concept_generate():
+        high_level_concept_content = input.high_level_concept()
         antigen = input.antigen()
         disease = input.disease()
+        innovation = input.innovation()
+        technology = input.technology()
+        approach = input.approach()
+
+        ui.update_action_button("high_level_concept_generate", disabled=True)
+
+        ui.update_action_button("thumbs_down_high_level_concept", disabled=False)
+        ui.update_action_button("thumbs_up_high_level_concept", disabled=False)
+
+        ui.update_action_button("underlying_mechanism_generate", disabled=False)
 
         if ENVIRONMENT == "development":
             response = f"Antigen: {antigen} and Disease: {disease}"
-            generated_product.set(response)
+            generated_high_level_concept.set(response)
 
-            ui.update_action_button("save_description", disabled=True)
-
-            ui.update_action_button("description_continue", disabled=True)
-            ui.update_action_button("product_retry", disabled=False)
-
-            ui.update_action_button("thumbs_down_product", disabled=False)
-            ui.update_action_button("thumbs_up_product", disabled=False)
         else:
-            response = generate_product(description_edit, antigen, disease)
+            response = generate_high_level_concept(
+                innovation, technology, approach, antigen, disease,
+            )
 
-            shared_state["product_trace"] = langfuse.trace(
+            shared_state["high_level_concept_trace"] = langfuse.trace(
                 id=response.trace_id
             )
 
-            logging.info("Generated product or products")
+            logging.info("Generated High Level Concept")
+    
+            generated_high_level_concept.set(response.prediction)
 
-            ui.update_action_button("save_description", disabled=True)
-
-            ui.update_action_button("description_continue", disabled=True)
-            ui.update_action_button("product_retry", disabled=False)
-
-            ui.update_action_button("thumbs_down_product", disabled=False)
-            ui.update_action_button("thumbs_up_product", disabled=False)
-
-            generated_product.set(response.prediction)
 
     @reactive.Effect
-    @reactive.event(input.product_retry)
-    def on_product_continue():
+    @reactive.event(input.underlying_mechanism_generate)
+    def on_underlying_mechanism_generate():
+        underlying_mechanism_content = input.underlying_mechanism()
+        antigen = input.antigen()
+        disease = input.disease()
+        innovation = input.innovation()
+        technology = input.technology()
+        approach = input.approach()
+
+        ui.update_action_button("underlying_mechanism_generate", disabled=True)
+
+        ui.update_action_button("thumbs_down_underlying_mechanism", disabled=False)
+        ui.update_action_button("thumbs_up_underlying_mechanism", disabled=False)
+
+        if ENVIRONMENT == "development":
+            response = f"Antigen: {antigen} and Disease: {disease}"
+            generated_underlying_mechanism.set(response)
+
+        else:
+            response = generate_underlying_mechanism(
+                innovation, technology, approach, antigen, disease,
+            )
+
+            shared_state["underlying_mechanism_trace"] = langfuse.trace(
+                id=response.trace_id
+            )
+
+            logging.info("Generated High Level Concept")
+    
+            generated_underlying_mechanism.set(response.prediction)
+    
+    @reactive.Effect
+    @reactive.event(input.embodiment_1_generate)
+    def on_embodiment_1_generate():
+        antigen = input.antigen()
+        disease = input.disease()
+        innovation = input.innovation()
+        technology = input.technology()
+        approach = input.approach()
+
+        ui.update_action_button("embodiment_1_generate", disabled=True)
+        
+
+        if ENVIRONMENT == "development":
+            response = f"Antigen: {antigen} and Disease: {disease}"
+            generated_embodiment_1.set(response)
+
+        else:
+            response = generate_embodiment(
+                "no previous embodiment, just ignore and generate the first one", innovation, technology, approach, antigen, disease,
+            )
+
+            shared_state["embodiment_1_trace"] = langfuse.trace(
+                id=response.trace_id
+            )
+
+            logging.info("Generated First Embodiment")
+    
+            generated_embodiment_1.set(response.prediction)
+
+    @reactive.Effect
+    @reactive.event(input.embodiment_2_generate)
+    def on_embodiment_2_generate():
+        embodiment_1_content = input.embodiment_1_text()
+        antigen = input.antigen()
+        disease = input.disease()
+        innovation = input.innovation()
+        technology = input.technology()
+        approach = input.approach()
+
+        ui.update_action_button("embodiment_2_generate", disabled=True)
+        
+
+        if ENVIRONMENT == "development":
+            response = f"Antigen: {antigen} and Disease: {disease}"
+            generated_embodiment_2.set(response)
+
+        else:
+            response = generate_embodiment(
+                embodiment_1_content, innovation, technology, approach, antigen, disease,
+            )
+
+            shared_state["embodiment_2_trace"] = langfuse.trace(
+                id=response.trace_id
+            )
+
+            logging.info("Generated First Embodiment")
+    
+            generated_embodiment_2.set(response.prediction)
+
+    @reactive.Effect
+    @reactive.event(input.embodiment_3_generate)
+    def on_embodiment_3_generate():
+        embodiment_2_content = input.embodiment_2_text()
+        antigen = input.antigen()
+        disease = input.disease()
+        innovation = input.innovation()
+        technology = input.technology()
+        approach = input.approach()
+
+        ui.update_action_button("embodiment_3_generate", disabled=True)
+        
+
+        if ENVIRONMENT == "development":
+            response = f"Antigen: {antigen} and Disease: {disease}"
+            generated_embodiment_3.set(response)
+
+        else:
+            response = generate_embodiment(
+                embodiment_2_content, innovation, technology, approach, antigen, disease,
+            )
+
+            shared_state["embodiment_3_trace"] = langfuse.trace(
+                id=response.trace_id
+            )
+
+            logging.info("Generated First Embodiment")
+    
+            generated_embodiment_3.set(response.prediction)
+
+    @reactive.Effect
+    @reactive.event(input.embodiment_4_generate)
+    def on_embodiment_4_generate():
+        embodiment_3_content = input.embodiment_3_text()
+        antigen = input.antigen()
+        disease = input.disease()
+        innovation = input.innovation()
+        technology = input.technology()
+        approach = input.approach()
+
+        ui.update_action_button("embodiment_4_generate", disabled=True)
+        ui.update_action_button("claims_generate", disabled=False)
+
+        if ENVIRONMENT == "development":
+            response = f"Antigen: {antigen} and Disease: {disease}"
+            generated_embodiment_4.set(response)
+
+        else:
+            response = generate_embodiment(
+                embodiment_3_content, innovation, technology, approach, antigen, disease,
+            )
+
+            shared_state["embodiment_4_trace"] = langfuse.trace(
+                id=response.trace_id
+            )
+
+            logging.info("Generated First Embodiment")
+    
+            generated_embodiment_4.set(response.prediction)
+
+
+    @reactive.Effect
+    @reactive.event(input.claims_generate)
+    def on_claims_generate():
+        antigen = input.antigen()
+        disease = input.disease()
+        innovation = input.innovation()
+        technology = input.technology()
+        approach = input.approach()
+
+        ui.update_action_button("claims_generate", disabled=True)
+
+        ui.update_action_button("thumbs_down_claims", disabled=False)
+        ui.update_action_button("thumbs_up_claims", disabled=False)
+
+        ui.update_action_button("abstract_generate", disabled=False)
+
+        if ENVIRONMENT == "development":
+            response = f"Antigen: {antigen} and Disease: {disease}"
+            generated_claims.set(response)
+
+        else:
+            response = generate_claims(
+                innovation, technology, approach, antigen, disease, 
+            )
+
+            shared_state["claims_trace"] = langfuse.trace(
+                id=response.trace_id
+            )
+
+            logging.info("Generated High Level Concept")
+    
+            generated_claims.set(response.prediction)
+    
+    @reactive.Effect
+    @reactive.event(input.abstract_generate)
+    def on_abstract_generate():
+        antigen = input.antigen()
+        disease = input.disease()
+        innovation = input.innovation()
+        technology = input.technology()
+        approach = input.approach()
+
+        ui.update_action_button("abstract_generate", disabled=True)
+
+        ui.update_action_button("thumbs_down_abstract", disabled=False)
+        ui.update_action_button("thumbs_up_abstract", disabled=False)
+
+        ui.update_action_button("key_terms_generate", disabled=False)
+
+        if ENVIRONMENT == "development":
+            response = f"Antigen: {antigen} and Disease: {disease}"
+            generated_abstract.set(response)
+
+        else:
+            response = generate_abstract(
+                innovation, technology, approach, antigen, disease,
+            )
+
+            shared_state["abstract_trace"] = langfuse.trace(
+                id=response.trace_id
+            )
+
+            logging.info("Generated Abstract")
+
+    
+            generated_abstract.set(response.prediction)
+
+    @reactive.Effect
+    @reactive.event(input.key_terms_generate)
+    def on_key_terms_generate():
+        antigen = input.antigen()
+        disease = input.disease()
+        innovation = input.innovation()
+        technology = input.technology()
+        approach = input.approach()
+
+        ui.update_action_button("key_terms_generate", disabled=True)
+
+        ui.update_action_button("thumbs_down_key_terms", disabled=False)
+        ui.update_action_button("thumbs_up_key_terms", disabled=False)
+
+        ui.update_action_button("key_terms_refresh", disabled=False)
+
+        if ENVIRONMENT == "development":
+            response = f"Antigen: {antigen} and Disease: {disease}"
+            generated_key_terms.set(response)
+
+        else:
+            response = generate_key_terms(
+                innovation, technology, approach, antigen, disease,
+            )
+
+            shared_state["key_terms_trace"] = langfuse.trace(
+                id=response.trace_id
+            )
+
+            logging.info("Generated Key Terms")
+    
+            generated_key_terms.set(response.prediction)
+
+    @reactive.Effect
+    @reactive.event(input.key_terms_refresh)
+    def on_key_terms_refresh():
         """
         Clean up all the output cards
         """
         generated_background.set("")
-        generated_field_of_invention.set("")
         generated_summary.set("")
-        generated_primary_invention.set("")
-        generated_technology.set("")
-        generated_description.set("")
-        generated_product.set("")              
+        generated_field_of_invention.set("")
+        generated_disease_overview.set("")
+        generated_target_overview.set("")
+        generated_high_level_concept.set("")
+        generated_underlying_mechanism.set("")
+        generated_embodiment_1.set("")
+        generated_embodiment_2.set("")
+        generated_embodiment_3.set("")
+        generated_embodiment_4.set("")
+        generated_claims.set("")    
+        generated_abstract.set("")            
+        generated_key_terms.set("")
 
 
     @output
     @render.ui
     def background_card():
-        return generate_card_content(generated_background(), "Background")
+        return generate_background_card(generated_background())
     
     @output
     @render.ui
     def summary_card():
-        return generate_card_content(generated_background(), "Summary")
+        return generate_card_content(generated_summary(), "Summary")
 
     @output
     @render.ui
     def field_of_invention_card():
-        return generate_card_content(generated_background(), "Field of Invention")
-
-    @output
-    @render.ui
-    def key_terms_card():
-        return generate_card_content(generated_background(), "Key Terms")
+        return generate_card_content(generated_field_of_invention(), "Field of Invention")
     
-
-    # UI renderers
     @output
     @render.ui
     def disease_overview_card():
-        return generate_card_content(generated_field_of_invention(), "Disease Overview")
+        return generate_card_content(generated_disease_overview(), "Disease Overview")
 
     @output
     @render.ui
     def target_overview_card():
-        return generate_card_content(generated_summary(), "Target Overview")
+        return generate_card_content(generated_target_overview(), "Target Overview")
 
     @output
     @render.ui
     def high_level_concept_card():
-        return generate_card_content(generated_primary_invention(), "High Level Concept")
+        return generate_card_content(generated_high_level_concept(), "High Level Concept")
 
     @output
     @render.ui
     def underlying_mechanism_card():
-        return generate_card_content(generated_technology(), "Underlying Mechanism")
+        return generate_card_content(generated_underlying_mechanism(), "Underlying Mechanism")
     
     @output
     @render.ui
-    def composition_card():
-        return generate_card_content(generated_description(), "Composition")
+    def embodiment_card_1():
+        return generate_embodiment_card(generated_embodiment_1(),"embodiment_1")
 
     @output
     @render.ui
-    def manufacturing_processes_card():
-        return generate_card_content(generated_product(), "Manufacturing Processes")
+    def embodiment_card_2():
+        return generate_embodiment_card(generated_embodiment_2(),"embodiment_2")
+    
     @output
     @render.ui
-    def administration_methods_card():
-        return generate_card_content(generated_product(), "Administration methods")
+    def embodiment_card_3():
+        return generate_embodiment_card(generated_embodiment_3(),"embodiment_3")
+    
     @output
     @render.ui
-    def indications_card():
-        return generate_card_content(generated_product(), "Indications")
-
-    @output
-    @render.ui
-    def additional_modalities_card():
-        return generate_card_content(generated_product(), "Additional Modalities")
+    def embodiment_card_4():
+        return generate_embodiment_card(generated_embodiment_4(),"embodiment_4")
+    
     @output
     @render.ui
     def claims_card():
-        return generate_card_content(generated_product(), "Claims")
+        return generate_card_content(generated_claims(), "Claims")
 
     @output
     @render.ui
     def abstract_card():
-        return generate_card_content(generated_background(), "Abstract")
+        return generate_card_content(generated_abstract(), "Abstract")
+    
+    @output
+    @render.ui
+    def key_terms_card():
+        return generate_card_content(generated_key_terms(), "Key Terms")
 
 
     # Background
