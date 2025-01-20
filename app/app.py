@@ -22,7 +22,6 @@ logging.basicConfig(level=logging.INFO)
 
 # Define UI
 app_ui = ui.page_fixed(
-        ui.h1("Detailed description"),
         ui.card(
             ui.card_header(
                 ui.h3("Inputs")
@@ -84,58 +83,234 @@ app_ui = ui.page_fixed(
             ),
             height=600
         ),
-
         ui.card(
-            ui.output_ui("background_card", height="100%", padding="0"),
+            ui.output_ui("background_card", height="100%", padding="0")
+        )
+        ,
+        ui.card(
+            ui.output_ui("summary_card", height="100%", padding="0")
+        )
+        ,
+        ui.card(
+            ui.output_ui("field_of_invention_card", height="100%", padding="0")
+        )
+        ,
+        ui.h3("Detailed description"),
+        ui.h4("1. Definitions and Methodology")
+        ,
+        ui.card(
+            ui.output_ui("key_terms_card", height="100%", padding="0"),
             min_height="100%",
             max_height="100%",
             class_="p-0",  # Placeholder for dynamically generated cards
         ),
-
+        ui.h4("2. Disease Background & Relevance")
+        ,
         ui.card(
-            ui.output_ui("field_of_invention_card", height="100%", padding="0"),
+            ui.output_ui("disease_overview_card", height="100%", padding="0"),
             min_height="100%",
             max_height="100%",
             class_="p-0",  # Placeholder for dynamically generated cards
         ),
-
         ui.card(
-            ui.output_ui("summary_card", height="100%", padding="0"),
+            ui.output_ui("target_overview_card", height="100%", padding="0"),
             min_height="100%",
             max_height="100%",
             class_="p-0",  # Placeholder for dynamically generated cards
         ),
-
+        ui.h4("3. Technology or Product Overview"),
+        ui.input_selectize(id="copy_threshold", label="Configure the copy threshold:",choices={"100%":"100%", "50%":"50%", "0%":"0%"} ),   
         ui.card(
-            ui.output_ui("primary_invention_card", height="100%", padding="0"),
+            ui.output_ui("high_level_concept_card", height="100%", padding="0"),
             min_height="100%",
             max_height="100%",
             class_="p-0",  # Placeholder for dynamically generated cards
         ),
-
         ui.card(
-            ui.output_ui("technology_card", height="100%", padding="0"),
+            ui.output_ui("underlying_mechanism_card", height="100%", padding="0"),
             min_height="100%",
             max_height="100%",
             class_="p-0",  # Placeholder for dynamically generated cards
         ),
-
+        ui.h4("4. Embodiments (Core of the Detailed Description)")
+        ,
         ui.card(
-            ui.output_ui("description_card", height="100%", padding="0"),
-            min_height="100%",
-            max_height="100%",
-            class_="p-0",  # Placeholder for dynamically generated cards
+            ui.card(
+                ui.card_header(ui.p("Embodiment")),
+                ui.card_body(ui.input_text_area("embodiment_text_1","",rows=8, cols=45)),
+                ui.card_footer(
+                    ui.input_action_button("embodiment_generate_1", "▶️", width="3vw", class_="btn btn-primary p-0"),
+                    ui.input_action_button("embodiment_approve_1", "Approve", width="6vw", class_="btn btn-secondary p-0"),
+                    ui.popover(
+                        ui.input_action_button("embodiment_retry_1", "Retry", width="3vw", class_="btn btn-danger p-0"),
+                        ui.input_text_area("embodiment_retry_critique_1", "What should change?", placeholder="Need more detail...", rows=5, resize="none"),
+                        ui.input_action_button("embodiment_retry_save_critique_1", "📝", class_="btn btn-secondary p-0")
+                        )
+                ),
+                height="35%", 
+                padding="0"),            
+            ui.card(
+                ui.card_header(ui.p("Embodiment")),
+                ui.card_body(ui.input_text_area("embodiment_text_2", "",rows=8, cols=45)),
+                ui.card_footer(
+                    ui.input_action_button("embodiment_generate_2", "▶️", width="3vw", class_="btn btn-primary p-0"),
+                    ui.input_action_button("embodiment_approve_2", "Approve", width="6vw", class_="btn btn-secondary p-0"),
+                    ui.popover(
+                        ui.input_action_button("embodiment_retry_2", "Retry", width="3vw", class_="btn btn-danger p-0"),
+                        ui.input_text_area("embodiment_retry_critique_2", "What should change?", placeholder="Need more detail...", rows=5, resize="none"),
+                        ui.input_action_button("embodiment_retry_save_critique_2", "📝", class_="btn btn-secondary p-0")
+                        )
+                ),
+                height="35%", 
+                padding="0"
+                ),        
+            ui.card(
+                ui.card_header(ui.p("Embodiment")),
+                ui.card_body(ui.input_text_area("embodiment_text_3","" ,rows=8, cols=45)),
+                ui.card_footer(
+                    ui.input_action_button("embodiment_generate_3", "▶️", width="3vw", class_="btn btn-primary p-0"),
+                    ui.input_action_button("embodiment_approve_3", "Approve", width="6vw", class_="btn btn-secondary p-0"),
+                    ui.popover(
+                        ui.input_action_button("embodiment_retry_3", "Retry", width="3vw", class_="btn btn-danger p-0"),
+                        ui.input_text_area("embodiment_retry_critique_3", "What should change?", placeholder="Need more detail...", rows=5, resize="none"),
+                        ui.input_action_button("embodiment_retry_save_critique_3", "📝", class_="btn btn-secondary p-0")
+                        )
+                ),
+                height="35%", 
+                padding="0"
+                ),         
+            ui.card(
+                ui.card_header(ui.p("Embodiment")),
+                ui.card_body(ui.input_text_area("embodiment_text_4", "", rows=8, cols=45)),
+                ui.card_footer(
+                    ui.input_action_button("embodiment_generate_4", "▶️", width="3vw", class_="btn btn-primary p-0"),
+                    ui.input_action_button("embodiment_approve_4", "Approve", width="6vw", class_="btn btn-secondary p-0"),
+                    ui.popover(
+                        ui.input_action_button("embodiment_retry_4", "Retry", width="3vw", class_="btn btn-danger p-0"),
+                        ui.input_text_area("embodiment_retry_critique_4", "What should change?", placeholder="Need more detail...", rows=5, resize="none"),
+                        ui.input_action_button("embodiment_retry_save_critique_4", "📝", class_="btn btn-secondary p-0")
+                        )
+                ),
+                height="35%", 
+                padding="0"
+                ),
+            height="150%"            
+        ),
+        ui.card(
+            ui.output_ui("claims_card", height="100%", padding="0")
+        ),
+        ui.card(
+            ui.output_ui("abstract_card", height="100%", padding="0")
         ),
 
-        ui.card(
-            ui.output_ui("product_card", height="100%", padding="0"),
-            min_height="100%",
-            max_height="100%",
-            class_="p-0",  # Placeholder for dynamically generated cards
-        ),
         height="100vh",
-        title="Detailed Description",
+        title="AI Patent",
     )
+
+def generate_technology(response_text, generation_step):
+    response_text = str(response_text)
+    step_id = generation_step.lower()
+
+    return ui.div(
+        ui.div(
+            ui.input_text_area(
+                f"{step_id}",
+                generation_step,
+                value=response_text,
+                width="100%",
+                height="100%",
+                rows=22,
+                resize="none",
+            ),
+            class_="card-body h-100",
+        ),
+        ui.div(
+            ui.input_action_button(
+                f"thumbs_up_{step_id}",
+                "👍",
+                class_="btn btn-success p-0",
+                width="3vw",
+                disabled=True,
+            ),
+            ui.popover(
+                ui.input_action_button(
+                    f"thumbs_down_{step_id}",
+                    "👎",
+                    class_="btn btn-danger p-0",
+                    width="3vw",
+                    disabled=True,
+                ),
+                ui.input_text_area(
+                    f"reasoning_thumbs_down_{step_id}",
+                    "thumbs down feedback",
+                    height="30vh",
+                    width="30vw",
+                    resize="none",
+                    spellcheck=True,
+                    placeholder="Please provide your feedback about what you didn't like or what could be improved.",
+                ),
+                ui.input_action_button(
+                    f"save_reasoning_thumbs_down_{step_id}",
+                    "📝",
+                    class_="btn btn-secondary p-0",
+                    width="3vw",
+                ),
+                id=f"thumbs_down_popover_{step_id}",
+            ),
+            ui.popover(
+                ui.input_action_button(
+                    f"save_{step_id}",
+                    "💾",
+                    class_="btn btn-primary p-0",
+                    width="3vw",
+                    disabled=False,
+                ),
+                ui.input_text_area(
+                    f"{step_id}_comment",
+                    "comment on your changes",
+                    placeholder="e.g, I edited the 'example' section because it did not accurately describe the process",
+                    rows=10,
+                    cols=5,
+                    resize="none",
+                ),
+                ui.input_action_button(
+                    f"save_{step_id}_comment",
+                    "📝",
+                    class_="btn btn-secondary p-0",
+                    width="3vw"
+                ),
+                id=f"{step_id}_save_popover"
+            ),
+            ui.input_action_button(
+                f"{step_id}_continue",
+                "▶️",
+                class_="btn btn-primary p-0",
+                width="3vw",
+                disabled=True,
+            ),
+            ui.popover(
+            ui.input_action_button(f"add_component_input_{step_id}", "add input", width="6vw", class_="btn btn-secondary p-0"),
+            ui.input_text_area(
+                label=f"Extra input for {generation_step}",
+                id=f"component_input_{step_id}",
+                rows=15,
+                cols=25,
+                resize="none",
+            ),
+            style="width: 600px;",
+            id=f"component_input_{step_id}_popover"
+        ),
+        ui.input_selectize(
+            "technology_copy_threshold"
+        )
+        ,
+        class_="card-footer mt-2",
+        ),
+        class_="card h-100 p-0",
+    )
+
+
+
 
 
 def generate_card_content(response_text, generation_step):
@@ -146,7 +321,7 @@ def generate_card_content(response_text, generation_step):
     step_id = generation_step.lower().replace(" ", "_")
 
     print(generation_step)
-    if generation_step == "product":
+    if generation_step == "Abstract":
         return ui.div(
             ui.div(
                 ui.input_text_area(
@@ -224,6 +399,17 @@ def generate_card_content(response_text, generation_step):
                     class_="btn btn-primary p-0",
                     width="3vw",
                     disabled=True,
+                ),
+                ui.popover(
+                    ui.input_action_button(f"add_component_input_{step_id}", "add input", width="6vw", class_="btn btn-secondary p-0")
+                    ,
+                    ui.input_text_area(
+                        label=f"Extra input for {generation_step}",
+                        id=f"component_input_{step_id}",
+                        rows=10,
+                        cols=5
+                    ),
+                    id=f"component_input_{step_id}_popover"
                 ),
                 class_="card-footer mt-2",
             ),
@@ -304,12 +490,25 @@ def generate_card_content(response_text, generation_step):
             ),
             ui.input_action_button(
                 f"{step_id}_continue",
-                "➡️",
+                "▶️",
                 class_="btn btn-primary p-0",
                 width="3vw",
                 disabled=True,
             ),
-            class_="card-footer mt-2",
+            ui.popover(
+            ui.input_action_button(f"add_component_input_{step_id}", "add input", width="6vw", class_="btn btn-secondary p-0"),
+            ui.input_text_area(
+                label=f"Extra input for {generation_step}",
+                id=f"component_input_{step_id}",
+                rows=15,
+                cols=25,
+                resize="none",
+
+            ),
+            style="width: 600px;",
+            id=f"component_input_{step_id}_popover"
+        ),
+        class_="card-footer mt-2",
         ),
         class_="card h-100 p-0",
     )
@@ -626,44 +825,81 @@ def server(input, output, session):
         generated_description.set("")
         generated_product.set("")              
 
+
     @output
     @render.ui
     def background_card():
-        return generate_card_content(generated_background(), "background")
+        return generate_card_content(generated_background(), "Background")
+    
+    @output
+    @render.ui
+    def summary_card():
+        return generate_card_content(generated_background(), "Summary")
+
+    @output
+    @render.ui
+    def field_of_invention_card():
+        return generate_card_content(generated_background(), "Field of Invention")
+
+    @output
+    @render.ui
+    def key_terms_card():
+        return generate_card_content(generated_background(), "Key Terms")
     
 
     # UI renderers
     @output
     @render.ui
-    def field_of_invention_card():
-        return generate_card_content(
-            generated_field_of_invention(), "field_of_invention"
-        )
+    def disease_overview_card():
+        return generate_card_content(generated_field_of_invention(), "Disease Overview")
 
     @output
     @render.ui
-    def summary_card():
-        return generate_card_content(generated_summary(), "summary")
+    def target_overview_card():
+        return generate_card_content(generated_summary(), "Target Overview")
 
     @output
     @render.ui
-    def primary_invention_card():
-        return generate_card_content(generated_primary_invention(), "primary_invention")
+    def high_level_concept_card():
+        return generate_card_content(generated_primary_invention(), "High Level Concept")
 
     @output
     @render.ui
-    def technology_card():
-        return generate_card_content(generated_technology(), "technology")
+    def underlying_mechanism_card():
+        return generate_card_content(generated_technology(), "Underlying Mechanism")
     
     @output
     @render.ui
-    def description_card():
-        return generate_card_content(generated_description(), "description")
+    def composition_card():
+        return generate_card_content(generated_description(), "Composition")
 
     @output
     @render.ui
-    def product_card():
-        return generate_card_content(generated_product(), "product")
+    def manufacturing_processes_card():
+        return generate_card_content(generated_product(), "Manufacturing Processes")
+    @output
+    @render.ui
+    def administration_methods_card():
+        return generate_card_content(generated_product(), "Administration methods")
+    @output
+    @render.ui
+    def indications_card():
+        return generate_card_content(generated_product(), "Indications")
+
+    @output
+    @render.ui
+    def additional_modalities_card():
+        return generate_card_content(generated_product(), "Additional Modalities")
+    @output
+    @render.ui
+    def claims_card():
+        return generate_card_content(generated_product(), "Claims")
+
+    @output
+    @render.ui
+    def abstract_card():
+        return generate_card_content(generated_background(), "Abstract")
+
 
     # Background
     @reactive.Effect
