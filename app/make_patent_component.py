@@ -1,12 +1,10 @@
 import uuid
-import sys
-
+import os
 from datetime import datetime
 
 from langfuse import Langfuse
 from openai import OpenAI
 from models.llm import (
-    PrimaryInvention,
     FieldOfInvention,
     BackgroundAndNeed,
     BriefSummary,
@@ -25,31 +23,16 @@ from utils.utils import values_to_json
 
 langfuse = Langfuse()
 
-
-class ProgressTracker:
-
-    def __init__(self):
-        self.counter = 0
-
-    async def update(self, total_tasks):
-        self.counter += 1
-        progress = (self.counter / total_tasks) * 100
-        sys.stdout.write(
-            f"\rProgress: {self.counter}/{total_tasks} tasks completed ({progress:.2f}%)"
-        )
-        sys.stdout.flush()
-
-
-progress_tracker = ProgressTracker()
-
+model = os.getenv("MODEL")
 
 def generate_field_of_invention(
     innovation: str, 
     technology: str,
     approach: str, 
     antigen: str, 
-    disease: str, 
-    model: str = "o1-preview") -> FieldOfInvention:
+    disease: str,
+    additional:str, 
+    model: str = model) -> FieldOfInvention:
     client = OpenAI()
 
     if not antigen or not disease:
@@ -64,7 +47,9 @@ def generate_field_of_invention(
         antigen=antigen, 
         disease=disease,
         innovation=innovation,
-        approach=approach        ),
+        approach=approach,
+        additional=additional,
+       ),
         tags=["evaluation"],
     )
     fetch_prompt = trace.span(name="fetch_prompt", start_time=datetime.now())
@@ -74,7 +59,8 @@ def generate_field_of_invention(
         antigen=antigen, 
         disease=disease,
         innovation=innovation,
-        approach=approach    )
+        approach=approach,
+        additional=additional    )
     fetch_prompt.end(
         end_time=datetime.now(),
         input=values_to_json(
@@ -82,7 +68,8 @@ def generate_field_of_invention(
             antigen=antigen, 
             disease=disease,
             innovation=innovation,
-            approach=approach
+            approach=approach,
+            additional=additional
         ),
         output=raw_prompt,
     )
@@ -126,8 +113,9 @@ def generate_background(
     technology: str,
     approach: str, 
     antigen: str, 
-    disease: str, 
-    model: str = "o1-preview") -> BackgroundAndNeed:
+    disease: str,
+    additional:str,
+    model: str = model) -> BackgroundAndNeed:
 
     client = OpenAI()
     if not antigen or not disease:
@@ -142,7 +130,8 @@ def generate_background(
         antigen=antigen, 
         disease=disease,
         innovation=innovation,
-        approach=approach        ),
+        approach=approach,
+        additional=additional        ),
         tags=["evaluation"],
     )
     fetch_prompt = trace.span(name="fetch_prompt", start_time=datetime.now())
@@ -152,7 +141,9 @@ def generate_background(
         antigen=antigen, 
         disease=disease,
         innovation=innovation,
-        approach=approach    )
+        approach=approach,
+        additional=additional,
+        )
     fetch_prompt.end(
         end_time=datetime.now(),
         input=values_to_json(
@@ -160,7 +151,9 @@ def generate_background(
         antigen=antigen, 
         disease=disease,
         innovation=innovation,
-        approach=approach        ),
+        approach=approach,
+        additional=additional,
+       ),
         output=raw_prompt,
     )
 
@@ -190,14 +183,14 @@ def generate_background(
         prediction=response.choices[0].message.content, trace_id=trace_id
     )
 
-
 def generate_summary(
     innovation: str, 
     technology: str,
     approach: str, 
     antigen: str, 
-    disease: str, 
-    model: str = "o1-preview") -> BriefSummary:
+    disease: str,
+    additional:str, 
+    model: str = model) -> BriefSummary:
     client = OpenAI()
     if not antigen or not disease:
         raise ValueError("Disease and antigen must be non-empty strings")
@@ -211,7 +204,9 @@ def generate_summary(
         antigen=antigen, 
         disease=disease,
         innovation=innovation,
-        approach=approach            ),
+        approach=approach,
+        additional=additional,
+      ),
         tags=["evaluation"],
     )
     fetch_prompt = trace.span(name="fetch_prompt", start_time=datetime.now())
@@ -221,7 +216,9 @@ def generate_summary(
         antigen=antigen, 
         disease=disease,
         innovation=innovation,
-        approach=approach        )
+        approach=approach,
+        additional=additional,
+       )
     fetch_prompt.end(
         end_time=datetime.now(),
         input=values_to_json(
@@ -229,7 +226,9 @@ def generate_summary(
         antigen=antigen, 
         disease=disease,
         innovation=innovation,
-        approach=approach            ),
+        approach=approach,
+        additional=additional,
+        ),
         output=raw_prompt,
     )
 
@@ -267,8 +266,10 @@ def generate_target_overview(
     technology: str,
     approach: str, 
     antigen: str, 
-    disease: str, 
-    model: str = "o1-preview") -> TargetOverview:
+    disease: str,
+    additional:str, 
+    context: str,
+    model: str = model) -> TargetOverview:
     client = OpenAI()
     if not antigen or not disease:
         raise ValueError("Disease and antigen must be non-empty strings")
@@ -282,7 +283,9 @@ def generate_target_overview(
         antigen=antigen, 
         disease=disease,
         innovation=innovation,
-        approach=approach        ),
+        approach=approach,
+        additional=additional,
+        ),
         tags=["evaluation"],
     )
     fetch_prompt = trace.span(name="fetch_prompt", start_time=datetime.now())
@@ -292,7 +295,10 @@ def generate_target_overview(
         antigen=antigen, 
         disease=disease,
         innovation=innovation,
-        approach=approach    )
+        approach=approach,
+        additional=additional,   
+        context=context 
+    )
     fetch_prompt.end(
         end_time=datetime.now(),
         input=values_to_json(
@@ -300,7 +306,10 @@ def generate_target_overview(
         antigen=antigen, 
         disease=disease,
         innovation=innovation,
-        approach=approach        ),
+        approach=approach,
+        additional=additional,
+        context=context
+       ),
         output=raw_prompt,
     )
 
@@ -338,8 +347,9 @@ def generate_high_level_concept(
     technology: str,
     approach: str, 
     antigen: str, 
-    disease: str, 
-    model: str = "o1-preview") -> HighLevelConcept:
+    disease: str,
+    additional:str, 
+    model: str = model) -> HighLevelConcept:
     client = OpenAI()
     if not antigen or not disease:
         raise ValueError("Disease and antigen must be non-empty strings")
@@ -353,7 +363,9 @@ def generate_high_level_concept(
         antigen=antigen, 
         disease=disease,
         innovation=innovation,
-        approach=approach        ),
+        approach=approach,
+        additional=additional,
+        ),
         tags=["evaluation"],
     )
     fetch_prompt = trace.span(name="fetch_prompt", start_time=datetime.now())
@@ -363,7 +375,9 @@ def generate_high_level_concept(
         antigen=antigen, 
         disease=disease,
         innovation=innovation,
-        approach=approach    )
+        approach=approach,
+        additional=additional,
+    )
     fetch_prompt.end(
         end_time=datetime.now(),
         input=values_to_json(
@@ -371,7 +385,9 @@ def generate_high_level_concept(
         antigen=antigen, 
         disease=disease,
         innovation=innovation,
-        approach=approach        ),
+        approach=approach,
+        additional=additional,
+        ),
         output=raw_prompt,
     )
 
@@ -409,8 +425,9 @@ def generate_underlying_mechanism(
     technology: str,
     approach: str, 
     antigen: str, 
-    disease: str, 
-    model: str = "o1-preview"
+    disease: str,
+    additional:str, 
+    model: str = model
 ) -> UnderlyingMechanism:
     client = OpenAI()
     if not antigen or not disease:
@@ -425,7 +442,8 @@ def generate_underlying_mechanism(
         antigen=antigen, 
         disease=disease,
         innovation=innovation,
-        approach=approach),
+        approach=approach,
+        additional=additional),
         tags=["evaluation"],
     )
     fetch_prompt = trace.span(name="fetch_prompt", start_time=datetime.now())
@@ -435,7 +453,8 @@ def generate_underlying_mechanism(
         antigen=antigen, 
         disease=disease,
         innovation=innovation,
-        approach=approach    )
+        approach=approach,
+        additional=additional,)
     fetch_prompt.end(
         end_time=datetime.now(),
         input=values_to_json(
@@ -443,7 +462,9 @@ def generate_underlying_mechanism(
         antigen=antigen, 
         disease=disease,
         innovation=innovation,
-        approach=approach        ),
+        approach=approach,  
+        additional=additional,
+        ),
         output=raw_prompt,
     )
 
@@ -482,7 +503,7 @@ def generate_embodiment(
     approach: str, 
     antigen: str, 
     disease: str, 
-    model: str = "o1-preview"
+    model: str = model
 ) -> Embodiment:
     client = OpenAI()
     if not antigen or not disease:
@@ -553,7 +574,7 @@ def generate_embodiment(
 
 
 def generate_disease_overview(
-    disease: str, model: str = "o1-preview"
+    disease: str, additional:str, context: str, model: str = model
 ) -> DiseaseOverview:
     client = OpenAI()
     if not disease:
@@ -571,12 +592,16 @@ def generate_disease_overview(
     fetch_prompt = trace.span(name="fetch_prompt", start_time=datetime.now())
     raw_prompt = langfuse.get_prompt("generate_disease_overview")
     prompt = raw_prompt.compile(
-        disease=disease
+        disease=disease,
+        additional=additional,
+        context=context
     )
     fetch_prompt.end(
         end_time=datetime.now(),
         input=values_to_json(
-            disease=disease
+            disease=disease,
+            additional=additional,
+            context=context
         ),
         output=raw_prompt,
     )
@@ -614,8 +639,9 @@ def generate_claims(
     technology: str,
     approach: str, 
     antigen: str, 
-    disease: str, 
-    model: str = "o1-preview") -> Claims:
+    disease: str,
+    additional:str, 
+    model: str = model) -> Claims:
     client = OpenAI()
     if not antigen or not disease:
         raise ValueError("Disease and antigen must be non-empty strings")
@@ -629,7 +655,8 @@ def generate_claims(
             antigen=antigen, 
             disease=disease,
             innovation=innovation,
-            approach=approach),
+            approach=approach,
+            additional=additional),
         tags=["evaluation"],
     )
     fetch_prompt = trace.span(name="fetch_prompt", start_time=datetime.now())
@@ -639,7 +666,8 @@ def generate_claims(
         antigen=antigen, 
         disease=disease,
         innovation=innovation,
-        approach=approach
+        approach=approach,
+        additional=additional
         )
     fetch_prompt.end(
         end_time=datetime.now(),
@@ -648,7 +676,8 @@ def generate_claims(
         antigen=antigen, 
         disease=disease,
         innovation=innovation,
-        approach=approach
+        approach=approach,
+        additional=additional
     ),
         output=raw_prompt,
     )
@@ -681,14 +710,14 @@ def generate_claims(
         prediction=response.choices[0].message.content, trace_id=trace_id
     )
 
-
 def generate_key_terms(
     innovation: str, 
     technology: str,
     approach: str, 
     antigen: str, 
-    disease: str, 
-    model: str = "o1-preview"
+    disease: str,
+    additional:str, 
+    model: str = model
 ) -> KeyTerms:
     client = OpenAI()
     if not antigen or not disease:
@@ -703,7 +732,8 @@ def generate_key_terms(
             antigen=antigen, 
             disease=disease,
             innovation=innovation,
-            approach=approach),
+            approach=approach,
+            additional=additional),
         tags=["evaluation"],
     )
     fetch_prompt = trace.span(name="fetch_prompt", start_time=datetime.now())
@@ -713,7 +743,8 @@ def generate_key_terms(
         antigen=antigen, 
         disease=disease,
         innovation=innovation,
-        approach=approach
+        approach=approach,
+        additional=additional
         )
     fetch_prompt.end(
         end_time=datetime.now(),
@@ -722,7 +753,8 @@ def generate_key_terms(
         antigen=antigen, 
         disease=disease,
         innovation=innovation,
-        approach=approach,        ),
+        approach=approach,
+        additional=additional,        ),
         output=raw_prompt,
     )
 
@@ -759,8 +791,9 @@ def generate_abstract(
     technology: str,
     approach: str, 
     antigen: str, 
-    disease: str, 
-    model: str = "o1-preview"
+    disease: str,
+    additional:str, 
+    model: str = model
 ) -> Abstract:
     client = OpenAI()
     if not antigen or not disease:
@@ -775,7 +808,8 @@ def generate_abstract(
             antigen=antigen, 
             disease=disease,
             innovation=innovation,
-            approach=approach),
+            approach=approach,
+            additional=additional),
         tags=["evaluation"],
         )
 
@@ -786,7 +820,8 @@ def generate_abstract(
             antigen=antigen, 
             disease=disease,
             innovation=innovation,
-            approach=approach    
+            approach=approach,
+            additional=additional    
     )
 
     fetch_prompt.end(
@@ -796,7 +831,8 @@ def generate_abstract(
         antigen=antigen, 
         disease=disease,
         innovation=innovation,
-        approach=approach
+        approach=approach,
+        additional=additional
         ),
         output=raw_prompt,
     )
@@ -828,5 +864,3 @@ def generate_abstract(
     return Abstract(
         prediction=response.choices[0].message.content, trace_id=trace_id
     )
-
-
