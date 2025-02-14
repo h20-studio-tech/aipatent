@@ -62,7 +62,7 @@ app_ui = ui.page_fixed(
                                                width="3vw",
                                                height="2vw",
                                                rows=5),
-                            ui.input_file("approach_file", "Upload an approach pdf file", accept="application/pdf", multiple=False, button_label="search"),
+                            ui.input_file("approach_file", "", accept="application/pdf", multiple=False, button_label="search"),
                             ),
                         height=550,
                         min_height=550),
@@ -81,13 +81,13 @@ app_ui = ui.page_fixed(
                         min_height=550),
                 ui.card(
                         ui.card_body(
-                            ui.input_text("innovation_prompt", "innovation_input"),
+                            ui.input_text("innovation_prompt", "innovation input"),
                             ui.output_ui("innovation",
                                                "",
                                                width="100%",
                                                height="100%",
                                                rows=5)),
-                        ui.input_file("innovation_file", "Upload an innovation pdf file", accept="application/pdf", multiple=False, button_label="search"),
+                        ui.input_file("innovation_file", "", accept="application/pdf", multiple=False, button_label="search"),
                         height=550,
                         min_height=550),
             ),
@@ -163,6 +163,7 @@ def generate_approach_card(response_text, card_id):
                                 response_text,
                                 width="100%",
                                 height="100%",
+                                placeholder="data accesed from your approach document will populate this field...",
                                 rows=8)
                 ),
             ui.output_ui("approach_source")
@@ -181,6 +182,7 @@ def generate_technology_card(response_text, card_id):
                                 response_text,
                                 width="100%",
                                 height="100%",
+                                placeholder="data accesed from your technology document will populate this field...",
                                 rows=8)
                 ),
                 ui.output_ui("technology_source")
@@ -198,6 +200,7 @@ def generate_innovation_card(response_text, card_id):
                                 response_text,
                                 width="100%",
                                 height="100%",
+                                placeholder="data accesed from your innovation document will populate this field...",
                                 rows=8)
                 )
             )
@@ -684,6 +687,20 @@ def server(input, output, session):
         if file is None:
             return None
         return {"approach_filepath":file[0]["datapath"], "approach_filename": file[0]["name"]}
+    
+    @reactive.calc
+    def parse_innovation_file():
+        file: list[FileInfo] | None = input.file()
+        if file is None:
+            return None
+        return {"innovation_filepath":file[0]["datapath"], "innovation_filename": file[0]["name"]}
+
+    @reactive.calc
+    def parse_technology_file():
+        file: list[FileInfo] | None = input.file()
+        if file is None:
+            return None
+        return {"technology_filepath":file[0]["datapath"], "technology_filename": file[0]["name"]}
     
     rag = RagWorkflow()
     # Create a reactive value to store the generated primary invention
