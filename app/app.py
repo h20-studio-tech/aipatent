@@ -682,22 +682,22 @@ def server(input, output, session):
     """
     
     @reactive.calc
-    def parse_file():
-        file: list[FileInfo] | None = input.file()
+    def parse_approach_file():
+        file: list[FileInfo] | None = input.approach_file()
         if file is None:
             return None
         return {"approach_filepath":file[0]["datapath"], "approach_filename": file[0]["name"]}
     
     @reactive.calc
     def parse_innovation_file():
-        file: list[FileInfo] | None = input.file()
+        file: list[FileInfo] | None = input.innovation_file()
         if file is None:
             return None
         return {"innovation_filepath":file[0]["datapath"], "innovation_filename": file[0]["name"]}
 
     @reactive.calc
     def parse_technology_file():
-        file: list[FileInfo] | None = input.file()
+        file: list[FileInfo] | None = input.technology_file()
         if file is None:
             return None
         return {"technology_filepath":file[0]["datapath"], "technology_filename": file[0]["name"]}
@@ -733,7 +733,7 @@ def server(input, output, session):
     @reactive.Effect
     @reactive.event(input.approach_file)
     def on_approach_file_upload():
-        filedata = parse_file()
+        filedata = parse_approach_file()
         filepath = filedata["approach_filepath"]
         filename = filedata["approach_filename"]
         prompt = input.approach_prompt()
@@ -741,7 +741,6 @@ def server(input, output, session):
         if filepath:
             rag.process_file(filepath, filename)
             rag.create_table_from_file(filepath)
-            rag.cleanup()
             chunks = rag.formatted_search(prompt)
             retrieved_approach.set(chunks)
             result = section_reasoning(chunks, prompt)
