@@ -74,7 +74,6 @@ app_ui = ui.page_fixed(
                                                width="100%",
                                                height="100%",
                                                rows=5),
-                            ui.output_ui("technology_source")
                             ),
                         ui.input_file("technology_file", "", accept="application/pdf", multiple=False, button_label="search"),
                         height=550,
@@ -187,6 +186,7 @@ def generate_technology_card(response_text, card_id):
                 ),
                 ui.output_ui("technology_source")
             )
+    
 def generate_innovation_card(response_text, card_id):
     return ui.card(
         ui.card_header(
@@ -202,7 +202,8 @@ def generate_innovation_card(response_text, card_id):
                                 height="100%",
                                 placeholder="data accesed from your innovation document will populate this field...",
                                 rows=8)
-                )
+                ),
+                ui.output_ui("innovation_source")
             )
     
 def generate_chunks_card(response_text, card_id):
@@ -1498,7 +1499,7 @@ def server(input, output, session):
     
     @output
     @render.ui
-    def innovation_generc():
+    def innovation_source():
         return generate_chunks_card(retrieved_innovation(), "innovation")
     # Background
     @reactive.Effect
