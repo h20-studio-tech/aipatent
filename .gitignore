@@ -11,3 +11,5 @@ eval/
 evaluation_results_detailed_description.csv
 evaluation_results_field_of_invention.csv
 evaluation_results_summary.csv
+.replit
+replit.nix
