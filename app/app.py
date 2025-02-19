@@ -9,7 +9,6 @@ from rag.rag_workflow import RagWorkflow
 from langfuse.openai import OpenAI 
 from langfuse.decorators import observe
 from make_patent_component import (
-    langfuse,
     generate_background,
     generate_summary,
     generate_field_of_invention,
@@ -22,6 +21,10 @@ from make_patent_component import (
     generate_abstract,
     generate_key_terms,
 )
+
+from langfuse_client import get_langfuse_instance
+
+langfuse = get_langfuse_instance()
 
 
 ENVIRONMENT = os.getenv("ENV")
