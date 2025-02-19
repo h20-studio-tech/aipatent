@@ -1,11 +1,9 @@
-"""secrets management"""
-import asyncio
 import os
 import logging
 from shiny import reactive, render, ui
 import shiny
 from shiny.types import FileInfo
-from rag.rag_workflow import RagWorkflow
+from rag_workflow import RagWorkflow
 from langfuse.openai import OpenAI 
 from langfuse.decorators import observe
 from make_patent_component import (
@@ -22,9 +20,9 @@ from make_patent_component import (
     generate_key_terms,
 )
 
-from langfuse.langfuse_client import get_langfuse_instance
+from langfuse_client import get_langfuse_instance
 
-langfuse = get_langfuse_instance()
+langfuse = get_langfuse_instance
 
 
 ENVIRONMENT = os.getenv("ENV")
@@ -745,14 +743,14 @@ def server(input, output, session):
     approach_rag = RagWorkflow()
     @reactive.Effect
     @reactive.event(input.approach_file)
-    async def on_approach_file_upload():
+    def on_approach_file_upload():
         filedata = parse_approach_file()
         filepath = filedata["approach_filepath"]
         filename = filedata["approach_filename"]
         
         print(f"approach file: {filename} \n filepath: {filepath}")
         if filepath:
-            await approach_rag.process_file(filepath, filename)
+            approach_rag.process_file(filepath, filename)
             approach_rag.create_table_from_file(filepath)
                 
     @reactive.Effect
@@ -775,14 +773,14 @@ def server(input, output, session):
     technology_rag = RagWorkflow()
     @reactive.Effect
     @reactive.event(input.technology_file)
-    async def on_technology_file_upload():     
+    def on_technology_file_upload():     
         filedata = parse_technology_file()
         filepath = filedata["technology_filepath"]
         filename = filedata["technology_filename"]
         
         print(f"technology file: {filename} \n filepath: {filepath}")
         if filepath:
-            await technology_rag.process_file(filepath, filename)
+            technology_rag.process_file(filepath, filename)
             technology_rag.create_table_from_file(filepath)
                 
     @reactive.Effect
@@ -805,14 +803,14 @@ def server(input, output, session):
     innovation_rag = RagWorkflow()
     @reactive.Effect
     @reactive.event(input.innovation_file)
-    async def on_innovation_file_upload():
+    def on_innovation_file_upload():
         filedata = parse_innovation_file()
         filepath = filedata["innovation_filepath"]
         filename = filedata["innovation_filename"]
         
         print(f"innovation file: {filename} \n filepath: {filepath}")
         if filepath:
-            await innovation_rag.process_file(filepath, filename)
+            innovation_rag.process_file(filepath, filename)
             innovation_rag.create_table_from_file(filepath)
     
     @reactive.Effect

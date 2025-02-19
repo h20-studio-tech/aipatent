@@ -2,7 +2,6 @@ import uuid
 import os
 from datetime import datetime
 
-from langfuse import Langfuse
 from openai import OpenAI
 from models.llm import (
     FieldOfInvention,
@@ -20,9 +19,9 @@ from models.llm import (
 )
 
 from utils.utils import values_to_json
-from langfuse.langfuse_client import get_langfuse_instance
+from langfuse_client import get_langfuse_instance
 
-langfuse = get_langfuse_instance()
+langfuse = get_langfuse_instance
 
 model = os.getenv("MODEL")
 
