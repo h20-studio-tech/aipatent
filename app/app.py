@@ -22,7 +22,7 @@ from make_patent_component import (
     generate_key_terms,
 )
 
-from langfuse_client import get_langfuse_instance
+from langfuse.langfuse_client import get_langfuse_instance
 
 langfuse = get_langfuse_instance()
 

@@ -14,10 +14,10 @@ from lancedb.embeddings import get_registry
 from typing import List
 from openai import AsyncOpenAI, OpenAI
 from pydantic import BaseModel
-from langfuse_client import get_langfuse_instance
+from langfuse.langfuse_client import get_langfuse_instance
 
 
-langfuse = get_langfuse_instance()
+
 class MultiQueryQuestions(BaseModel):
     questions: List[str]
     
@@ -251,7 +251,6 @@ class RagWorkflow:
     def multiquery_search(self, query:str) -> str:
         table = self.db.open_table(self.table_name)
         document = table.search(query).limit(1).to_pydantic(self.schema)
-        
         example_questions = [
         "What is the composition of the substance?",
         "How does the component operate, and what are his effects in the organism?"]
@@ -282,6 +281,7 @@ class RagWorkflow:
             chunks = [self.search(q) for q in multiquery.questions]
             
             
+            langfuse = get_langfuse_instance()
             trace_id = str(uuid.uuid4())
             langfuse.trace(
                 id=trace_id,
