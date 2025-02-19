@@ -13,9 +13,25 @@ import instructor
 import asyncio
 from openai import AsyncOpenAI
 from pydantic import BaseModel
-from schema.etl import Chunk, ChunkReview, ReviewedChunk
 
-
+class Chunk(BaseModel):
+    element_id: str
+    text: str
+    page_number: int
+    filename: str
+    chunk_id: int
+    
+class ChunkReview(BaseModel):
+    relevant: bool
+    
+class ReviewedChunk(BaseModel):
+    element_id: str
+    text: str
+    page_number: int
+    filename: str
+    chunk_id: int
+    relevant: bool
+    
 class RagWorkflow:
     def __init__(self):
         self.client = unstructured_client.UnstructuredClient(
