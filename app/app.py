@@ -763,7 +763,7 @@ def server(input, output, session):
             ui.notification_show(type="error", duration=3)
             return
         
-        chunks = approach_rag.multiquery_search(prompt)  # Await async method
+        chunks = approach_rag.multiquery_search(prompt) 
         result = section_reasoning(chunks, prompt)
         
         retrieved_approach.set(chunks)

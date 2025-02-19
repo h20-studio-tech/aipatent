@@ -229,6 +229,7 @@ class RagWorkflow:
     def format_chunks(self, chunks: List[LanceModel]) -> str:
         lines = []
         for i, chunk in enumerate(chunks, start=1):
+            print(f"current chunk: {chunk}")
             lines.append(f"===== Chunk {i} =====")
             lines.append(chunk.text.strip())
             lines.append(f"page number: {chunk.page_number}")
@@ -279,7 +280,8 @@ class RagWorkflow:
                 input=query,
                 output=multiquery
             )
-            return self.format_chunks(chunks)
+            formatted_chunks = self.format_chunks(chunks)
+            return formatted_chunks
         except Exception as e:
             print(f"Error generating MultiQueryQuestions: {str(e)}")
             return []
