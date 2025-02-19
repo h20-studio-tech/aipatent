@@ -247,11 +247,3 @@ class RagWorkflow:
         self.db.drop_table(self.table_name)
         if delete_file:
             self.delete_file()
-
-df = pd.read_csv("app/data/tmp/GvHD-paper.csv")
-
-rag = RagWorkflow()
-
-clean_df = asyncio.run(rag.clean_df(df))
-
-clean_df.to_csv("app/data/tmp/clean GvHD-paper.csv")
