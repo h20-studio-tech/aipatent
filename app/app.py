@@ -745,14 +745,14 @@ def server(input, output, session):
     approach_rag = RagWorkflow()
     @reactive.Effect
     @reactive.event(input.approach_file)
-    def on_approach_file_upload():
+    async def on_approach_file_upload():
         filedata = parse_approach_file()
         filepath = filedata["approach_filepath"]
         filename = filedata["approach_filename"]
         
         print(f"approach file: {filename} \n filepath: {filepath}")
         if filepath:
-            asyncio.run(approach_rag.process_file(filepath, filename))
+            await approach_rag.process_file(filepath, filename)
             approach_rag.create_table_from_file(filepath)
                 
     @reactive.Effect
@@ -762,10 +762,10 @@ def server(input, output, session):
         
         # display a warning if prompt is empty
         if not prompt:
-            ui.notification_show(type="error", duration=3) 
+            ui.notification_show(type="error", duration=3)
             return
         
-        chunks = approach_rag.formatted_search(prompt)
+        chunks = approach_rag.multiquery_search(prompt)  # Await async method
         result = section_reasoning(chunks, prompt)
         
         retrieved_approach.set(chunks)
@@ -775,14 +775,14 @@ def server(input, output, session):
     technology_rag = RagWorkflow()
     @reactive.Effect
     @reactive.event(input.technology_file)
-    def on_technology_file_upload():     
+    async def on_technology_file_upload():     
         filedata = parse_technology_file()
         filepath = filedata["technology_filepath"]
         filename = filedata["technology_filename"]
         
         print(f"technology file: {filename} \n filepath: {filepath}")
         if filepath:
-            asyncio.run(technology_rag.process_file(filepath, filename))
+            await technology_rag.process_file(filepath, filename)
             technology_rag.create_table_from_file(filepath)
                 
     @reactive.Effect
@@ -795,7 +795,7 @@ def server(input, output, session):
             ui.notification_show(type="error", duration=3) 
             return
         
-        chunks = technology_rag.formatted_search(prompt)
+        chunks = technology_rag.multiquery_search(prompt)
         result = section_reasoning(chunks, prompt)
         
         retrieved_technology.set(chunks)
@@ -805,14 +805,14 @@ def server(input, output, session):
     innovation_rag = RagWorkflow()
     @reactive.Effect
     @reactive.event(input.innovation_file)
-    def on_innovation_file_upload():
+    async def on_innovation_file_upload():
         filedata = parse_innovation_file()
         filepath = filedata["innovation_filepath"]
         filename = filedata["innovation_filename"]
         
         print(f"innovation file: {filename} \n filepath: {filepath}")
         if filepath:
-            asyncio.run(innovation_rag.process_file(filepath, filename))
+            await innovation_rag.process_file(filepath, filename)
             innovation_rag.create_table_from_file(filepath)
     
     @reactive.Effect
@@ -825,7 +825,7 @@ def server(input, output, session):
             ui.notification_show(type="error", duration=3) 
             return
         
-        chunks = innovation_rag.formatted_search(prompt)
+        chunks = innovation_rag.multiquery_search(prompt)
         result = section_reasoning(chunks, prompt)
         
         retrieved_innovation.set(chunks)
