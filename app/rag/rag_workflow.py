@@ -248,7 +248,7 @@ class RagWorkflow:
         return self.format_chunks(chunks)
 
     
-    def multiquery_search(self, query:str) -> MultiQueryQuestions:
+    def multiquery_search(self, query:str) -> str:
         table = self.db.open_table(self.table_name)
         document = table.search(query).limit(1).to_pydantic(self.schema)
         
