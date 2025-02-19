@@ -9,6 +9,11 @@ from unstructured_client.models import operations, shared
 from lancedb.pydantic import LanceModel, Vector
 from lancedb.embeddings import get_registry
 from typing import List
+import instructor
+import asyncio
+from openai import AsyncOpenAI
+from pydantic import BaseModel
+from schema.etl import Chunk, ChunkReview, ReviewedChunk
 
 
 class RagWorkflow:
@@ -22,6 +27,8 @@ class RagWorkflow:
         self.uri = "app/data/lancedb"
         self.db = lancedb.connect(self.uri)
         self.table_name = "document"
+        self.openai = instructor.from_openai(AsyncOpenAI())
+        self.semaphore = asyncio.Semaphore(20)
 
         class Schema(LanceModel):
             text: str = self.func.SourceField()
@@ -32,8 +39,82 @@ class RagWorkflow:
             chunk_id: int
 
         self.schema = Schema
-
-    def process_file(self, file_path: str, filename: str) -> dict:
+        
+    async def limited_chunk_review(self, chunk):
+        async with self.semaphore:
+            return await self.chunk_review(chunk)
+    
+    async def process_all_chunks(self, chunks):
+        tasks = [self.limited_chunk_review(chunk) for chunk in chunks]
+        reviewed_chunks = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        # Check if any task failed and log the error
+        for i, result in enumerate(reviewed_chunks):
+            if isinstance(result, Exception):
+                print(f"Task {i} failed with exception: {result}")
+            else:
+                print(f"Task {i} completed successfully")
+        
+        
+            # Filter out any exceptions (failed tasks) before proceeding
+        successful_chunks = [rc for rc in reviewed_chunks if not isinstance(rc, Exception)]
+    
+        return successful_chunks    
+        
+    async def chunk_review(self, chunk: Chunk)-> ReviewedChunk:
+            prompt  = f"""
+                You are a data annotator, your task is to review a corpus of data consisting of chunks from a source document.
+                Your perfomance is critical as it ensures that bad or irrelevant data doesn't flood the vector database where
+                the chunks will be stored
+                
+                here's the chunk text: <Text>{chunk.text}</Text>
+                
+                <Guidelines>
+                    What makes text irrelevant:
+                    - the text is too short and doesn't develop any idea or argument
+                    - contains only numbers
+                    - text that appears to be a caption for an image
+                    - text that appears to only contain people's names
+                    - text that is out of context
+                    - as a rule of thumb text smaller than 80 tokens is not relevant
+                    
+                    What makes text relevant: 
+                    - it does present findings, ideas, arguments,
+                    - it describes something and contains semantic meaning, valuable ideas about a topic can infered from it
+                </Guidelines>
+            """
+            
+            res = await self.openai.chat.completions.create(
+                model="o3-mini",
+                response_model=ChunkReview,
+                messages=[
+                    {"role": "assistant", "content": prompt}
+                ]
+            )
+            print("API Response:", res)
+            return ReviewedChunk(**chunk.model_dump(), relevant=res.relevant)    
+        
+    async def clean_df(self, df: pd.DataFrame) -> pd.DataFrame:
+        df['chunk_id'] = range(1, len(df) + 1)
+        chunks: List[BaseModel] = []
+        for _,row in df.iterrows():
+            chunk = Chunk(
+                element_id=row["element_id"],
+                text=row["text"],
+                page_number=row["page_number"],
+                filename=row["filename"],
+                chunk_id=row["chunk_id"]    
+            )
+            
+            chunks.append(chunk)
+        reviewed_chunks = await self.process_all_chunks(chunks)
+        reviewed_dicts = [rc.model_dump() for rc in reviewed_chunks]
+        reviewed_df = pd.DataFrame(reviewed_dicts)
+        clean_df = reviewed_df[reviewed_df["relevant"] != False]
+        return clean_df
+                
+        
+    async def process_file(self, file_path: str, filename: str) -> dict:
         self.table_name = filename.replace(".pdf", "")
         if not os.path.exists(file_path):
             print("The file does not exist")
@@ -76,6 +157,7 @@ class RagWorkflow:
                 data.append(new_row)
 
             df = pd.DataFrame(data=data)
+            df = await self.clean_df(df)
             df.to_csv(file_path.replace(".pdf", ".csv"), index=False)
             return {"df": df, "filepath": file_path}
 
@@ -89,8 +171,6 @@ class RagWorkflow:
             return
 
         self.file_path = file_path
-        # document = self.process_file(file_path)
-        # df = document["df"]
         df = pd.read_csv(file_path.replace(".pdf", ".csv"))
         
         df = df[df["text"].str.strip() != ""]
@@ -152,4 +232,10 @@ class RagWorkflow:
         if delete_file:
             self.delete_file()
 
-# rag.process_file(r"C:\Users\vtorr\Work\Projects\aipatent\app\data\tmp\GvHD-paper.pdf")
+df = pd.read_csv("app/data/tmp/GvHD-paper.csv")
+
+rag = RagWorkflow()
+
+clean_df = asyncio.run(rag.clean_df(df))
+
+clean_df.to_csv("app/data/tmp/clean GvHD-paper.csv")

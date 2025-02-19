@@ -1,4 +1,5 @@
 """secrets management"""
+import asyncio
 import os
 import logging
 from shiny import reactive, render, ui
@@ -748,7 +749,7 @@ def server(input, output, session):
         
         print(f"approach file: {filename} \n filepath: {filepath}")
         if filepath:
-            approach_rag.process_file(filepath, filename)
+            asyncio.run(approach_rag.process_file(filepath, filename))
             approach_rag.create_table_from_file(filepath)
                 
     @reactive.Effect
@@ -778,7 +779,7 @@ def server(input, output, session):
         
         print(f"technology file: {filename} \n filepath: {filepath}")
         if filepath:
-            technology_rag.process_file(filepath, filename)
+            asyncio.run(technology_rag.process_file(filepath, filename))
             technology_rag.create_table_from_file(filepath)
                 
     @reactive.Effect
@@ -808,7 +809,7 @@ def server(input, output, session):
         
         print(f"innovation file: {filename} \n filepath: {filepath}")
         if filepath:
-            innovation_rag.process_file(filepath, filename)
+            asyncio.run(innovation_rag.process_file(filepath, filename))
             innovation_rag.create_table_from_file(filepath)
     
     @reactive.Effect
