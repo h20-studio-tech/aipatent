@@ -3,17 +3,25 @@ import pandas as pd
 import unstructured_client
 import lancedb
 import json
+import uuid
+import instructor
+import asyncio
 
 from lancedb.table import Table
 from unstructured_client.models import operations, shared
 from lancedb.pydantic import LanceModel, Vector
 from lancedb.embeddings import get_registry
 from typing import List
-import instructor
-import asyncio
-from openai import AsyncOpenAI
+from openai import AsyncOpenAI, OpenAI
 from pydantic import BaseModel
+from langfuse_client import get_langfuse_instance
 
+
+langfuse = get_langfuse_instance()
+class MultiQueryQuestions(BaseModel):
+    questions: List[str]
+    
+    
 class Chunk(BaseModel):
     element_id: str
     text: str
@@ -43,7 +51,8 @@ class RagWorkflow:
         self.uri = "app/data/lancedb"
         self.db = lancedb.connect(self.uri)
         self.table_name = "document"
-        self.openai = instructor.from_openai(AsyncOpenAI())
+        self.asyncopenai = instructor.from_openai(AsyncOpenAI())
+        self.openai = instructor.from_openai(OpenAI())
         self.semaphore = asyncio.Semaphore(20)
 
         class Schema(LanceModel):
@@ -123,6 +132,7 @@ class RagWorkflow:
             )
             
             chunks.append(chunk)
+            
         reviewed_chunks = await self.process_all_chunks(chunks)
         reviewed_dicts = [rc.model_dump() for rc in reviewed_chunks]
         reviewed_df = pd.DataFrame(reviewed_dicts)
@@ -237,6 +247,53 @@ class RagWorkflow:
         chunks = self.search(query, k_results)
         return self.format_chunks(chunks)
 
+    
+    def multiquery_search(self, query:str) -> MultiQueryQuestions:
+        table = self.db.open_table(self.table_name)
+        document = table.search(query).limit(1).to_pydantic(self.schema)
+        
+        example_questions = [
+        "What is the composition of the substance?",
+        "How does the component operate, and what are his effects in the organism?"]
+                
+        prompt = f"""
+            Generate `{3}` questions based on {query}. The questions should be focused on expanding the search of information from a microbiology paper:
+
+            <content>
+            example content from the paper
+            {document.text}
+            </content>
+
+            Example questions:
+            {chr(10).join(f'- {q}' for q in example_questions)}
+
+            Do not use the exact example questions. Use them only as inspiration for the types of more specific questions to generate.
+            Questions should ask about biological characteristics for clarification on the composition, effect or method of action of a given component or mechanism that could uncover valuable insights ro answer the original question.
+            Stylistically, the questions should resemble what would be asked to a RAG-based answer tool to access relevant information about target antigens and disease drivers to enrich a patent generation process.
+            """
+        try:
+            multiquery = self.openai.chat.completions.create(
+                model="o3-mini",
+                response_model=MultiQueryQuestions,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            
+            
+            chunks = [self.search(q) for q in multiquery.questions]
+            
+            
+            trace_id = str(uuid.uuid4())
+            langfuse.trace(
+                id=trace_id,
+                name=f"multiquery questions",
+                input=query,
+                output=multiquery
+            )
+            return self.format_chunks(chunks)
+        except Exception as e:
+            print(f"Error generating MultiQueryQuestions: {str(e)}")
+            return []
+    
     def delete_file(self):
         if os.path.exists(self.file_path):
             os.remove(self.file_path)
