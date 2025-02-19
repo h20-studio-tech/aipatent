@@ -211,7 +211,7 @@ class RagWorkflow:
         if self.table_name in self.db.table_names():
             self.db.drop_table(self.table_name)
         
-        self.table = self.db.create_table(self.table_name, schema=self.schema)
+        self.table = self.db.create_table(self.table_name, schema=self.schema, exist_ok=True)
         self.add_df_to_table(df)
         
         table = self.table.count_rows()
