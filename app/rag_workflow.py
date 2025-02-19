@@ -15,10 +15,7 @@ from openai import AsyncOpenAI, OpenAI
 from pydantic import BaseModel
 from langfuse_client import get_langfuse_instance
 
-langfuse = get_langfuse_instance
-
-
-
+langfuse = get_langfuse_instance()
 class MultiQueryQuestions(BaseModel):
     questions: List[str]
     
@@ -250,19 +247,12 @@ class RagWorkflow:
 
     
     def multiquery_search(self, query:str) -> str:
-        table = self.db.open_table(self.table_name)
-        document = table.search(query).limit(1).to_pydantic(self.schema)
         example_questions = [
         "What is the composition of the substance?",
         "How does the component operate, and what are his effects in the organism?"]
                 
         prompt = f"""
             Generate `{3}` questions based on {query}. The questions should be focused on expanding the search of information from a microbiology paper:
-
-            <content>
-            example content from the paper
-            {document.text}
-            </content>
 
             Example questions:
             {chr(10).join(f'- {q}' for q in example_questions)}
@@ -277,10 +267,11 @@ class RagWorkflow:
                 response_model=MultiQueryQuestions,
                 messages=[{"role": "user", "content": prompt}],
             )
-            
+            print(f"MultiQuery questions: {multiquery.questions}")
             
             chunks = [self.search(q) for q in multiquery.questions]
-            
+            chunks = chunks[0]
+            print(f"\n retrieved chunks: {chunks}")
             trace_id = str(uuid.uuid4())
             langfuse.trace(
                 id=trace_id,
@@ -303,3 +294,10 @@ class RagWorkflow:
         self.db.drop_table(self.table_name)
         if delete_file:
             self.delete_file()
+            
+# rag = RagWorkflow()
+
+# rag.create_table_from_file(rf"C:\Users\vtorr\Work\Projects\aipatent\app\data\tmp\GvHD-paper.csv")
+# ans = rag.multiquery_search("hola")
+
+# print(ans)

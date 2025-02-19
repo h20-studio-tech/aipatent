@@ -21,7 +21,7 @@ from models.llm import (
 from utils.utils import values_to_json
 from langfuse_client import get_langfuse_instance
 
-langfuse = get_langfuse_instance
+langfuse = get_langfuse_instance()
 
 model = os.getenv("MODEL")
 
