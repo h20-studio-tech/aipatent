@@ -57,6 +57,7 @@ app_ui = ui.page_fixed(
                 ui.card(
                         ui.card_body(
                             ui.input_text("approach_prompt", "approach input"),
+                            ui.input_action_button("generate_approach", "start", class_="btn btn-success p-0", width="3vw"),
                             ui.output_ui("approach",
                                                "",
                                                width="3vw",
@@ -69,6 +70,7 @@ app_ui = ui.page_fixed(
                 ui.card(
                         ui.card_body(
                             ui.input_text("technology_prompt", "technology input"),
+                            ui.input_action_button("generate_technology", "start", class_="btn btn-success p-0", width="3vw"),
                             ui.output_ui("technology",
                                                "",
                                                width="100%",
@@ -80,7 +82,10 @@ app_ui = ui.page_fixed(
                         min_height=550),
                 ui.card(
                         ui.card_body(
-                            ui.input_text("innovation_prompt", "innovation input"),
+                            ui.div(
+                                ui.input_text("innovation_prompt", "innovation input"),
+                                ui.input_action_button("generate_innovation", "start", class_="btn btn-success p-0", width="3vw")
+                                ),
                             ui.output_ui("innovation",
                                                "",
                                                width="100%",
@@ -150,6 +155,7 @@ app_ui = ui.page_fixed(
 )
 
 def generate_approach_card(response_text, card_id):
+    
     return ui.card(
         ui.card_header(
             ui.p("approach")
@@ -187,7 +193,7 @@ def generate_technology_card(response_text, card_id):
                 ui.output_ui("technology_source")
             )
     
-def generate_innovation_card(response_text, card_id):
+def generate_innovation_card(response_text, card_id): # TODO: compress this code by abstracting the card id
     return ui.card(
         ui.card_header(
             ui.p("Innovation")
@@ -703,7 +709,7 @@ def server(input, output, session):
             return None
         return {"technology_filepath":file[0]["datapath"], "technology_filename": file[0]["name"]}
     
-    rag = RagWorkflow()
+    
     # Create a reactive value to store the generated primary invention
     generated_background = reactive.Value("")
     generated_summary = reactive.Value("")
@@ -730,55 +736,97 @@ def server(input, output, session):
     retrieved_approach = reactive.Value("")
     retrieved_technology = reactive.Value("")
     retrieved_innovation = reactive.Value("")
-       
+    
+    
+    approach_rag = RagWorkflow()
     @reactive.Effect
     @reactive.event(input.approach_file)
     def on_approach_file_upload():
         filedata = parse_approach_file()
         filepath = filedata["approach_filepath"]
         filename = filedata["approach_filename"]
-        prompt = input.approach_prompt()
-        print(f"approach file: {filepath}")
+        
+        print(f"approach file: {filename} \n filepath: {filepath}")
         if filepath:
-            rag.process_file(filepath, filename)
-            rag.create_table_from_file(filepath)
-            chunks = rag.formatted_search(prompt)
-            retrieved_approach.set(chunks)
-            result = section_reasoning(chunks, prompt)
-            generated_approach.set(result)    
+            approach_rag.process_file(filepath, filename)
+            approach_rag.create_table_from_file(filepath)
+                
+    @reactive.Effect
+    @reactive.event(input.generate_approach)
+    def on_generate_approach():
+        prompt = input.approach_prompt()
+        
+        # display a warning if prompt is empty
+        if not prompt:
+            ui.notification_show(type="error", duration=3) 
+            return
+        
+        chunks = approach_rag.formatted_search(prompt)
+        result = section_reasoning(chunks, prompt)
+        
+        retrieved_approach.set(chunks)
+        generated_approach.set(result)        
     
+    
+    technology_rag = RagWorkflow()
     @reactive.Effect
     @reactive.event(input.technology_file)
-    def on_technology_file_upload():
+    def on_technology_file_upload():     
         filedata = parse_technology_file()
         filepath = filedata["technology_filepath"]
         filename = filedata["technology_filename"]
+        
+        print(f"technology file: {filename} \n filepath: {filepath}")
+        if filepath:
+            technology_rag.process_file(filepath, filename)
+            technology_rag.create_table_from_file(filepath)
+                
+    @reactive.Effect
+    @reactive.event(input.generate_technology)
+    def on_generate_technology():
         prompt = input.technology_prompt()
         
-        if filepath:
-            rag.process_file(filepath, filename)
-            rag.create_table_from_file(filepath)
-            chunks = rag.formatted_search(prompt)
-            retrieved_technology.set(chunks)
-            result = section_reasoning(chunks, prompt)
-            generated_technology.set(result)    
+        # display a warning if prompt is empty
+        if not prompt:
+            ui.notification_show(type="error", duration=3) 
+            return
+        
+        chunks = technology_rag.formatted_search(prompt)
+        result = section_reasoning(chunks, prompt)
+        
+        retrieved_technology.set(chunks)
+        generated_technology.set(result)
     
     
+    innovation_rag = RagWorkflow()
     @reactive.Effect
     @reactive.event(input.innovation_file)
     def on_innovation_file_upload():
         filedata = parse_innovation_file()
         filepath = filedata["innovation_filepath"]
         filename = filedata["innovation_filename"]
-        prompt = input.innovation_prompt()
         
+        print(f"innovation file: {filename} \n filepath: {filepath}")
         if filepath:
-            rag.process_file(filepath, filename)
-            rag.create_table_from_file(filepath)
-            chunks = rag.formatted_search(prompt)
-            retrieved_innovation.set(chunks)
-            result = section_reasoning(chunks, prompt)
-            generated_innovation.set(result)
+            innovation_rag.process_file(filepath, filename)
+            innovation_rag.create_table_from_file(filepath)
+    
+    @reactive.Effect
+    @reactive.event(input.generate_innovation)
+    def on_generate_innovation():
+        prompt = input.approach_prompt()
+        
+        # display a warning if prompt is empty
+        if not prompt:
+            ui.notification_show(type="error", duration=3) 
+            return
+        
+        chunks = innovation_rag.formatted_search(prompt)
+        result = section_reasoning(chunks, prompt)
+        
+        retrieved_innovation.set(chunks)
+        generated_innovation.set(result)        
+    
             
     @reactive.Effect
     @reactive.event(input.generate)
@@ -2130,4 +2178,4 @@ def server(input, output, session):
 
 # Run App
 app = shiny.App(app_ui, server)
-app.run(host="0.0.0.0", port=8000)
+app.run()
