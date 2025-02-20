@@ -25,21 +25,53 @@ from make_patent_component import (
 from langfuse_client import get_langfuse_instance
 import re
 
-def normalize_filename(filename):
-    # Split the filename into name and extension
-    name, ext = os.path.splitext(filename)
+def normalize_filename(filename: str) -> str:
+    """
+    Normalize a file name by removing unsafe characters and normalizing whitespace,
+    while preserving the file extension and handling edge cases.
+
+    Rules:
+    - Leading and trailing whitespace is removed.
+    - For non-hidden files:
+         * All dots ('.') in the base name are replaced with underscores.
+         * Characters that are not alphanumeric, underscore, hyphen, or whitespace are removed.
+         * Whitespace is collapsed into a single underscore.
+    - For hidden files (those starting with a dot and having no extension):
+         * The leading dot is preserved.
+         * The rest of the filename is processed similarly.
+    - The file extension is preserved (and converted to lowercase).
+    - If the normalized base name ends up empty, it defaults to "file".
+    """
+    if not isinstance(filename, str):
+        raise TypeError("Filename must be a string.")
     
-    # Remove characters that are not alphanumeric, underscore, hyphen, or space.
-    # Adjust the regex as needed if you want to allow more characters.
-    name = re.sub(r'[^\w\s-]', '', name)
+    # Remove leading and trailing whitespace.
+    filename = filename.strip()
+    if not filename:
+        raise ValueError("Filename cannot be empty or whitespace only.")
     
-    # Replace any sequence of whitespace with a single underscore
-    name = re.sub(r'\s+', '_', name)
+    # Split into base and extension.
+    base, ext = os.path.splitext(filename)
     
-    # Optionally, lower the extension for consistency
-    ext = ext.lower()
+    # Special handling for hidden files (e.g. ".env" or ".gitignore").
+    if base.startswith('.') and ext == '':
+        # Preserve the leading dot and replace any other dots in the rest.
+        inner = base[1:].replace('.', '_')
+        safe_inner = re.sub(r'[^\w\s-]', '', inner)
+        safe_base = '.' + re.sub(r'\s+', '_', safe_inner)
+    else:
+        # Replace any dots in the base with underscores.
+        base = base.replace('.', '_')
+        safe_base = re.sub(r'[^\w\s-]', '', base)
+        safe_base = re.sub(r'\s+', '_', safe_base)
     
-    return name + ext
+    # If the safe base name is empty (or just a dot), use a default.
+    if safe_base in ["", "."]:
+        safe_base = "file"
+    
+    safe_ext = ext.lower()  # Normalize extension to lowercase.
+    
+    return safe_base + safe_ext
 
 langfuse = get_langfuse_instance()
 
