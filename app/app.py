@@ -20,7 +20,26 @@ from make_patent_component import (
     generate_key_terms,
 )
 
+
+
 from langfuse_client import get_langfuse_instance
+import re
+
+def normalize_filename(filename):
+    # Split the filename into name and extension
+    name, ext = os.path.splitext(filename)
+    
+    # Remove characters that are not alphanumeric, underscore, hyphen, or space.
+    # Adjust the regex as needed if you want to allow more characters.
+    name = re.sub(r'[^\w\s-]', '', name)
+    
+    # Replace any sequence of whitespace with a single underscore
+    name = re.sub(r'\s+', '_', name)
+    
+    # Optionally, lower the extension for consistency
+    ext = ext.lower()
+    
+    return name + ext
 
 langfuse = get_langfuse_instance()
 
@@ -747,6 +766,7 @@ def server(input, output, session):
         filedata = parse_approach_file()
         filepath = filedata["approach_filepath"]
         filename = filedata["approach_filename"]
+        filename = normalize_filename(filename)
         
         print(f"approach file: {filename} \n filepath: {filepath}")
         if filepath:
@@ -777,7 +797,7 @@ def server(input, output, session):
         filedata = parse_technology_file()
         filepath = filedata["technology_filepath"]
         filename = filedata["technology_filename"]
-        
+        filename = normalize_filename(filename)
         print(f"technology file: {filename} \n filepath: {filepath}")
         if filepath:
             technology_rag.process_file(filepath, filename)
@@ -807,7 +827,7 @@ def server(input, output, session):
         filedata = parse_innovation_file()
         filepath = filedata["innovation_filepath"]
         filename = filedata["innovation_filename"]
-        
+        filename = normalize_filename(filename)
         print(f"innovation file: {filename} \n filepath: {filepath}")
         if filepath:
             innovation_rag.process_file(filepath, filename)
