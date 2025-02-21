@@ -22,10 +22,10 @@ from make_patent_component import (
 
 
 
-from langfuse_client import get_langfuse_instance
+from utils.langfuse_client import get_langfuse_instance
 from utils.normalize_filename import normalize_filename
 
-
+langfuse =  get_langfuse_instance()
 
 ENVIRONMENT = os.getenv("ENV")
 

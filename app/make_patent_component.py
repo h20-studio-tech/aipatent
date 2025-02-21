@@ -18,8 +18,8 @@ from models.llm import (
 
 )
 
-from utils.utils import values_to_json
-from langfuse_client import get_langfuse_instance
+from utils.values_to_json import values_to_json
+from utils.langfuse_client import get_langfuse_instance
 
 langfuse = get_langfuse_instance()
 

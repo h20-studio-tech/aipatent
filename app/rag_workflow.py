@@ -13,7 +13,7 @@ from lancedb.embeddings import get_registry
 from typing import List
 from openai import AsyncOpenAI, OpenAI
 from pydantic import BaseModel
-from langfuse_client import get_langfuse_instance
+from app.utils.langfuse_client import get_langfuse_instance
 
 langfuse = get_langfuse_instance()
 class MultiQueryQuestions(BaseModel):
