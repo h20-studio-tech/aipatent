@@ -20,8 +20,6 @@ from make_patent_component import (
     generate_key_terms,
 )
 
-
-
 from utils.langfuse_client import get_langfuse_instance
 from utils.normalize_filename import normalize_filename
 

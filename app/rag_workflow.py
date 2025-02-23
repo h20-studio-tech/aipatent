@@ -16,6 +16,8 @@ from pydantic import BaseModel
 from app.utils.langfuse_client import get_langfuse_instance
 
 langfuse = get_langfuse_instance()
+    
+    
 class MultiQueryQuestions(BaseModel):
     questions: List[str]
     
@@ -247,20 +249,18 @@ class RagWorkflow:
         return self.format_chunks(chunks)
 
     
-    def multiquery_search(self, query:str) -> str:
-        example_questions = [
-        "What is the composition of the substance?",
-        "How does the component operate, and what are his effects in the organism?"]
+    def multiquery_search(self, query:str, n_queries: str = 3) -> str:
                 
         prompt = f"""
-            Generate `{3}` questions based on {query}. The questions should be focused on expanding the search of information from a microbiology paper:
+            You are a query understanding system for an AI Patent Generation application your task is to transform the user query and expand it into `{n_queries}` different queries
+            in order to maximize retrieval efficiency
+            
+            
+            Generate `{n_queries}` questions based on `{query}`. The questions should be focused on expanding the search of information from a microbiology paper:
 
-            Example questions:
-            {chr(10).join(f'- {q}' for q in example_questions)}
 
-            Do not use the exact example questions. Use them only as inspiration for the types of more specific questions to generate.
-            Questions should ask about biological characteristics for clarification on the composition, effect or method of action of a given component or mechanism that could uncover valuable insights ro answer the original question.
-            Stylistically, the questions should resemble what would be asked to a RAG-based answer tool to access relevant information about target antigens and disease drivers to enrich a patent generation process.
+            Stylistically the queries should be optimized for matching text chunks in a vectordb, doing so enhances the likelihood of effectively retrieving the relevant chunks
+            that contain the answer to the original user query.
             """
         try:
             multiquery = self.openai.chat.completions.create(
@@ -268,11 +268,12 @@ class RagWorkflow:
                 response_model=MultiQueryQuestions,
                 messages=[{"role": "user", "content": prompt}],
             )
-            print(f"MultiQuery questions: {multiquery.questions}")
+            print(f"MultiQuery questions: {chr(10).join(f'- {q}' for q in multiquery.questions)}")
             
             chunks = [self.search(q) for q in multiquery.questions]
             chunks = chunks[0]
-            print(f"\n retrieved chunks: {chunks}")
+            print(f"Amount of retrieved chunks: {len(chunks)}")
+            print(f"retrieved chunks: {chunks}")
             trace_id = str(uuid.uuid4())
             langfuse.trace(
                 id=trace_id,
