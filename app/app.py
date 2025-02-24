@@ -808,6 +808,8 @@ def server(input, output, session):
         filedata = parse_innovation_file()
         filepath = filedata["innovation_filepath"]
         filename = filedata["innovation_filename"]
+        # save file to disk
+        
         filename = normalize_filename(filename)
         print(f"innovation file: {filename} \n filepath: {filepath}")
         if filepath:
@@ -820,7 +822,7 @@ def server(input, output, session):
         prompt = input.approach_prompt()
         
         # display a warning if prompt is empty
-        if not prompt:
+        if prompt == "":
             ui.notification_show(type="error", duration=3) 
             return
         
