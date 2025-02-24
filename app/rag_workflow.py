@@ -229,7 +229,13 @@ class RagWorkflow:
         
         table_rows = self.table.count_rows()
         print(f"Entries added to the table: {table_rows}")
-
+        
+    def get_table(self, filename: str):
+        table_name = filename.replace(".pdf", "") # get the filename without the extension
+        if table_name in self.db.table_names():
+            logging.info(f"opening table: {table_name}")
+            return self.db.open_table(table_name)
+        
     def add_df_to_table(self, df: pd.DataFrame):
         df = df[df["text"].str.strip() != ""]
         print(f"checking rows with missing text: {df['text'].isnull().sum()} ")
