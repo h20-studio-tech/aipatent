@@ -756,8 +756,14 @@ def server(input, output, session):
         
         print(f"approach file: {filename} \n filepath: {filepath}")
         if filepath:
-            approach_rag.process_file(filepath, filename)
-            approach_rag.create_table_from_file(filepath)
+            result = approach_rag.process_file(filepath, filename)
+            
+            # check if the file already exists in the database
+            if isinstance(result, FileProcessedError):
+                # make the rag workflow point to the existing table 
+                approach_rag.set_table_name(filename=filename)
+            else:
+                approach_rag.create_table_from_file(filepath)
                 
     @reactive.Effect
     @reactive.event(input.generate_approach)
@@ -765,8 +771,8 @@ def server(input, output, session):
         prompt = input.approach_prompt()
         
         # display a warning if prompt is empty
-        if not prompt:
-            ui.notification_show(type="error", duration=3)
+        if prompt == "":
+            ui.notification_show("please provide an innovation input",type="error", duration=3) 
             return
         
         chunks = approach_rag.multiquery_search(prompt) 
@@ -784,10 +790,16 @@ def server(input, output, session):
         filepath = filedata["technology_filepath"]
         filename = filedata["technology_filename"]
         filename = normalize_filename(filename)
-        print(f"technology file: {filename} \n filepath: {filepath}")
+        logging.info(f"technology file: {filename} \n filepath: {filepath}")
         if filepath:
-            technology_rag.process_file(filepath, filename)
-            technology_rag.create_table_from_file(filepath)
+            result = technology_rag.process_file(filepath, filename)
+            
+            # check if the file already exists in the database
+            if isinstance(result, FileProcessedError):
+                # make the rag workflow point to the existing table 
+                technology_rag.set_table_name(filename=filename)
+            else:
+                technology_rag.create_table_from_file(filepath)
                 
     @reactive.Effect
     @reactive.event(input.generate_technology)
@@ -795,8 +807,8 @@ def server(input, output, session):
         prompt = input.technology_prompt()
         
         # display a warning if prompt is empty
-        if not prompt:
-            ui.notification_show(type="error", duration=3) 
+        if prompt == "":
+            ui.notification_show("please provide an innovation input",type="error", duration=3) 
             return
         
         chunks = technology_rag.multiquery_search(prompt)
@@ -832,11 +844,11 @@ def server(input, output, session):
     def on_generate_innovation():
         prompt = input.innovation_prompt()
         
+        
         # display a warning if prompt is empty
         if prompt == "":
             ui.notification_show("please provide an innovation input",type="error", duration=3) 
             return
-        
         chunks = innovation_rag.multiquery_search(prompt)
         result = section_reasoning(chunks, prompt)
         
