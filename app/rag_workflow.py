@@ -321,8 +321,8 @@ class RagWorkflow:
         if delete_file:
             self.delete_file()
             
-rag = RagWorkflow()
+# rag = RagWorkflow()
 
-ans = rag.multiquery_search("posttransplant expansion appearances")
+# ans = rag.multiquery_search("posttransplant expansion appearances")
 
-print(ans)
+# print(ans)
