@@ -754,7 +754,7 @@ def server(input, output, session):
         filename = filedata["approach_filename"]
         filename = normalize_filename(filename)
         
-        print(f"approach file: {filename} \n filepath: {filepath}")
+        logging.info(f"approach file: {filename} \n filepath: {filepath}")
         if filepath:
             result = approach_rag.process_file(filepath, filename)
             
@@ -772,7 +772,7 @@ def server(input, output, session):
         
         # display a warning if prompt is empty
         if prompt == "":
-            ui.notification_show("please provide an innovation input",type="error", duration=3) 
+            ui.notification_show("please provide an approach input",type="error", duration=3) 
             return
         
         chunks = approach_rag.multiquery_search(prompt) 
@@ -790,6 +790,7 @@ def server(input, output, session):
         filepath = filedata["technology_filepath"]
         filename = filedata["technology_filename"]
         filename = normalize_filename(filename)
+        
         logging.info(f"technology file: {filename} \n filepath: {filepath}")
         if filepath:
             result = technology_rag.process_file(filepath, filename)
@@ -808,7 +809,7 @@ def server(input, output, session):
         
         # display a warning if prompt is empty
         if prompt == "":
-            ui.notification_show("please provide an innovation input",type="error", duration=3) 
+            ui.notification_show("please provide a technology input",type="error", duration=3) 
             return
         
         chunks = technology_rag.multiquery_search(prompt)
@@ -828,7 +829,7 @@ def server(input, output, session):
         # save file to disk
         
         filename = normalize_filename(filename)
-        print(f"innovation file: {filename} \n filepath: {filepath}")
+        logging.info(f"innovation file: {filename} \n filepath: {filepath}")
         if filepath:
             result = innovation_rag.process_file(filepath, filename)
             
