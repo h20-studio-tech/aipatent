@@ -28,7 +28,11 @@ langfuse =  get_langfuse_instance()
 
 ENVIRONMENT = os.getenv("ENV")
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 
 openai = OpenAI()
 
@@ -826,11 +830,11 @@ def server(input, output, session):
     @reactive.Effect
     @reactive.event(input.generate_innovation)
     def on_generate_innovation():
-        prompt = input.approach_prompt()
+        prompt = input.innovation_prompt()
         
         # display a warning if prompt is empty
         if prompt == "":
-            ui.notification_show(type="error", duration=3) 
+            ui.notification_show("please provide an innovation input",type="error", duration=3) 
             return
         
         chunks = innovation_rag.multiquery_search(prompt)
