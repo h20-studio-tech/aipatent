@@ -6,6 +6,7 @@ import json
 import uuid
 import instructor
 import asyncio
+import logging
 
 from unstructured_client.models import operations, shared
 from lancedb.pydantic import LanceModel, Vector
@@ -17,6 +18,14 @@ from app.utils.langfuse_client import get_langfuse_instance
 
 langfuse = get_langfuse_instance()
     
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+
+class FileProcessedError(BaseModel):
+    is_processed: bool
     
 class MultiQueryQuestions(BaseModel):
     questions: List[str]
@@ -140,8 +149,12 @@ class RagWorkflow:
         return clean_df
                 
         
-    def process_file(self, file_path: str, filename: str) -> dict:
+    def process_file(self, file_path: str, filename: str) -> dict | FileProcessedError:
         self.table_name = filename.replace(".pdf", "")
+        if self.table_name in self.db.table_names():
+            logging.info("File already exists in database, skipping processing")
+            return FileProcessedError(is_processed=True)
+
         if not os.path.exists(file_path):
             print("The file does not exist")
             return
@@ -214,8 +227,8 @@ class RagWorkflow:
         self.table = self.db.create_table(self.table_name, schema=self.schema, exist_ok=True)
         self.add_df_to_table(df)
         
-        table = self.table.count_rows()
-        print(f"Entries added to the table: {table}")
+        table_rows = self.table.count_rows()
+        print(f"Entries added to the table: {table_rows}")
 
     def add_df_to_table(self, df: pd.DataFrame):
         df = df[df["text"].str.strip() != ""]
