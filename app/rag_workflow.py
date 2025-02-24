@@ -15,6 +15,7 @@ from typing import List
 from openai import AsyncOpenAI, OpenAI
 from pydantic import BaseModel
 from app.utils.langfuse_client import get_langfuse_instance
+from models.workflow import FileProcessedError
 
 langfuse = get_langfuse_instance()
     
@@ -23,9 +24,6 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'
 )
-
-class FileProcessedError(BaseModel):
-    is_processed: bool
     
 class MultiQueryQuestions(BaseModel):
     questions: List[str]
@@ -228,13 +226,15 @@ class RagWorkflow:
         self.add_df_to_table(df)
         
         table_rows = self.table.count_rows()
-        print(f"Entries added to the table: {table_rows}")
+        logging.info(f"table {self.table_name} successfully created")
+        logging.info(f"Entries added to the table: {table_rows}")
         
-    def get_table(self, filename: str):
+        
+    def set_table_name(self, filename: str):
         table_name = filename.replace(".pdf", "") # get the filename without the extension
         if table_name in self.db.table_names():
-            logging.info(f"opening table: {table_name}")
-            return self.db.open_table(table_name)
+            logging.info(f"setting table: {table_name}")
+            self.table_name = table_name
         
     def add_df_to_table(self, df: pd.DataFrame):
         df = df[df["text"].str.strip() != ""]

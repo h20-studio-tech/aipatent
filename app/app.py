@@ -6,6 +6,7 @@ from shiny.types import FileInfo
 from rag_workflow import RagWorkflow
 from langfuse.openai import OpenAI 
 from langfuse.decorators import observe
+from models.workflow import FileProcessedError
 from make_patent_component import (
     generate_background,
     generate_summary,
@@ -813,8 +814,14 @@ def server(input, output, session):
         filename = normalize_filename(filename)
         print(f"innovation file: {filename} \n filepath: {filepath}")
         if filepath:
-            innovation_rag.process_file(filepath, filename)
-            innovation_rag.create_table_from_file(filepath)
+            result = innovation_rag.process_file(filepath, filename)
+            
+            # check if the file already exists in the database
+            if isinstance(result, FileProcessedError):
+                # make the rag workflow point to the existing table 
+                innovation_rag.set_table_name(filename=filename)
+            else:
+                innovation_rag.create_table_from_file(filepath)
     
     @reactive.Effect
     @reactive.event(input.generate_innovation)
