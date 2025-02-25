@@ -21,14 +21,14 @@ req = operations.PartitionRequest(
                     file_name=filename,
                 ),
                 combine_under_n_chars=120,
-                chunking_strategy=shared.ChunkingStrategy.BY_SIMILARITY,
+                chunking_strategy=shared.ChunkingStrategy.BY_PAGE,
                 strategy=shared.Strategy.FAST,
                 languages=["eng"],
                 split_pdf_page=True,
                 split_pdf_allow_failed=True,
                 split_pdf_concurrency_level=15,
-                max_characters=800,
-                overlap=400
+                max_characters=1000,
+                overlap=500
             ),
         )
 

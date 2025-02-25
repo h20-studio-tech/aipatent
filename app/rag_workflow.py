@@ -13,7 +13,7 @@ from lancedb.pydantic import LanceModel, Vector
 from lancedb.embeddings import get_registry
 from typing import List
 from openai import AsyncOpenAI, OpenAI
-from pydantic import BaseModel
+from pydantic import BaseModel, SecretStr
 from utils.langfuse_client import get_langfuse_instance
 from models.workflow import FileProcessedError
 
@@ -50,8 +50,8 @@ class ReviewedChunk(BaseModel):
 class RagWorkflow:
     def __init__(self):
         self.client = unstructured_client.UnstructuredClient(
-            api_key_auth=os.getenv("UNSTRUCTURED_API_KEY"),
-            server_url=os.getenv("UNSTRUCTURED_API_URL"),
+            api_key_auth=SecretStr(os.getenv("UNSTRUCTURED_API_KEY")),
+            server_url=SecretStr(os.getenv("UNSTRUCTURED_API_URL")),
         )
 
         self.func = get_registry().get("openai").create(name="text-embedding-3-large")

@@ -1,5 +1,7 @@
 import os
 
+from pydantic import SecretStr
+
 from unstructured_ingest.v2.pipeline.pipeline import Pipeline
 from unstructured_ingest.v2.interfaces import ProcessorConfig
 
@@ -56,28 +58,26 @@ from unstructured_ingest.v2.processes.connectors.lancedb.aws import (
 if __name__ == "__main__":
     Pipeline.from_configs(
         context=ProcessorConfig(),
-        indexer_config=LocalIndexerConfig(input_path=os.getenv("LOCAL_FILE_INPUT_DIR")),
+        indexer_config=LocalIndexerConfig(input_path=SecretStr(os.getenv("LOCAL_FILE_INPUT_DIR"))),
         downloader_config=LocalDownloaderConfig(),
         source_connection_config=LocalConnectionConfig(),
         partitioner_config=PartitionerConfig(
             partition_by_api=True,
-            api_key=os.getenv("UNSTRUCTURED_API_KEY"),
-            partition_endpoint=os.getenv("UNSTRUCTURED_API_URL"),
+            api_key=SecretStr(os.getenv("UNSTRUCTURED_API_KEY")),
+            partition_endpoint=SecretStr(os.getenv("UNSTRUCTURED_API_URL")),
             additional_partition_args={
                 "split_pdf_page": True,
                 "split_pdf_allow_failed": True,
                 "split_pdf_concurrency_level": 15,
-                
             }
         ),
         chunker_config=ChunkerConfig(chunking_strategy="by_title"),
-        embedder_config=EmbedderConfig(embedding_provider="huggingface"),
+        embedder_config=EmbedderConfig(embedding_provider="openai", embedding_model_name="text-embedding-3-large", embedding_api_key=SecretStr(os.getenv("OPENAI_API_KEY"))),
 
         # For LanceDB OSS with local data storage:
         destination_connection_config=LanceDBConnectionConfig(
-            uri=os.getenv("LANCEDB_URI")
+            uri=SecretStr(os.getenv("LANCEDB_URI"))
         ),
-
         stager_config=LanceDBUploadStagerConfig(),
-        uploader_config=LanceDBUploaderConfig(table_name=os.getenv("LANCEDB_TABLE"))
+        uploader_config=LanceDBUploaderConfig(table_name=SecretStr(os.getenv("LANCEDB_TABLE")))
     ).run()
