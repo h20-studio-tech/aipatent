@@ -83,9 +83,9 @@ class RagWorkflow:
         # Check if any task failed and log the error
         for i, result in enumerate(reviewed_chunks):
             if isinstance(result, Exception):
-                print(f"Task {i} failed with exception: {result}")
+                logging.info(f"Task {i} failed with exception: {result}")
             else:
-                print(f"Task {i} completed successfully")
+                logging.info(f"Task {i} completed successfully")
         
         
             # Filter out any exceptions (failed tasks) before proceeding
@@ -123,7 +123,7 @@ class RagWorkflow:
                     {"role": "assistant", "content": prompt}
                 ]
             )
-            print("API Response:", res)
+            logging.info("API Response:", res)
             return ReviewedChunk(**chunk.model_dump(), relevant=res.relevant)    
         
     async def clean_df(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -154,22 +154,23 @@ class RagWorkflow:
             return FileProcessedError(is_processed=True)
 
         if not os.path.exists(file_path):
-            print("The file does not exist")
+            logging.info("The file does not exist")
             return
-        print(f"Processing file: {file_path}")
+        logging.info(f"Processing file: {file_path}")
         req = operations.PartitionRequest(
             partition_parameters=shared.PartitionParameters(
                 files=shared.Files(
                     content=open(file_path, "rb"),
                     file_name=filename,
                 ),
-                combine_under_n_chars=80,
                 chunking_strategy=shared.ChunkingStrategy.BY_SIMILARITY,
-                strategy=shared.Strategy.HI_RES,
+                strategy=shared.Strategy.FAST,
                 languages=["eng"],
                 split_pdf_page=True,
                 split_pdf_allow_failed=True,
                 split_pdf_concurrency_level=15,
+                max_characters=800,
+                overlap=400
             ),
         )
 
@@ -199,24 +200,24 @@ class RagWorkflow:
             return {"df": df, "filepath": file_path}
 
         except Exception as e:
-            print(e)
+            logging.info(e)
 
     def create_table_from_file(self, file_path: str):
 
         if not os.path.exists(file_path):
-            print("The file does not exist")
+            logging.info("The file does not exist")
             return
 
         self.file_path = file_path
         df = pd.read_csv(file_path.replace(".pdf", ".csv"))
         
         df = df[df["text"].str.strip() != ""]
-        print(f"checking rows with missing text: {df['text'].isnull().sum()} ")  # How many rows have missing text?
-        print(f"create_table_from_file: {file_path} of length: {df.shape[0]}")
+        logging.info(f"checking rows with missing text: {df['text'].isnull().sum()} ")  # How many rows have missing text?
+        logging.info(f"create_table_from_file: {file_path} of length: {df.shape[0]}")
 
 
         if df.empty:
-            print("Warning: The DataFrame is empty, no data will be added.")
+            logging.info("Warning: The DataFrame is empty, no data will be added.")
             return
 
         if self.table_name in self.db.table_names():
