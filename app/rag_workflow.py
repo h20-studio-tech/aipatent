@@ -163,6 +163,7 @@ class RagWorkflow:
                     content=open(file_path, "rb"),
                     file_name=filename,
                 ),
+                combine_under_n_chars=200,
                 chunking_strategy=shared.ChunkingStrategy.BY_SIMILARITY,
                 strategy=shared.Strategy.FAST,
                 languages=["eng"],
