@@ -11,7 +11,7 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 
-file_path = rf"C:\Users\vtorr\Work\Projects\aipatent\experiments\unstructured\docs\ALD-patent-background-target-paper.pdf"
+file_path = rf"C:\Users\vtorr\Work\Projects\aipatent\experiments\unstructured\docs\GvHD patent background disease-target paper.pdf"
 filename = "gvhd-paper.pdf"
 
 req = operations.PartitionRequest(

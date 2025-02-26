@@ -11,7 +11,7 @@ import logging
 from unstructured_client.models import operations, shared
 from lancedb.pydantic import LanceModel, Vector
 from lancedb.embeddings import get_registry
-from typing import List
+from typing import List, Tuple, Union
 from openai import AsyncOpenAI, OpenAI
 from pydantic import BaseModel, SecretStr
 from utils.langfuse_client import get_langfuse_instance
@@ -50,8 +50,8 @@ class ReviewedChunk(BaseModel):
 class RagWorkflow:
     def __init__(self):
         self.client = unstructured_client.UnstructuredClient(
-            api_key_auth=SecretStr(os.getenv("UNSTRUCTURED_API_KEY")),
-            server_url=SecretStr(os.getenv("UNSTRUCTURED_API_URL")),
+            api_key_auth=os.getenv("UNSTRUCTURED_API_KEY"),
+            server_url=os.getenv("UNSTRUCTURED_API_URL"),
         )
 
         self.func = get_registry().get("openai").create(name="text-embedding-3-large")
@@ -163,15 +163,15 @@ class RagWorkflow:
                     content=open(file_path, "rb"),
                     file_name=filename,
                 ),
-                combine_under_n_chars=200,
-                chunking_strategy=shared.ChunkingStrategy.BY_SIMILARITY,
+                combine_under_n_chars=120,
+                chunking_strategy=shared.ChunkingStrategy.BY_PAGE,
                 strategy=shared.Strategy.FAST,
                 languages=["eng"],
                 split_pdf_page=True,
                 split_pdf_allow_failed=True,
                 split_pdf_concurrency_level=15,
-                max_characters=800,
-                overlap=400
+                max_characters=1000,
+                overlap=500
             ),
         )
 
@@ -202,6 +202,81 @@ class RagWorkflow:
 
         except Exception as e:
             logging.info(e)
+    
+    FileTuple = Tuple[str, str]
+
+    def process_files(self, file_list: List[FileTuple]) -> List[Union[dict, FileProcessedError]]:
+        """
+        Process a list of files by partitioning each document into chunks.
+        For each file, the partitioned data is saved as JSON and CSV.
+        Returns a list of results per file processed.
+
+        :param file_list: List of tuples (file_path, filename)
+        :return: List of dictionaries with keys "df" and "filepath", or a FileProcessedError if processing failed.
+        """
+        results = []
+        
+        for file_path, filename in file_list:
+            if not os.path.exists(file_path):
+                logging.info(f"The file does not exist: {file_path}")
+                results.append(FileProcessedError(is_processed=False))
+                continue
+
+            logging.info(f"Processing file: {file_path}")
+            try:
+                # Open the file in binary mode using a context manager
+                with open(file_path, "rb") as file_content:
+                    req = operations.PartitionRequest(
+                        partition_parameters=shared.PartitionParameters(
+                            files=shared.Files(
+                                content=file_content,
+                                file_name=filename,
+                            ),
+                            combine_under_n_chars=120,
+                            chunking_strategy=shared.ChunkingStrategy.BY_PAGE,
+                            strategy=shared.Strategy.FAST,
+                            languages=["eng"],
+                            split_pdf_page=True,
+                            split_pdf_allow_failed=True,
+                            split_pdf_concurrency_level=15,
+                            max_characters=1000,
+                            overlap=500
+                        ),
+                    )
+                    res = self.client.general.partition(request=req)
+                
+                # Extract partitioned elements
+                element_dicts = [element for element in res.elements]
+                
+                # Save the raw partitioned data as JSON for record-keeping
+                json_path = file_path.replace(".pdf", ".json")
+                with open(json_path, "w") as json_file:
+                    json.dump(element_dicts, json_file)
+                
+                # Process each partition element into a row for the DataFrame
+                data = []
+                chunk_counter = 0
+                for element_dict in element_dicts:
+                    chunk_counter += 1  # Increment for every new row
+                    new_row = {
+                        "element_id": element_dict["element_id"],
+                        "text": element_dict["text"],
+                        "page_number": element_dict["metadata"].get("page_number"),
+                        "filename": element_dict["metadata"].get("filename"),
+                        "chunk_id": chunk_counter,
+                    }
+                    data.append(new_row)
+                
+                df = pd.DataFrame(data=data)
+                csv_path = file_path.replace(".pdf", ".csv")
+                df.to_csv(csv_path, index=False)
+                
+                results.append({"df": df, "filepath": file_path})
+            except Exception as e:
+                logging.info(f"Error processing file {file_path}: {e}")
+                
+        
+        return results
 
     def create_table_from_file(self, file_path: str):
 
@@ -231,6 +306,59 @@ class RagWorkflow:
         logging.info(f"table {self.table_name} successfully created")
         logging.info(f"Entries added to the table: {table_rows}")
         
+    def create_table_from_files(self, file_paths: List[str]) -> None:
+        """
+        Creates a single table in the database using CSV data generated
+        from multiple PDF files. Each CSV is expected to be located at
+        the same path as its corresponding PDF, but with a '.csv' extension.
+        
+        :param file_paths: List of file paths pointing to the PDF files.
+        """
+        aggregated_data = []
+        
+        for file_path in file_paths:
+            if not os.path.exists(file_path):
+                logging.info(f"The file does not exist: {file_path}")
+                continue
+
+            # Assume CSV file has the same path but with .csv extension
+            csv_path = file_path.replace(".pdf", ".csv")
+            if not os.path.exists(csv_path):
+                logging.info(f"CSV file does not exist: {csv_path}")
+                continue
+
+            df = pd.read_csv(csv_path)
+            # Remove rows with empty or whitespace-only text
+            df = df[df["text"].str.strip() != ""]
+            logging.info(f"Checking CSV {csv_path}: missing text rows: {df['text'].isnull().sum()}")
+            logging.info(f"File {csv_path} has {df.shape[0]} rows after filtering.")
+            
+            if df.empty:
+                logging.info(f"Warning: The DataFrame for {csv_path} is empty; skipping file.")
+                continue
+            
+            aggregated_data.append(df)
+        
+        if not aggregated_data:
+            logging.info("No valid data found in any of the provided files.")
+            return
+
+        # Concatenate all DataFrames into one
+        aggregated_df = pd.concat(aggregated_data, ignore_index=True)
+        logging.info(f"Aggregated DataFrame contains {aggregated_df.shape[0]} rows.")
+
+        # If a table already exists, drop it to replace with new data
+        if self.table_name in self.db.table_names():
+            self.db.drop_table(self.table_name)
+            logging.info(f"Dropped existing table {self.table_name}.")
+
+        # Create the table using the defined schema
+        self.table = self.db.create_table(self.table_name, schema=self.schema, exist_ok=True)
+        self.add_df_to_table(aggregated_df)
+        
+        table_rows = self.table.count_rows()
+        logging.info(f"Table {self.table_name} successfully created.")
+        logging.info(f"Entries added to the table: {table_rows}")    
         
     def set_table_name(self, filename: str):
         table_name = filename.replace(".pdf", "") # get the filename without the extension
@@ -323,8 +451,12 @@ class RagWorkflow:
         if delete_file:
             self.delete_file()
             
-# rag = RagWorkflow()
-
+rag = RagWorkflow()
+rag.process_files([(rf"C:\Users\vtorr\Work\Projects\aipatent\experiments\unstructured\docs\ald_paper.pdf", "ald_paper"),
+                   (rf"C:\Users\vtorr\Work\Projects\aipatent\experiments\unstructured\docs\gvhd_paper.pdf", "gvhd_paper")
+                   ])
+rag.create_table_from_files([rf"C:\Users\vtorr\Work\Projects\aipatent\experiments\unstructured\docs\gvhd_paper.pdf",
+                             rf"C:\Users\vtorr\Work\Projects\aipatent\experiments\unstructured\docs\ald_paper.pdf",])
 # ans = rag.multiquery_search("posttransplant expansion appearances")
 
 # print(ans)
