@@ -451,12 +451,12 @@ class RagWorkflow:
         if delete_file:
             self.delete_file()
             
-rag = RagWorkflow()
-rag.process_files([(rf"C:\Users\vtorr\Work\Projects\aipatent\experiments\unstructured\docs\ald_paper.pdf", "ald_paper"),
-                   (rf"C:\Users\vtorr\Work\Projects\aipatent\experiments\unstructured\docs\gvhd_paper.pdf", "gvhd_paper")
-                   ])
-rag.create_table_from_files([rf"C:\Users\vtorr\Work\Projects\aipatent\experiments\unstructured\docs\gvhd_paper.pdf",
-                             rf"C:\Users\vtorr\Work\Projects\aipatent\experiments\unstructured\docs\ald_paper.pdf",])
+# rag = RagWorkflow()
+# rag.process_files([(rf"C:\Users\vtorr\Work\Projects\aipatent\experiments\unstructured\docs\ald_paper.pdf", "ald_paper"),
+#                    (rf"C:\Users\vtorr\Work\Projects\aipatent\experiments\unstructured\docs\gvhd_paper.pdf", "gvhd_paper")
+#                    ])
+# rag.create_table_from_files([rf"C:\Users\vtorr\Work\Projects\aipatent\experiments\unstructured\docs\gvhd_paper.pdf",
+#                              rf"C:\Users\vtorr\Work\Projects\aipatent\experiments\unstructured\docs\ald_paper.pdf",])
 # ans = rag.multiquery_search("posttransplant expansion appearances")
 
 # print(ans)
