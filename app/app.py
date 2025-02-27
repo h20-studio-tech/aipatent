@@ -7,6 +7,7 @@ from rag_workflow import RagWorkflow
 from langfuse.openai import OpenAI 
 from langfuse.decorators import observe
 from models.workflow import FileProcessedError
+from typing import List, Optional
 from make_patent_component import (
     generate_background,
     generate_summary,
@@ -70,7 +71,7 @@ app_ui = ui.page_fixed(
                                                width="3vw",
                                                height="2vw",
                                                rows=5),
-                            ui.input_file("approach_file", "", accept="application/pdf", multiple=False, button_label="search"),
+                            ui.input_file("approach_file", "", accept="application/pdf", multiple=True, button_label="search"),
                             ),
                         height=550,
                         min_height=550),
@@ -696,11 +697,14 @@ def server(input, output, session):
     """
     
     @reactive.calc
-    def parse_approach_file():
+    def parse_approach_file() -> Optional[List[dict[str,str]]]:
         file: list[FileInfo] | None = input.approach_file()
         if file is None:
             return None
-        return {"approach_filepath":file[0]["datapath"], "approach_filename": file[0]["name"]}
+        files = []
+        for f in file:
+            files.append({"approach_filepath":f["datapath"], "approach_filename":f["name"]})
+        return files
     
     @reactive.calc
     def parse_innovation_file():
@@ -750,20 +754,42 @@ def server(input, output, session):
     @reactive.event(input.approach_file)
     def on_approach_file_upload():
         filedata = parse_approach_file()
-        filepath = filedata["approach_filepath"]
-        filename = filedata["approach_filename"]
-        filename = normalize_filename(filename)
         
-        logging.info(f"approach file: {filename} \n filepath: {filepath}")
-        if filepath:
-            result = approach_rag.process_file(filepath, filename)
+        if len(filedata) == 1:
+            logging.info(f"single file, {filedata}")
+            filepath  = filedata[0]["approach_filepath"]
+            filename = filedata[0]["approach_filename"]
+            if filepath:
+                result = approach_rag.process_file(filepath, filename)
+                
+                # check if the file already exists in the database
+                if isinstance(result, FileProcessedError):
+                    # make the rag workflow point to the existing table 
+                    approach_rag.set_table_name(filename=filename)
+                else:
+                    approach_rag.create_table_from_file(filepath)
+            return
+        
+
+        filepaths = []
+        file_tuples = []
+        logging.info(f"uploaded multiple approach files")
+        for file in filedata:    
+            filepath = file["approach_filepath"]
+            filepaths.append(filepath)
             
-            # check if the file already exists in the database
-            if isinstance(result, FileProcessedError):
-                # make the rag workflow point to the existing table 
-                approach_rag.set_table_name(filename=filename)
-            else:
-                approach_rag.create_table_from_file(filepath)
+            filename = normalize_filename(file["approach_filename"])
+            file = (filepath, filename)
+            
+            file_tuples.append(file)
+            
+            logging.info(f"appended file: {file}")
+            
+        if file_tuples:
+            result = approach_rag.process_files(file_tuples)
+            approach_rag.create_table_from_files(filepaths)
+        
+        logging.info("on_approach_file_upload completed successfully")
                 
     @reactive.Effect
     @reactive.event(input.generate_approach)
@@ -787,20 +813,42 @@ def server(input, output, session):
     @reactive.event(input.technology_file)
     def on_technology_file_upload():     
         filedata = parse_technology_file()
-        filepath = filedata["technology_filepath"]
-        filename = filedata["technology_filename"]
-        filename = normalize_filename(filename)
         
-        logging.info(f"technology file: {filename} \n filepath: {filepath}")
-        if filepath:
-            result = technology_rag.process_file(filepath, filename)
+        if len(filedata) == 1:
+            logging.info(f"single file, {filedata}")
+            filepath  = filedata[0]["technology_filepath"]
+            filename = filedata[0]["technology_filename"]
+            if filepath:
+                result = technology_rag.process_file(filepath, filename)
+                
+                # check if the file already exists in the database
+                if isinstance(result, FileProcessedError):
+                    # make the rag workflow point to the existing table 
+                    technology_rag.set_table_name(filename=filename)
+                else:
+                    technology_rag.create_table_from_file(filepath)
+            return
+        
+
+        filepaths = []
+        file_tuples = []
+        logging.info(f"uploaded multiple technology files")
+        for file in filedata:    
+            filepath = file["technology_filepath"]
+            filepaths.append(filepath)
             
-            # check if the file already exists in the database
-            if isinstance(result, FileProcessedError):
-                # make the rag workflow point to the existing table 
-                technology_rag.set_table_name(filename=filename)
-            else:
-                technology_rag.create_table_from_file(filepath)
+            filename = normalize_filename(file["technology_filename"])
+            file = (filepath, filename)
+            
+            file_tuples.append(file)
+            
+            logging.info(f"appended file: {file}")
+            
+        if file_tuples:
+            result = technology_rag.process_files(file_tuples)
+            technology_rag.create_table_from_files(filepaths)
+        
+        logging.info("on_technology_file_upload completed successfully")
                 
     @reactive.Effect
     @reactive.event(input.generate_technology)
@@ -824,21 +872,42 @@ def server(input, output, session):
     @reactive.event(input.innovation_file)
     def on_innovation_file_upload():
         filedata = parse_innovation_file()
-        filepath = filedata["innovation_filepath"]
-        filename = filedata["innovation_filename"]
-        # save file to disk
         
-        filename = normalize_filename(filename)
-        logging.info(f"innovation file: {filename} \n filepath: {filepath}")
-        if filepath:
-            result = innovation_rag.process_file(filepath, filename)
+        if len(filedata) == 1:
+            logging.info(f"single file, {filedata}")
+            filepath  = filedata[0]["innovation_filepath"]
+            filename = filedata[0]["innovation_filename"]
+            if filepath:
+                result = innovation_rag.process_file(filepath, filename)
+                
+                # check if the file already exists in the database
+                if isinstance(result, FileProcessedError):
+                    # make the rag workflow point to the existing table 
+                    innovation_rag.set_table_name(filename=filename)
+                else:
+                    innovation_rag.create_table_from_file(filepath)
+            return
+        
+
+        filepaths = []
+        file_tuples = []
+        logging.info(f"uploaded multiple innovation files")
+        for file in filedata:    
+            filepath = file["innovation_filepath"]
+            filepaths.append(filepath)
             
-            # check if the file already exists in the database
-            if isinstance(result, FileProcessedError):
-                # make the rag workflow point to the existing table 
-                innovation_rag.set_table_name(filename=filename)
-            else:
-                innovation_rag.create_table_from_file(filepath)
+            filename = normalize_filename(file["innovation_filename"])
+            file = (filepath, filename)
+            
+            file_tuples.append(file)
+            
+            logging.info(f"appended file: {file}")
+            
+        if file_tuples:
+            result = innovation_rag.process_files(file_tuples)
+            innovation_rag.create_table_from_files(filepaths)
+        
+        logging.info("on_innovation_file_upload completed successfully")
     
     @reactive.Effect
     @reactive.event(input.generate_innovation)
