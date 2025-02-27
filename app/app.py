@@ -85,7 +85,7 @@ app_ui = ui.page_fixed(
                                                height="100%",
                                                rows=5),
                             ),
-                        ui.input_file("technology_file", "", accept="application/pdf", multiple=False, button_label="search"),
+                        ui.input_file("technology_file", "", accept="application/pdf", multiple=True, button_label="search"),
                         height=550,
                         min_height=550),
                 ui.card(
@@ -99,7 +99,7 @@ app_ui = ui.page_fixed(
                                                width="100%",
                                                height="100%",
                                                rows=5)),
-                        ui.input_file("innovation_file", "", accept="application/pdf", multiple=False, button_label="search"),
+                        ui.input_file("innovation_file", "", accept="application/pdf", multiple=True, button_label="search"),
                         height=550,
                         min_height=550),
             ),
@@ -711,14 +711,20 @@ def server(input, output, session):
         file: list[FileInfo] | None = input.innovation_file()
         if file is None:
             return None
-        return {"innovation_filepath":file[0]["datapath"], "innovation_filename": file[0]["name"]}
+        files = []
+        for f in file:
+            files.append({"innovation_filepath":f["datapath"], "innovation_filename":f["name"]})
+        return files
 
     @reactive.calc
     def parse_technology_file():
         file: list[FileInfo] | None = input.technology_file()
         if file is None:
             return None
-        return {"technology_filepath":file[0]["datapath"], "technology_filename": file[0]["name"]}
+        files = []
+        for f in file:
+            files.append({"technology_filepath":f["datapath"], "technology_filename":f["name"]})
+        return files
     
     
     # Create a reactive value to store the generated primary invention
