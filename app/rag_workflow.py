@@ -7,6 +7,8 @@ import uuid
 import instructor
 import asyncio
 import logging
+import time
+import aiofiles 
 
 from unstructured_client.models import operations, shared
 from lancedb.pydantic import LanceModel, Vector
@@ -16,6 +18,9 @@ from openai import AsyncOpenAI, OpenAI
 from pydantic import BaseModel, SecretStr
 from utils.langfuse_client import get_langfuse_instance
 from models.workflow import FileProcessedError
+from models.metadata_extraction import Extraction
+from concurrent.futures import ThreadPoolExecutor
+
 
 langfuse = get_langfuse_instance()
     
@@ -68,7 +73,11 @@ class RagWorkflow:
             element_id: str
             page_number: int
             filename: str
+            keywords : List[str]
+            hypothetical_questions: list[str]
+            method: list[str]
             chunk_id: int
+            
 
         self.schema = Schema
         
@@ -146,8 +155,153 @@ class RagWorkflow:
         clean_df = reviewed_df[reviewed_df["relevant"] != False]
         return clean_df
                 
+    async def extract_metadata(self, text: str) -> dict:
+        """
+        Asynchronously extract metadata (keywords, methods, hypothetical questions)
+        from a given text chunk by wrapping the blocking API call.
+        """
+        try:
+            model = "gpt-3.5-turbo"
+            messages = [
+                {
+                    "role": "system",
+                    "content": "Your role is to extract data from the following document and create a set of topics."
+                },
+                {"role": "user", "content": text},
+            ]
+            # Wrap the blocking API call in asyncio.to_thread
+            extraction = await asyncio.to_thread(
+                self.openai.chat.completions.create,
+                model=model,
+                response_model=Extraction,
+                messages=messages
+            )
+            # extraction is assumed to be a Pydantic model; convert to dict
+            return extraction.model_dump()
+        except Exception as e:
+            logging.error(f"Error extracting metadata: {e}")
+            # Return empty metadata in case of error
+            return {"keywords": [], "method": [], "hypothetical_questions": []}
         
+    async def aprocess_file(self, file_path: str, filename: str) -> dict | FileProcessedError:
+        """
+        Asynchronously process a PDF file by partitioning its text into chunks,
+        extracting metadata concurrently for each chunk, and saving the results
+        to both JSON and CSV formats.
+        
+        :param str = file_path: 
+        :param str = filename: 
+        :return dict | FileProcessedError: 
+        """
+        # Create a table name by removing the .pdf extension
+        self.table_name = filename.replace(".pdf", "")
+        if self.table_name in self.db.table_names():
+            logging.info("File already exists in database, skipping processing")
+            return FileProcessedError(is_processed=True, error="File already processed.")
+
+        if not os.path.exists(file_path):
+            logging.info("The file does not exist")
+            return FileProcessedError(is_processed=False, error="File does not exist.")
+
+        logging.info(f"Processing file: {file_path}")
+
+        req = operations.PartitionRequest(
+            partition_parameters=shared.PartitionParameters(
+                files=shared.Files(
+                    content=open(file_path, "rb"),
+                    file_name=filename,
+                ),
+                combine_under_n_chars=120,
+                chunking_strategy=shared.ChunkingStrategy.BY_PAGE,
+                strategy=shared.Strategy.FAST,
+                languages=["eng"],
+                split_pdf_page=True,
+                split_pdf_allow_failed=True,
+                split_pdf_concurrency_level=15,
+                max_characters=1000,
+                overlap=500
+            ),
+        )
+
+        try:
+            start_time = time.perf_counter()
+            # Run the blocking partitioning API call in a separate thread
+            res = await asyncio.to_thread(self.client.general.partition, request=req)
+            element_dicts = [element for element in res.elements]
+            elapsed_time = time.perf_counter() - start_time
+            logging.info(f"Partitioning completed in {elapsed_time:.2f} seconds")
+
+            # Asynchronously write the raw JSON data
+            json_path = file_path.replace(".pdf", ".json")
+            async with aiofiles.open(json_path, "w") as jf:
+                await jf.write(json.dumps(element_dicts))
+
+            # Build rows for our DataFrame
+            data = []
+            for chunk_counter, element in enumerate(element_dicts, start=1):
+                row = {
+                    "element_id": element.get("element_id"),
+                    "text": element.get("text"),
+                    "page_number": element.get("metadata", {}).get("page_number"),
+                    "filename": element.get("metadata", {}).get("filename"),
+                    "chunk_id": chunk_counter,
+                }
+                data.append(row)
+
+            # concurrently extract metadata for each text chunk
+            tasks = [self.extract_metadata(row["text"]) for row in data]
+            metadata_results = await asyncio.gather(*tasks)
+
+            # update each row with the extracted metadata
+            for row, metadata in zip(data, metadata_results):
+                # keep metadata in separate columns for convenience
+                row.update(metadata)
+
+                # formatted metadata section
+                meta_lines = []
+                if metadata.get("keywords"):
+                    meta_lines.append(f"Keywords: {', '.join(metadata['keywords'])}")
+                if metadata.get("method"):
+                    meta_lines.append(f"Methods: {', '.join(metadata['method'])}")
+                if metadata.get("hypothetical_questions"):
+                    meta_lines.append(f"Hypothetical Questions: {', '.join(metadata['hypothetical_questions'])}")
+
+                # if we actually have metadata to add, append it to the text
+                if meta_lines:
+                    metadata_str = "\n\n--- Extracted Metadata ---\n" + "\n".join(meta_lines)
+                    # append the metadata string to the original text
+                    row["text"] = row["text"] + metadata_str
+                row.update(metadata)
+
+            # Create a Pandas DataFrame from the processed data
+            df = pd.DataFrame(data)
+            csv_path = file_path.replace(".pdf", ".csv")
+            loop = asyncio.get_running_loop()
+            # Write CSV using ThreadPoolExecutor to avoid blocking the event loop
+            with ThreadPoolExecutor() as pool:
+                await loop.run_in_executor(pool, lambda: df.to_csv(csv_path, index=False))
+
+            total_time = time.perf_counter() - start_time
+            logging.info(f"process_file completed successfully in {total_time:.2f} seconds")
+            return {"df": df, "filepath": csv_path}
+
+        except Exception as e:
+            logging.error(f"Error during processing: {e}")
+            return FileProcessedError(is_processed=False, error=str(e))
+                
     def process_file(self, file_path: str, filename: str) -> dict | FileProcessedError:
+        """
+        Synchronously process a PDF file by partitioning its text into chunks,
+        and saving the results to both JSON and CSV formats.
+        
+        **important:** This function doesn't incorporate metadata extraction due to latency considerations.
+        for detailed and concurrent metadata extraction use **aprocess_file**
+        
+        :param str  file_path: 
+        :param str  filename:        
+        
+        
+        """
         self.table_name = filename.replace(".pdf", "")
         if self.table_name in self.db.table_names():
             logging.info("File already exists in database, skipping processing")
@@ -178,8 +332,11 @@ class RagWorkflow:
         try:
             data = []
             chunk_counter = 0
+            start_time = time.perf_counter()
             res = self.client.general.partition(request=req)
             element_dicts = [element for element in res.elements]
+            elapsed_time = time.perf_counter() - start_time
+            logging.info(f"partition completed with time: {elapsed_time}")
             with open(file_path.replace(".pdf", ".json"), "w") as f:
                 json.dump(element_dicts, f)
 
@@ -198,6 +355,10 @@ class RagWorkflow:
             df = pd.DataFrame(data=data)
             # df = await self.clean_df(df)
             df.to_csv(file_path.replace(".pdf", ".csv"), index=False)
+            
+            end_time = time.perf_counter() - start_time
+            
+            logging.info(f"process_file completed successfully with time: {end_time}")
             return {"df": df, "filepath": file_path}
 
         except Exception as e:
@@ -210,7 +371,7 @@ class RagWorkflow:
         Process a list of files by partitioning each document into chunks.
         For each file, the partitioned data is saved as JSON and CSV.
         Returns a list of results per file processed.
-
+ 
         :param file_list: List of tuples (file_path, filename)
         :return: List of dictionaries with keys "df" and "filepath", or a FileProcessedError if processing failed.
         """
@@ -314,8 +475,8 @@ class RagWorkflow:
         
         :param file_paths: List of file paths pointing to the PDF files.
         """
-        aggregated_data = []
         
+        aggregated_data = []
         for file_path in file_paths:
             if not os.path.exists(file_path):
                 logging.info(f"The file does not exist: {file_path}")
@@ -451,12 +612,20 @@ class RagWorkflow:
         if delete_file:
             self.delete_file()
             
-# rag = RagWorkflow()
-# rag.process_files([(rf"C:\Users\vtorr\Work\Projects\aipatent\experiments\unstructured\docs\ald_paper.pdf", "ald_paper"),
-#                    (rf"C:\Users\vtorr\Work\Projects\aipatent\experiments\unstructured\docs\gvhd_paper.pdf", "gvhd_paper")
-#                    ])
-# rag.create_table_from_files([rf"C:\Users\vtorr\Work\Projects\aipatent\experiments\unstructured\docs\gvhd_paper.pdf",
-#                              rf"C:\Users\vtorr\Work\Projects\aipatent\experiments\unstructured\docs\ald_paper.pdf",])
-# ans = rag.multiquery_search("posttransplant expansion appearances")
 
-# print(ans)
+
+# async def main():
+#     rag = RagWorkflow()
+#     res = await rag.aprocess_file(
+#         rf"C:\Users\vtorr\Work\Projects\aipatent\experiments\unstructured\docs\ald_paper.pdf",
+#         "ald_paper"
+#     )
+
+# if __name__ == "__main__":
+#     asyncio.run(main())
+
+# # ans = rag.multiquery_search("posttransplant expansion appearances")
+
+# # print(ans)
+
+
