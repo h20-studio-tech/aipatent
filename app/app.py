@@ -758,7 +758,7 @@ def server(input, output, session):
     approach_rag = RagWorkflow()
     @reactive.Effect
     @reactive.event(input.approach_file)
-    def on_approach_file_upload():
+    async def on_approach_file_upload():
         filedata = parse_approach_file()
         
         if len(filedata) == 1:
@@ -766,7 +766,7 @@ def server(input, output, session):
             filepath  = filedata[0]["approach_filepath"]
             filename = filedata[0]["approach_filename"]
             if filepath:
-                result = approach_rag.process_file(filepath, filename)
+                result = await approach_rag.aprocess_file(filepath, filename)
                 
                 # check if the file already exists in the database
                 if isinstance(result, FileProcessedError):
@@ -776,24 +776,24 @@ def server(input, output, session):
                     approach_rag.create_table_from_file(filepath)
             return
         
-
-        filepaths = []
-        file_tuples = []
-        logging.info(f"uploaded multiple approach files")
-        for file in filedata:    
-            filepath = file["approach_filepath"]
-            filepaths.append(filepath)
-            
-            filename = normalize_filename(file["approach_filename"])
-            file = (filepath, filename)
-            
-            file_tuples.append(file)
-            
-            logging.info(f"appended file: {file}")
-            
-        if file_tuples:
-            result = approach_rag.process_files(file_tuples)
-            approach_rag.create_table_from_files(filepaths)
+        else:
+            filepaths = []
+            file_tuples = []
+            logging.info(f"uploaded multiple approach files")
+            for file in filedata:    
+                filepath = file["approach_filepath"]
+                filepaths.append(filepath)
+                
+                filename = normalize_filename(file["approach_filename"])
+                file = (filepath, filename)
+                
+                file_tuples.append(file)
+                
+                logging.info(f"appended file: {file}")
+                
+            if file_tuples:
+                result = approach_rag.process_files(file_tuples)
+                approach_rag.create_table_from_files(filepaths)
         
         logging.info("on_approach_file_upload completed successfully")
                 
