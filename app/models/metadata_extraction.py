@@ -1,4 +1,5 @@
-import logging 
+import logging
+from typing import Literal 
 import instructor
 import time
 
@@ -12,7 +13,7 @@ class Extraction(BaseModel):
     hypothetical_questions: list[str] = Field(
         default_factory=list,
         description="Hypothetical questions that this document could answer",
-    )
+    ) 
     keywords: list[str] = Field(
         default_factory=list, description="Biology related keywords that this document is about or MeSH headings for p apers"
-    )
+    ) 

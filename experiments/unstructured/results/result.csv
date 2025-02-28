@@ -1,0 +1,901 @@
+,element_id,text,page_number,filename,chunk_id,method,hypothetical_questions,keywords
+0,7f7d5987bf8a1697f967b2ffa39877cc,"RES EARCH
+
+MICROBIOME
+
+Lactose drives Enterococcus expansion to promote graft-versus-host disease
+
+C. K. Stein-Thoeringer1,2,3, K. B. Nichols1,2, A. Lazrak1,2, M. D. Docampo1,2, A. E. Slingerland1,2, J. B. Slingerland1,2, A. G. Clurman4, G. Armijo1,2, A. L. C. Gomes1,2, Y. Shono1,2, A. Staffas1,2, M. Burgos da Silva1,2, S. M. Devlin5, K. A. Markey1,2,4, D. Bajic6, R. Pinedo7, A. Tsakmaklis8,9, E. R. Littmann1,10, A. Pastore1, Y. Taur11, S. Monette12, M. E. Arcila13, A. J. Pickard14, M. Maloy4, R. J. Wright1, L. A. Amoretti1, E. Fontana1, D. Pham15, M. A. Jamal15, D. Weber16, A. D. Sung17, D. Hashimoto18, C. Scheid8, J. B. Xavier19, J. A. Messina20, K. Romero21, M. Lew17, A. Bush17, L. Bohannon17, K. Hayasaka22, Y. Hasegawa18, M. J. G. T. Vehreschild8,9,23, J. R. Cross14, D. M. Ponce2,4, M. A. Perales2,4, S. A. Giralt2,4, R. R. Jenq15, T. Teshima18,22, E. Holler16, N. J. Chao17, E. G. Pamer1,2,10, J. U. Peled1,2,4*†, M. R. M. van den Brink1,2,4*†
+
+--- Extracted Metadata ---
+Keywords: microbiome, Lactose, Enterococcus, graft-versus-host disease
+Methods: microbiome analysis, graft-versus-host disease, Enterococcus expansion
+Hypothetical Questions: How does lactose influence the expansion of Enterococcus?, What is the role of the microbiome in graft-versus-host disease?, Could manipulating lactose levels impact the severity of graft-versus-host disease?",1,gvhd_paper.pdf,1,"microbiome analysis, graft-versus-host disease, Enterococcus expansion","How does lactose influence the expansion of Enterococcus?, What is the role of the microbiome in graft-versus-host disease?, Could manipulating lactose levels impact the severity of graft-versus-host disease?","microbiome, Lactose, Enterococcus, graft-versus-host disease"
+1,238d990edb06f14a66463181ef08af24,"Disruption of intestinal microbial communities appears to underlie many human illnesses, but the mechanisms that promote this dysbiosis and its adverse consequences are poorly understood. In patients who received allogeneic hematopoietic cell transplantation (allo-HCT), we describe a high incidence of enterococcal expansion, which was associated with graft-versus-host disease (GVHD) and mortality. We found that Enterococcus also expands in the mouse gastrointestinal tract after allo-HCT and exacerbates disease severity in gnotobiotic models. Enterococcus growth is dependent on the disaccharide lactose, and dietary lactose depletion attenuates Enterococcus outgrowth and reduces the severity of GVHD in mice. Allo-HCT patients carrying lactose-nonabsorber genotypes showed compromised clearance of postantibiotic Enterococcus domination. We report lactose as a common nutrient that drives expansion of a commensal bacterium that exacerbates an intestinal and systemic inflammatory disease.
+
+--- Extracted Metadata ---
+Keywords: intestinal microbial communities, dysbiosis, graft-versus-host disease, Enterococcus, lactose, allogeneic hematopoietic cell transplantation
+Methods: allo-HCT, gnotobiotic models
+Hypothetical Questions: How does the disruption of intestinal microbial communities relate to human illnesses?, What mechanisms promote dysbiosis in patients undergoing allo-HCT?, What is the connection between Enterococcus expansion and graft-versus-host disease?, How does dietary lactose depletion affect Enterococcus growth?, What are the implications of lactose-nonabsorber genotypes on Enterococcus clearance post-antibiotic treatment?",1,gvhd_paper.pdf,2,"allo-HCT, gnotobiotic models","How does the disruption of intestinal microbial communities relate to human illnesses?, What mechanisms promote dysbiosis in patients undergoing allo-HCT?, What is the connection between Enterococcus expansion and graft-versus-host disease?, How does dietary lactose depletion affect Enterococcus growth?, What are the implications of lactose-nonabsorber genotypes on Enterococcus clearance post-antibiotic treatment?","intestinal microbial communities, dysbiosis, graft-versus-host disease, Enterococcus, lactose, allogeneic hematopoietic cell transplantation"
+2,47ec11b531d67fcbc2a3e06f5ed928fd,"T he healthy gut is inhabited by a diverse
+
+community of mostly anaerobic bacteria, and a hallmark of microbial imbalance (dysbiosis) observed in many disease states involves the expansion of facul- tative anaerobic bacteria (1). Enterococci are facultative anaerobes that colonize the intes- tines of almost every species, from insects to mammals (2), and make up a very small proportion (<0.1%) of the gut microbiota in healthy humans (3). However, enterococci are also pathogens; the species Enterococcus faecium and Enterococcus faecalis are impor- tant causes of multidrug-resistant infections in patients (4). In single-center studies, E. faecium has been observed to dominate the fecal microbiota of immunocompromised patients after allogeneic hematopoietic cell transplantation (allo-HCT), a curative-intent therapy for hematological malignancies (5–7). Moreover, fecal domination with vancomycin- resistant enterococci increases the risk of
+
+--- Extracted Metadata ---
+Keywords: gut microbiota, dysbiosis, facultative anaerobes, Enterococcus faecium, Enterococcus faecalis, multidrug-resistant infections, immunocompromised patients, allogeneic hematopoietic cell transplantation, vancomycin-resistant enterococci",1,gvhd_paper.pdf,3,,,"gut microbiota, dysbiosis, facultative anaerobes, Enterococcus faecium, Enterococcus faecalis, multidrug-resistant infections, immunocompromised patients, allogeneic hematopoietic cell transplantation, vancomycin-resistant enterococci"
+3,3adfd860c74dfa9291502ba02dc1cfdc,"bloodstream infection in allo-HCT patients (5, 8). Patients with severe graft-versus-host disease (GVHD) after allo-HCT have poor outcomes with only ~30% long-term survival (9). Gut microbiota perturbations caused by broad-spectrum antibiotics and a reduction in microbial diversity are associated with in- creased transplant-related mortality and lethal GVHD in humans and mice (10–13). Besides causing infections, experimental studies in gno- tobiotic mice have revealed that enterococci play an important role in colitis (14) by stimulat- ing antigen-presenting cells and CD4+RORg+ T cell infiltration, causing intestinal inflam- mation (15). In this study, we investigated the role of enterococci in the development of acute GVHD, both in allo-HCT patients and preclinical allo-HCT mouse models.
+
+We used 16S ribosomal RNA (rRNA) gene sequencing to study the fecal microbiota of 1325 adult allo-HCT recipients at four HCT centers: Memorial Sloan Kettering Cancer
+
+--- Extracted Metadata ---
+Keywords: allo-HCT, GVHD, gut microbiota, antibiotics, immune response, enterococci, microbial diversity, transplant-related mortality, intestinal inflammation
+Methods: 16S ribosomal RNA (rRNA) gene sequencing
+Hypothetical Questions: What is the impact of gut microbiota perturbations on outcomes in allo-HCT patients?, How do enterococci contribute to the development of acute GVHD?, What is the relation between antibiotic use and transplant-related mortality in allo-HCT patients?",1,gvhd_paper.pdf,4,16S ribosomal RNA (rRNA) gene sequencing,"What is the impact of gut microbiota perturbations on outcomes in allo-HCT patients?, How do enterococci contribute to the development of acute GVHD?, What is the relation between antibiotic use and transplant-related mortality in allo-HCT patients?","allo-HCT, GVHD, gut microbiota, antibiotics, immune response, enterococci, microbial diversity, transplant-related mortality, intestinal inflammation"
+4,dcac3ccc7ca803df2e1c68f51ae414a9,"Center (MSKCC) (United States), Duke Uni- versity (United States), Hokkaido University (Japan), and University Hospital Regensburg (Germany). Patient characteristics are shown in table S1. We observed high abundance of enterococci soon after transplantation in samples from all four transplant centers (Fig. 1B and fig. S1B). We defined Enterococcus domination as relative genus abundance ≥0.3 (≥30%) in any fecal sample, following a thresh- old we have used previously (5) (materials and methods and fig. S2C). The incidence of domination rose comparably across cen- ters, with up to 65% of patients exhibiting a domination event after allo-HCT (Fig. 1A). E. faecium was the dominant species in both the MSKCC and the multicenter-validation cohort (Duke, Hokkaido, and Regensburg) (Fig. 1B, fig. S1, and table S2), where 40.1% of MSKCC patients (441 of 1101 patients) and 46.0% of multicenter-validation patients (103 of 224 patients) met criteria for domination at any time point between day −20
+
+--- Extracted Metadata ---
+Keywords: Enterococcus, allo-HCT, enterococci domination, fecal samples, transplant centers, E. faecium
+Methods: allo-HCT
+Hypothetical Questions: What factors contribute to the domination of enterococci after transplantation?, How does the incidence of enterococcus domination vary across different transplant centers?, What are the long-term effects of enterococcus domination on patient health post-transplant?",1,gvhd_paper.pdf,5,allo-HCT,"What factors contribute to the domination of enterococci after transplantation?, How does the incidence of enterococcus domination vary across different transplant centers?, What are the long-term effects of enterococcus domination on patient health post-transplant?","Enterococcus, allo-HCT, enterococci domination, fecal samples, transplant centers, E. faecium"
+5,c04a81921fde24f9e0cbc0b231668e7e,"nd fig. S2C). The incidence of domination rose comparably across cen- ters, with up to 65% of patients exhibiting a domination event after allo-HCT (Fig. 1A). E. faecium was the dominant species in both the MSKCC and the multicenter-validation cohort (Duke, Hokkaido, and Regensburg) (Fig. 1B, fig. S1, and table S2), where 40.1% of MSKCC patients (441 of 1101 patients) and 46.0% of multicenter-validation patients (103 of 224 patients) met criteria for domination at any time point between day −20 and day +80 relative to the date of allo-HCT, in which cells are infused on day 0.
+
+--- Extracted Metadata ---
+Keywords: allo-HCT, E. faecium, domination events, incidence, multicenter-validation cohort
+Methods: allo-HCT
+Hypothetical Questions: What factors contribute to the incidence of domination events after allo-HCT?, How does the prevalence of E. faecium compare to other species post allo-HCT?, What is the significance of the 40.1% and 46.0% domination rates observed in the MSKCC and multicenter-validation cohorts, respectively?",1,gvhd_paper.pdf,6,allo-HCT,"What factors contribute to the incidence of domination events after allo-HCT?, How does the prevalence of E. faecium compare to other species post allo-HCT?, What is the significance of the 40.1% and 46.0% domination rates observed in the MSKCC and multicenter-validation cohorts, respectively?","allo-HCT, E. faecium, domination events, incidence, multicenter-validation cohort"
+6,8b6ad225be4c4466a49438b73e0bdd2c,"Fecal domination by Enterococcus in the early posttransplant period (day 0 to +21) was associated with significantly reduced overall survival and increased GVHD-related mortality in both the MSKCC and multicenter- validation cohort, as well as an increased risk of moderate-to-severe acute GVHD in the MSKCC cohort (Fig. 1, C and D, fig. S2, A and B, and table S3). The risk of relapse or disease progression was not associated with enterococcal domination in either cohort. The association of domination by genus Enterococcus with clinical outcomes in the MSKCC cohort remained significant in a multivariate analysis adjusted for graft source, disease, conditioning intensity, gender, and age (table S4). In a subset of MSKCC patients, the vanA operon was found in 152 (37.4%) of 406 patients that had samples available for analysis, indicating the presence of vancomycin-resistant enterococci (VRE) (fig. S2E). Notably, expansions of several different taxa were detected in fecal samples in this
+
+--- Extracted Metadata ---
+Keywords: Enterococcus, GVHD, transplant, vancomycin-resistant enterococci, microbiome, acute GVHD, overall survival
+Methods: microbiome analysis, multivariate analysis, evaluation of clinical outcomes
+Hypothetical Questions: What is the impact of Enterococcus dominance on patient survival after transplant?, How does the presence of vancomycin-resistant enterococci affect transplant outcomes?, What are the implications of fecal microbiome composition on acute GVHD risk?",1,gvhd_paper.pdf,7,"microbiome analysis, multivariate analysis, evaluation of clinical outcomes","What is the impact of Enterococcus dominance on patient survival after transplant?, How does the presence of vancomycin-resistant enterococci affect transplant outcomes?, What are the implications of fecal microbiome composition on acute GVHD risk?","Enterococcus, GVHD, transplant, vancomycin-resistant enterococci, microbiome, acute GVHD, overall survival"
+7,6e38c9c17c1e63a0fdd016372d9204dd,"nation by genus Enterococcus with clinical outcomes in the MSKCC cohort remained significant in a multivariate analysis adjusted for graft source, disease, conditioning intensity, gender, and age (table S4). In a subset of MSKCC patients, the vanA operon was found in 152 (37.4%) of 406 patients that had samples available for analysis, indicating the presence of vancomycin-resistant enterococci (VRE) (fig. S2E). Notably, expansions of several different taxa were detected in fecal samples in this study, but the Enterococcus genus was the one most commonly observed dominating the microbiota in all four transplant centers (fig. S3 and tables S5 and S6).
+
+--- Extracted Metadata ---
+Keywords: Enterococcus, vanA operon, vancomycin-resistant enterococci, fecal samples, clinical outcomes, MSKCC cohort
+Methods: multivariate analysis
+Hypothetical Questions: What are the clinical outcomes associated with Enterococcus in transplant patients?, How does the presence of the vanA operon affect patient outcomes in the MSKCC cohort?, What factors were controlled for in the multivariate analysis of Enterococcus?, What is the prevalence of vancomycin-resistant enterococci in the MSKCC cohort?, How does the Enterococcus genus compare to other taxa in fecal samples after transplantation?",1,gvhd_paper.pdf,8,multivariate analysis,"What are the clinical outcomes associated with Enterococcus in transplant patients?, How does the presence of the vanA operon affect patient outcomes in the MSKCC cohort?, What factors were controlled for in the multivariate analysis of Enterococcus?, What is the prevalence of vancomycin-resistant enterococci in the MSKCC cohort?, How does the Enterococcus genus compare to other taxa in fecal samples after transplantation?","Enterococcus, vanA operon, vancomycin-resistant enterococci, fecal samples, clinical outcomes, MSKCC cohort"
+8,17149fec61a0e6af27bb2d7d1d86990b,"1Department of Immunology, Sloan Kettering Institute, Memorial Sloan Kettering Cancer Center, New York, NY, USA. 2Weill Cornell Medical College, New York, NY, USA. 3German Cancer Research Center (DKFZ), Heidelberg, Germany. 4Adult Bone Marrow Transplantation Service, Department of Medicine, Memorial Sloan Kettering Cancer Center, New York, NY, USA. 5Epidemiology and Biostatistics, Memorial Sloan Kettering Cancer Center, New York, NY, USA. 6Department of Internal Medicine II, Technical University of Munich, Munich, Germany. 7Gnotobiotic Facility, Memorial Sloan Kettering Cancer Center, New York, NY, USA. 8Department I of Internal Medicine, Center for Integrated Oncology Aachen Bonn Cologne Duesseldorf, University of Cologne, Cologne, Germany. 9German Center for Infection Research, Partner site Bonn-Cologne, Cologne, Germany. 10Department of Medicine, Section of Infectious Medicine and Global Health, University of Chicago, Chicago, IL, USA. 11Infectious Disease Service, Department of
+
+--- Extracted Metadata ---
+Keywords: Immunology, Cancer, Bone Marrow Transplantation, Epidemiology, Biostatistics, Infectious Disease",1,gvhd_paper.pdf,9,,,"Immunology, Cancer, Bone Marrow Transplantation, Epidemiology, Biostatistics, Infectious Disease"
+9,75de3317d2e5f398bc35924c1d2c2b86,"ity of Munich, Munich, Germany. 7Gnotobiotic Facility, Memorial Sloan Kettering Cancer Center, New York, NY, USA. 8Department I of Internal Medicine, Center for Integrated Oncology Aachen Bonn Cologne Duesseldorf, University of Cologne, Cologne, Germany. 9German Center for Infection Research, Partner site Bonn-Cologne, Cologne, Germany. 10Department of Medicine, Section of Infectious Medicine and Global Health, University of Chicago, Chicago, IL, USA. 11Infectious Disease Service, Department of Medicine, Memorial Sloan Kettering Cancer Center, New York, NY, USA. 12Laboratory of Comparative Pathology, Memorial Sloan Kettering Cancer Center, The Rockefeller University, Weill Cornell Medicine, New York, NY, USA. 13Diagnostic Molecular Pathology Laboratory, Memorial Sloan Kettering Cancer Center, New York, NY, USA. 14Donald B. and Catherine C. Marron Cancer Metabolism Center, Memorial Sloan Kettering Cancer Center, New York, NY, USA. 15Department of Genomic Medicine, The University of
+
+--- Extracted Metadata ---
+Keywords: not applicable",1,gvhd_paper.pdf,10,,,not applicable
+10,be2cc11b44942d0fd1a5df07b82f9eff,"of Medicine, Memorial Sloan Kettering Cancer Center, New York, NY, USA. 12Laboratory of Comparative Pathology, Memorial Sloan Kettering Cancer Center, The Rockefeller University, Weill Cornell Medicine, New York, NY, USA. 13Diagnostic Molecular Pathology Laboratory, Memorial Sloan Kettering Cancer Center, New York, NY, USA. 14Donald B. and Catherine C. Marron Cancer Metabolism Center, Memorial Sloan Kettering Cancer Center, New York, NY, USA. 15Department of Genomic Medicine, The University of Texas MD Anderson Cancer Center, Houston, TX, USA. 16Internal Medicine III, University Clinic Regensburg, Regensburg, Germany. 17Division of Hematologic Malignancies and Cellular Therapy, Department of Medicine, Duke University Medical Center, Durham, NC, USA. 18Department of Hematology, Hokkaido University, Faculty of Medicine, Sapporo, Japan. 19Computational and Systems Biology Program, Memorial Sloan Kettering Cancer Center, New York, NY, USA. 20Division of Infectious Diseases, Department of
+
+--- Extracted Metadata ---
+Keywords: Pathology, Cancer, Genomic Medicine, Infectious Diseases, Hematology, Cellular Therapy",1,gvhd_paper.pdf,11,,,"Pathology, Cancer, Genomic Medicine, Infectious Diseases, Hematology, Cellular Therapy"
+11,bc113d1b66c1d492bebdd74caab60bd4,"Texas MD Anderson Cancer Center, Houston, TX, USA. 16Internal Medicine III, University Clinic Regensburg, Regensburg, Germany. 17Division of Hematologic Malignancies and Cellular Therapy, Department of Medicine, Duke University Medical Center, Durham, NC, USA. 18Department of Hematology, Hokkaido University, Faculty of Medicine, Sapporo, Japan. 19Computational and Systems Biology Program, Memorial Sloan Kettering Cancer Center, New York, NY, USA. 20Division of Infectious Diseases, Department of Medicine, Duke University, Durham, NC, USA. 21Office of Clinical Research, Duke University School of Medicine, Durham, NC, USA. 22Division of Laboratory and Transfusion Medicine, Hokkaido University Hospital, Sapporo, Japan. 23Department of Internal Medicine, Infectious Diseases, Goethe University Frankfurt, University Hospital Frankfurt, Frankfurt am Main, Germany. *These authors contributed equally to this work. †Corresponding author. Email: peledj@mskcc.org (J.U.P.); vandenbm@mskcc.org
+
+--- Extracted Metadata ---
+Keywords: Texas MD Anderson Cancer Center, Duke University Medical Center, Hokkaido University, Memorial Sloan Kettering Cancer Center, University Clinic Regensburg, Goethe University Frankfurt, Hematologic Malignancies, Cellular Therapy, Infectious Diseases, Clinical Research, Internal Medicine, Laboratory and Transfusion Medicine",1,gvhd_paper.pdf,12,,,"Texas MD Anderson Cancer Center, Duke University Medical Center, Hokkaido University, Memorial Sloan Kettering Cancer Center, University Clinic Regensburg, Goethe University Frankfurt, Hematologic Malignancies, Cellular Therapy, Infectious Diseases, Clinical Research, Internal Medicine, Laboratory and Transfusion Medicine"
+12,ff97bc34153abdd12362cfef7a3b461d,"nt of Medicine, Duke University, Durham, NC, USA. 21Office of Clinical Research, Duke University School of Medicine, Durham, NC, USA. 22Division of Laboratory and Transfusion Medicine, Hokkaido University Hospital, Sapporo, Japan. 23Department of Internal Medicine, Infectious Diseases, Goethe University Frankfurt, University Hospital Frankfurt, Frankfurt am Main, Germany. *These authors contributed equally to this work. †Corresponding author. Email: peledj@mskcc.org (J.U.P.); vandenbm@mskcc.org (M.R.M.v.d.B.)
+
+--- Extracted Metadata ---
+Keywords: Clinical Research, Infectious Diseases, Transfusion Medicine",1,gvhd_paper.pdf,13,,,"Clinical Research, Infectious Diseases, Transfusion Medicine"
+13,576114183a3fe7fb86f0be2665230667,"Stein-Thoeringer et al., Science 366, 1143–1149 (2019)
+
+29 November 2019
+
+1 of 7
+
+D o w n o a d e d
+
+l
+
+f r o m h t t p : / / s c e n c e . s c e n c e m a g . o r g / o n N o v e m b e r
+
+i
+
+i
+
+2 8 ,
+
+2 0 1 9
+
+--- Extracted Metadata ---
+Keywords: Stein-Thoeringer, Science, 2019",1,gvhd_paper.pdf,14,,,"Stein-Thoeringer, Science, 2019"
+14,1683f49f6c8d4a4a8fc7300cecfc7f5b,"RES EARCH | R E P O R T
+
+To further investigate these clinical obser- vations, we examined the fecal microbiota of mice early after transplantation using well- established mouse models of allo-HCT. In a major histocompatibility complex (MHC)– matched, minor-antigen-mismatched allo-HCT model [C57BL/6-to-129S1/Sv transplant (C57BL/ 6→129S1/Sv)], we performed 16S rRNA gene sequencing of fecal samples and found that E. faecalis dominated the fecal microbiota at posttransplant day +8 in mice who re- ceived T cell–replete grafts and developed lethal, acute GVHD (Fig. 2A and fig. S4A). In contrast to the patients who had pro- longed antibiotic exposures, this expansion of E. faecalis was independent of antibiotic administration and dependent upon GVHD, as it was not observed in control recipients of T cell–depleted allografts in which GVHD did
+
+--- Extracted Metadata ---
+Keywords: fecal microbiota, allo-HCT, E. faecalis, GVHD, 16S rRNA, antibiotic administration
+Methods: 16S rRNA gene sequencing
+Hypothetical Questions: How does the fecal microbiota composition change after transplantation?, What is the role of E. faecalis in acute GVHD development following allo-HCT?",2,gvhd_paper.pdf,15,16S rRNA gene sequencing,"How does the fecal microbiota composition change after transplantation?, What is the role of E. faecalis in acute GVHD development following allo-HCT?","fecal microbiota, allo-HCT, E. faecalis, GVHD, 16S rRNA, antibiotic administration"
+15,66fbc8433a9c1929c26f12912090fd90,"not develop. This posttransplant expansion of enterococci was consistently found in two additional lethal GVHD models: C57BL/6→ BALB/c mice (MHC-disparate model after ir- radiation conditioning) (Fig. 2B) and LP/ J→C57BL/6 mice [MHC-matched, minor- antigen–mismatched after busulfan and cyclophosphamide conditioning (16)] (Fig. 2C). The expansion of enterococci in murine allo- HCT recipients with GVHD was accompanied by an increase in Enterococcus colony–forming units recovered from mesenteric lymph nodes, consistent with increased bacterial translo- cation (Fig. 2B).
+
+Although we observed E. faecium domina- tion in patients and a transient expansion of E. faecalis in GVHD mice, we hypothesized that both members of this genus might be associated with GVHD. Of note, E. faecium
+
+--- Extracted Metadata ---
+Keywords: Enterococcus, GVHD, HCT, E. faecium, E. faecalis, bacterial translocation
+Methods: posttransplant expansion, GVHD models, bacterial translocation
+Hypothetical Questions: How does the posttransplant expansion of enterococci affect GVHD outcomes?, What role do Enterococcus species play in the immune response during GVHD?, Can the manipulation of enterococci populations improve patient recovery after HCT?",2,gvhd_paper.pdf,16,"posttransplant expansion, GVHD models, bacterial translocation","How does the posttransplant expansion of enterococci affect GVHD outcomes?, What role do Enterococcus species play in the immune response during GVHD?, Can the manipulation of enterococci populations improve patient recovery after HCT?","Enterococcus, GVHD, HCT, E. faecium, E. faecalis, bacterial translocation"
+16,0e1d4b8504f410fdb3238937c3449289,"only recently became recognized as a major human pathogen; before the 1990s it was E. faecalis that caused >90% of clinical in- fections (17). Because E. faecalis expands in mice with GVHD and is the major Enterococcus species in laboratory mice, we next investigated whether E. faecalis contributes to GVHD. We colonized germ-free C57BL/6 mice with a com- munity of six bacterial strains (Akkermansia muciniphila, Lactobacillus johnsonii, Blautia producta, Bacteroides sartorii, Clostridium bolteae, and Parabacteroides diastonis; see materials and methods) (10, 18, 19) 21 days prior to allo-HCT (LP/J→gnotobiotic C57BL/6). One group of mice was cocolonized on day −21 with E. faecalis OG1RF, which remained detectable in mouse feces on days 0 and +7 (Fig. 2D, right panel, and fig. S4E). GVHD was exacerbated in E. faecalis–harboring mice
+
+A
+
+f o e c n e d i c n
+
+e v i t a u m u c
+
+l
+
+n o i t a n m o d s u c c o c o r e t n E
+
+i
+
+Incidence of domination
+
+0.75
+
+0.50
+
+0.25
+
+f o n o i t c a r f
+
+--- Extracted Metadata ---
+Keywords: Enterococcus faecalis, GVHD, allo-HCT, germ-free mice, bacterial colonization, microbiome
+Methods: GVHD investigation, colonization study
+Hypothetical Questions: Does E. faecalis contribute to GVHD severity?, What is the effect of E. faecalis colonization on germ-free mice in the context of allo-HCT?",2,gvhd_paper.pdf,17,"GVHD investigation, colonization study","Does E. faecalis contribute to GVHD severity?, What is the effect of E. faecalis colonization on germ-free mice in the context of allo-HCT?","Enterococcus faecalis, GVHD, allo-HCT, germ-free mice, bacterial colonization, microbiome"
+17,6be6fb68268ed1c6149c969eb6731897,"s e p m a s d e t a n m o d s u c c o c o r e t n E
+
+l
+
+i
+
+Prevalence of domination 0.6
+
+0.4
+
+0.2
+
+MSKCC Duke Hokkaido Regensburg
+
+C
+
+g n v v r u s n o i t r o p o r p
+
+i
+
+i
+
+1.0
+
+0.8
+
+0.6
+
+0.4
+
+0.2
+
+Overall survival
+
+Enterococcus Enterococcus
+
+≥ 0.3 (n=149) < 0.3 (n=389)
+
+e c n e d i c n
+
+e v i t a u m u c
+
+l
+
+0.2
+
+0.15
+
+0.1
+
+0.05
+
+GVHD-related mortality
+
+Enterococcus Enterococcus
+
+≥ 0.3 (n=148) < 0.3 (n=389)
+
+HR, 2.04; p = 0.01
+
+0
+
+20
+
+20 0 day relative to HCT
+
+0
+
+20
+
+20 0 day relative to HCT
+
+0
+
+0
+
+HR, 1.97; p < 0.001
+
+5
+
+10
+
+15
+
+20
+
+0
+
+0
+
+5
+
+10
+
+15
+
+20
+
+B
+
+E. faecium
+
+other E. spp.
+
+D
+
+months after HCT
+
+months after HCT
+
+e c n a d n u b a e v i t a e r
+
+l
+
+1.00
+
+0.60
+
+0.30
+
+0.10
+
+0.01
+
+1.00
+
+0.60
+
+0.30
+
+0.10
+
+M S K C C
+
+v a
+
+l i
+
+d a t i o n c o h o r t
+
+E. faecium E. cecorum
+
+E. durans E. mundtii E. rivorum E. moraviensis E. gallinarum E. lactis E. malodoratus E. ureasiticus E. faecalis
+
+Other rare E. spp.
+
+g n v v r u s n o i t r o p o r p
+
+i
+
+i
+
+1.0
+
+0.8
+
+0.6
+
+0.4
+
+0.2
+
+0
+
+0
+
+--- Extracted Metadata ---
+Keywords: Enterococcus, survival, GVHD, HCT",2,gvhd_paper.pdf,18,,,"Enterococcus, survival, GVHD, HCT"
+18,6a9ef1555ef3350e69413224db14dde6,"Overall survival
+
+Enterococcus Enterococcus
+
+≥ 0.3 (n=54) < 0.3 (n=113)
+
+HR, 1.95; p = 0.03
+
+5
+
+10
+
+15
+
+20
+
+e c n e d i c n
+
+i
+
+e v i t a u m u c
+
+l
+
+0.2
+
+0.15
+
+0.1
+
+0.05
+
+0
+
+0
+
+GVHD-related mortality
+
+Enterococcus Enterococcus
+
+≥ 0.3 (n=53) < 0.3 (n=111)
+
+HR, 5.8; p = 0.002
+
+5
+
+10
+
+15
+
+20
+
+0.01
+
+months after HCT
+
+months after HCT
+
+−20
+
+0
+
+20
+
+40
+
+60
+
+80 −20 0
+
+20
+
+40
+
+60
+
+80
+
+day relative to HCT
+
+--- Extracted Metadata ---
+Keywords: Enterococcus, overall survival, GVHD-related mortality, hazard ratio, HCT
+Hypothetical Questions: What is the relationship between Enterococcus levels and overall survival after HCT?, How does Enterococcus influence GVHD-related mortality?, What are the hazard ratios associated with different levels of Enterococcus?",2,gvhd_paper.pdf,19,,"What is the relationship between Enterococcus levels and overall survival after HCT?, How does Enterococcus influence GVHD-related mortality?, What are the hazard ratios associated with different levels of Enterococcus?","Enterococcus, overall survival, GVHD-related mortality, hazard ratio, HCT"
+19,64a665b7c95ecbed4a955c6a7a0e28a6,"Fig. 1. Enterococcus domination occurs globally and increases risk of GVHD and mortality after allo-HCT. Fecal microbiota were profiled using 16S rRNA gene sequencing of 1325 adult allo-HCT recipients. The patients attended one of four HCT centers in different countries: MSKCC (United States), Duke University (United States), Hokkaido University (Japan), and University Hospital Regensburg (Germany). (A) (Left) Cumulative incidence of patients who experienced at least one instance of genus Enterococcus domination of the gut microbiota [domination defined as a genus relative abundance of ≥0.3 (on a unitless scale from 0 to 1) over the course of allo-HCT (day −20 to +24 relative to HCT; using 7-day sliding windows) at different transplant centers]. (Right) Fraction of fecal specimens with enterococcal domination of the gut microbiota. (B) Relative abundance of different Enterococcus spp. in the microbiota of allo-HCT patients from the MSKCC and multicenter-validation cohort over the
+
+--- Extracted Metadata ---
+Keywords: Enterococcus, GVHD, allo-HCT, microbiota, 16S rRNA gene sequencing, fecal microbiota, transplant centers, relative abundance
+Methods: 16S rRNA gene sequencing
+Hypothetical Questions: What are the consequences of Enterococcus domination in the gut microbiota of allo-HCT recipients?, How does Enterococcus abundance correlate with GVHD risk and mortality?, What is the geographic distribution of Enterococcus domination among allo-HCT recipients?",2,gvhd_paper.pdf,20,16S rRNA gene sequencing,"What are the consequences of Enterococcus domination in the gut microbiota of allo-HCT recipients?, How does Enterococcus abundance correlate with GVHD risk and mortality?, What is the geographic distribution of Enterococcus domination among allo-HCT recipients?","Enterococcus, GVHD, allo-HCT, microbiota, 16S rRNA gene sequencing, fecal microbiota, transplant centers, relative abundance"
+20,19b45898ea80ea045e1f99debe4b150b,"nterococcus domination of the gut microbiota [domination defined as a genus relative abundance of ≥0.3 (on a unitless scale from 0 to 1) over the course of allo-HCT (day −20 to +24 relative to HCT; using 7-day sliding windows) at different transplant centers]. (Right) Fraction of fecal specimens with enterococcal domination of the gut microbiota. (B) Relative abundance of different Enterococcus spp. in the microbiota of allo-HCT patients from the MSKCC and multicenter-validation cohort over the course of HCT, determined by 16S rRNA gene sequencing of fecal samples. Each
+
+--- Extracted Metadata ---
+Keywords: Enterococcus, gut microbiota, allo-HCT, 16S rRNA gene sequencing, fecal specimens
+Methods: 16S rRNA gene sequencing
+Hypothetical Questions: What factors contribute to the domination of Enterococcus in the gut microbiota after allo-HCT?, How does enterococcal domination correlate with patient outcomes following allo-HCT?",2,gvhd_paper.pdf,21,16S rRNA gene sequencing,"What factors contribute to the domination of Enterococcus in the gut microbiota after allo-HCT?, How does enterococcal domination correlate with patient outcomes following allo-HCT?","Enterococcus, gut microbiota, allo-HCT, 16S rRNA gene sequencing, fecal specimens"
+21,b8bfee93a8712191461e464538118235,"point represents a fecal sample, and color indicates the different Enterococcus spp.; the red dotted line indicates the threshold for domination set at a relative abundance ≥0.3. (C) Overall survival (left) and cumulative incidence of GVHD- related mortality (right) in the T cell replete graft recipients in the MSKCC patient cohort (see table S3), stratified into nondominated and Enterococcus- dominated groups (domination is defined as the relative genus abundance ≥0.3 in at least one sample between day 0 and +21). n, number of individuals. (D) Overall survival (left) and cumulative incidence of GVHD-related mortality (right) in Enterococcus-dominated (at genus level) versus nondominated allo-HCT patients in the combined multicenter-validation cohort (table S3). Clinical outcomes in (C) and (D) were analyzed using the R packages survival and cmprsk. Wald values of P <0.05 signify higher risks (HR, hazard ratios) of mortality among patients with Enterococcus domination as compared with
+
+--- Extracted Metadata ---
+Keywords: Enterococcus, GVHD, allo-HCT, overall survival, cumulative incidence, hazard ratios
+Methods: survival analysis, cumulative incidence analysis
+Hypothetical Questions: What is the impact of Enterococcus dominance on overall survival rates?, How does relative abundance of Enterococcus spp. affect GVHD-related mortality?, What statistical methods can be employed to analyze clinical outcomes in allo-HCT patients?",2,gvhd_paper.pdf,22,"survival analysis, cumulative incidence analysis","What is the impact of Enterococcus dominance on overall survival rates?, How does relative abundance of Enterococcus spp. affect GVHD-related mortality?, What statistical methods can be employed to analyze clinical outcomes in allo-HCT patients?","Enterococcus, GVHD, allo-HCT, overall survival, cumulative incidence, hazard ratios"
+22,eac16ca895fe358980971db6fee8e728,"ween day 0 and +21). n, number of individuals. (D) Overall survival (left) and cumulative incidence of GVHD-related mortality (right) in Enterococcus-dominated (at genus level) versus nondominated allo-HCT patients in the combined multicenter-validation cohort (table S3). Clinical outcomes in (C) and (D) were analyzed using the R packages survival and cmprsk. Wald values of P <0.05 signify higher risks (HR, hazard ratios) of mortality among patients with Enterococcus domination as compared with those without domination.
+
+--- Extracted Metadata ---
+Keywords: Enterococcus, allo-HCT, GVHD, survival analysis, cumulative incidence, hazard ratios
+Methods: allo-HCT, survival analysis
+Hypothetical Questions: What is the impact of Enterococcus domination on overall survival rates in allo-HCT patients?, How does Enterococcus dominance affect the risk of GVHD-related mortality?",2,gvhd_paper.pdf,23,"allo-HCT, survival analysis","What is the impact of Enterococcus domination on overall survival rates in allo-HCT patients?, How does Enterococcus dominance affect the risk of GVHD-related mortality?","Enterococcus, allo-HCT, GVHD, survival analysis, cumulative incidence, hazard ratios"
+23,afdc14583717e3073a4b0e2298911437,"Stein-Thoeringer et al., Science 366, 1143–1149 (2019)
+
+29 November 2019
+
+2 of 7
+
+D o w n o a d e d
+
+l
+
+f r o m h t t p : / / s c e n c e . s c e n c e m a g . o r g / o n N o v e m b e r
+
+i
+
+i
+
+2 8 ,
+
+2 0 1 9
+
+--- Extracted Metadata ---
+Keywords: Stein-Thoeringer, Science",2,gvhd_paper.pdf,24,,,"Stein-Thoeringer, Science"
+24,ac8cf93fa82afdabb045efd481667a9b,RES EARCH | R E P O R T,3,gvhd_paper.pdf,25,,,
+25,e50f477a15b8af8436956d1913971354,"Fig. 2. Enterococcus dominates mouse gut microbiota after HCT and can exacerbate GVHD. (A) (Left) High-density sampling and 16S rRNA gene sequencing of fecal microbiota from 129S1/Sv mice (1 box = 1 mouse) receiving bone marrow (BM; upper row) or T cell–replete bone marrow [BM+T (2 × 106 T cells); lower row]. (Right) BM+T transplanted mice develop lethal GVHD as shown by survival analysis. rel., relative. (B) (Left) Relative abundance of the genus Enterococcus in BALB/c host mice transplanted with C57BL/6 BM or BM+T (1 × 106 T cells) at different time points relative to HCT. (Middle) Colony-forming units (CFUs) of enterococci in fecal samples and in mesenteric lymph nodes (mLN). Scatter plot data show means ± SEM. (Right) Survival of BALB/c recipient mice after HCT [BM versus BM+T (1 × 106 T cells)]. (C) (Left) Schematic showing HCT of LP/J BM versus BM+T (4 × 106 T cells) into C57BL/6 mice after chemotherapy conditioning. (Middle) Relative abundance of the genus Enterococcus in the
+
+--- Extracted Metadata ---
+Keywords: Enterococcus, gut microbiota, GVHD, bone marrow transplant, 16S rRNA gene sequencing
+Methods: 16S rRNA gene sequencing, Bone marrow transplant (HCT), Transplantation with T cells
+Hypothetical Questions: What are the effects of Enterococcus dominance on gut microbiota after HCT?, How does Enterococcus influence the development of GVHD in transplanted mice?, What is the correlation between Enterococcus abundance and survival rates in recipient mice post-transplant?",3,gvhd_paper.pdf,26,"16S rRNA gene sequencing, Bone marrow transplant (HCT), Transplantation with T cells","What are the effects of Enterococcus dominance on gut microbiota after HCT?, How does Enterococcus influence the development of GVHD in transplanted mice?, What is the correlation between Enterococcus abundance and survival rates in recipient mice post-transplant?","Enterococcus, gut microbiota, GVHD, bone marrow transplant, 16S rRNA gene sequencing"
+26,6f4402b088b4fd2134cf7db9ef3ae992,"with C57BL/6 BM or BM+T (1 × 106 T cells) at different time points relative to HCT. (Middle) Colony-forming units (CFUs) of enterococci in fecal samples and in mesenteric lymph nodes (mLN). Scatter plot data show means ± SEM. (Right) Survival of BALB/c recipient mice after HCT [BM versus BM+T (1 × 106 T cells)]. (C) (Left) Schematic showing HCT of LP/J BM versus BM+T (4 × 106 T cells) into C57BL/6 mice after chemotherapy conditioning. (Middle) Relative abundance of the genus Enterococcus in the feces of
+
+--- Extracted Metadata ---
+Keywords: C57BL/6, BALB/c, HCT, T cells, enterococci, colony-forming units, mesenteric lymph nodes, fecal samples, chemotherapy conditioning
+Methods: HCT
+Hypothetical Questions: What is the effect of HCT on CFU counts of enterococci?, How does the presence of T cells influence mouse survival after HCT?",3,gvhd_paper.pdf,27,HCT,"What is the effect of HCT on CFU counts of enterococci?, How does the presence of T cells influence mouse survival after HCT?","C57BL/6, BALB/c, HCT, T cells, enterococci, colony-forming units, mesenteric lymph nodes, fecal samples, chemotherapy conditioning"
+27,7edf1b7fb4304d67b050c242d3ca87b9,"Stein-Thoeringer et al., Science 366, 1143–1149 (2019)
+
+29 November 2019
+
+--- Extracted Metadata ---
+Keywords: CRISPR, gene editing, genetics, agriculture, biotechnology
+Methods: gene editing, CRISPR
+Hypothetical Questions: How does CRISPR technology improve gene editing accuracy?, What are the implications of gene editing for agriculture?",3,gvhd_paper.pdf,28,"gene editing, CRISPR","How does CRISPR technology improve gene editing accuracy?, What are the implications of gene editing for agriculture?","CRISPR, gene editing, genetics, agriculture, biotechnology"
+28,3d9980ac508aa27c2304a9c90793f413,"transplanted mice at different time points relative to HCT. (Right) Comparison of overall survival between BM and BM+T mice. bu/cy-cond., busulfan/ cyclophosphamide conditioning. (D) (Left) Schematic showing colonization of germ-free C57BL/6 mice with a 6-strain minimal microbiota with (+EF) or without (-EF) E. faecalis OG1RF (2 × 107 CFUs per mouse); after 14 days, colonized mice received chemotherapy conditioning with busulfan and cyclophosphamide and, subsequently, an HCT of LP/J BM versus BM+T (4 × 106 T cells). (Middle) Comparison of overall survival. (Right) Relative abundances of E. faecalis spiked to the minimal microbiota in the EF+ group with samples collected at the day of HCT (day 0) and 7 days later (n = 4 to 11 mice per group; P = 0.09, paired testing of relative abundances of enterococci of day 0 versus BM+T day +7). Scatter plot data are presented as means ± SEM **P < 0.01, ***P < 0.001 (independent t test for BM versus BM+T); survival data were statistically analyzed
+
+--- Extracted Metadata ---
+Keywords: transplanted mice, HCT, microbiota, E. faecalis, overall survival, busulfan, cyclophosphamide, T cells, relative abundance
+Methods: HCT, chemotherapy conditioning, colonization, survival analysis
+Hypothetical Questions: What is the impact of different microbiota on overall survival in transplanted mice?, How does the presence of E. faecalis influence the survival rates in mice post-HCT?, What are the differences in outcomes between BM and BM+T mice?",3,gvhd_paper.pdf,29,"HCT, chemotherapy conditioning, colonization, survival analysis","What is the impact of different microbiota on overall survival in transplanted mice?, How does the presence of E. faecalis influence the survival rates in mice post-HCT?, What are the differences in outcomes between BM and BM+T mice?","transplanted mice, HCT, microbiota, E. faecalis, overall survival, busulfan, cyclophosphamide, T cells, relative abundance"
+29,5ce49cffa9006a7930b830aedb35b736,"M+T (4 × 106 T cells). (Middle) Comparison of overall survival. (Right) Relative abundances of E. faecalis spiked to the minimal microbiota in the EF+ group with samples collected at the day of HCT (day 0) and 7 days later (n = 4 to 11 mice per group; P = 0.09, paired testing of relative abundances of enterococci of day 0 versus BM+T day +7). Scatter plot data are presented as means ± SEM **P < 0.01, ***P < 0.001 (independent t test for BM versus BM+T); survival data were statistically analyzed using Mantel-Cox log-rank test.
+
+--- Extracted Metadata ---
+Keywords: overall survival, E. faecalis, microbiota, HCT, enterococci, survival data, statistical analysis
+Methods: survival analysis, independent t test, Mantel-Cox log-rank test
+Hypothetical Questions: How does the treatment affect the overall survival of mice?, What is the effect of E. faecalis on microbiota composition after HCT?, Is there a significant difference in the relative abundances of enterococci from day 0 to day 7 after BM+T?",3,gvhd_paper.pdf,30,"survival analysis, independent t test, Mantel-Cox log-rank test","How does the treatment affect the overall survival of mice?, What is the effect of E. faecalis on microbiota composition after HCT?, Is there a significant difference in the relative abundances of enterococci from day 0 to day 7 after BM+T?","overall survival, E. faecalis, microbiota, HCT, enterococci, survival data, statistical analysis"
+30,21fd67ad4a192acda6622cc6486b05e9,"3 of 7
+
+D o w n o a d e d
+
+l
+
+f r o m h t t p : / / s c e n c e . s c e n c e m a g . o r g / o n N o v e m b e r
+
+i
+
+i
+
+2 8 ,
+
+2 0 1 9",3,gvhd_paper.pdf,31,,,
+31,a310af9d393d8f6fdcb3f7b063ba1bc1,"RES EARCH | R E P O R T
+
+A
+
+B
+
+C
+
+D
+
+E
+
+F
+
+G
+
+D o w n o a d e d
+
+l
+
+f r o m h t t p : / / s c e n c e . s c e n c e m a g . o r g / o n N o v e m b e r
+
+i
+
+i
+
+2 8 ,
+
+2 0 1 9",4,gvhd_paper.pdf,32,,,
+32,4598d41f94c72b881bfafcad5c5d84a2,"Fig. 3. Metagenomic and metabolomic analyses of Enterococcus-dominated fecal specimens in human HCT patients and mice. (A) (Left) Differential abundances of shotgun-sequenced and HUMAnN2-annotated bacterial metabolic pathways between paired pre- and post-HCT fecal samples from MSKCC patients who received allo-HCT for acute myeloid leukemia (AML) analyzed by linear discriminant analysis (LDA) coupled with effect size measurements (LEfSe). pre HCT, day −8 to −1 before allo-HCT; post HCT, day +3 to +25 after allo-HCT. (Right) Pie chart showing mean relative abundances of bacterial genera (analyzed by MetaPhlAn2) found in patient fecal samples pre- and post-HCT; data are aggregated across all patients. non-dom., nondominated; domin., dominated. (B) LEfSe analysis of bacterial metabolic pathway abundances in HCT day +7 fecal samples of 129S1/SV mice transplanted with C57BL/6 BM versus BM+T (2 × 106 T cells) (see Fig. 2A). (C) Pie charts with metabolic pathway abundances determined by
+
+--- Extracted Metadata ---
+Keywords: Enterococcus, fecal specimens, HCT, acute myeloid leukemia, metabolic pathways, bacterial genera, metagenomics, metabolomics
+Methods: metagenomic analysis, metabolomic analysis, linear discriminant analysis, LEfSe analysis
+Hypothetical Questions: What are the effects of allo-HCT on bacterial metabolic pathways?, How do bacterial genera abundances differ pre- and post-HCT in human patients?, What is the impact of transplanting different bone marrow types on metabolic pathways in mice?",4,gvhd_paper.pdf,33,"metagenomic analysis, metabolomic analysis, linear discriminant analysis, LEfSe analysis","What are the effects of allo-HCT on bacterial metabolic pathways?, How do bacterial genera abundances differ pre- and post-HCT in human patients?, What is the impact of transplanting different bone marrow types on metabolic pathways in mice?","Enterococcus, fecal specimens, HCT, acute myeloid leukemia, metabolic pathways, bacterial genera, metagenomics, metabolomics"
+33,eed569a65dd02372febeb2df0d4b9ea6,"+3 to +25 after allo-HCT. (Right) Pie chart showing mean relative abundances of bacterial genera (analyzed by MetaPhlAn2) found in patient fecal samples pre- and post-HCT; data are aggregated across all patients. non-dom., nondominated; domin., dominated. (B) LEfSe analysis of bacterial metabolic pathway abundances in HCT day +7 fecal samples of 129S1/SV mice transplanted with C57BL/6 BM versus BM+T (2 × 106 T cells) (see Fig. 2A). (C) Pie charts with metabolic pathway abundances determined by whole-genome sequencing of E. faecalis (isolated from feces of a BALB/c GVHD mouse, day +7 after HCT; upper panel) and E. faecium (human isolate; ATCC #700221; lower panel); only pathways with an abundance ≥2% are shown in both panels. (D) (Left) In vitro growth of E. faecalis (mouse GVHD isolate; upper panel) and E. faecium (ATCC #700221; lower panel) in nontreated BHI broth
+
+--- Extracted Metadata ---
+Keywords: allo-HCT, bacterial genera, fecal samples, LEfSe analysis, metabolic pathways, E. faecalis, E. faecium, BHI broth, GVHD
+Methods: allo-HCT, LEfSe analysis, whole-genome sequencing, in vitro growth
+Hypothetical Questions: What are the relative abundances of bacterial genera in fecal samples before and after HCT?, How do metabolic pathway abundances differ in HCT day +7 fecal samples between different mouse bone marrow transplants?, What metabolic pathways are prevalent in E. faecalis and E. faecium isolated from mouse and human samples?, How does the growth of E. faecalis and E. faecium differ in nontreated BHI broth?",4,gvhd_paper.pdf,34,"allo-HCT, LEfSe analysis, whole-genome sequencing, in vitro growth","What are the relative abundances of bacterial genera in fecal samples before and after HCT?, How do metabolic pathway abundances differ in HCT day +7 fecal samples between different mouse bone marrow transplants?, What metabolic pathways are prevalent in E. faecalis and E. faecium isolated from mouse and human samples?, How does the growth of E. faecalis and E. faecium differ in nontreated BHI broth?","allo-HCT, bacterial genera, fecal samples, LEfSe analysis, metabolic pathways, E. faecalis, E. faecium, BHI broth, GVHD"
+34,d98dfb347d7b7551921c9d256bf8812c,"Stein-Thoeringer et al., Science 366, 1143–1149 (2019)
+
+29 November 2019
+
+--- Extracted Metadata ---
+Keywords: gene editing, CRISPR, agriculture, biodiversity
+Methods: gene editing
+Hypothetical Questions: What are the applications of gene editing in agriculture?, How does gene editing impact biodiversity?",4,gvhd_paper.pdf,35,gene editing,"What are the applications of gene editing in agriculture?, How does gene editing impact biodiversity?","gene editing, CRISPR, agriculture, biodiversity"
+35,6df034b96831f888ec178c62601e21aa,"or in BHI broth pretreated with lactase. (Right) E. faecalis or E. faecium incubated in lactase-pretreated BHI were put into regular BHI broth after 8 hours to assess growth dynamics in regular BHI (gray symbols). Data are results of four experiments combined; values represent means ± SEM. (E) (Left) Fecal butyrate concentrations (means ± SEM) from pre- and posttransplant fecal samples from AML patients from MSKCC, who received allo-HCT and were selected based on a highly diverse pre-HCT microbiota and a posttransplant E. faecium domination [by 16S rRNA gene sequencing; 6 (out of 8) patients are presented in (A)]. (Right) Correlation of butyrate concentrations with relative abundances of the genus Enterococcus (n = 139 patients; 8 patients from left panel), and 131 allo-HCT patients from a dataset published by Haak et al. (28); statistical analysis was performed using Kendall’s tau rank correlation coefficient. (F) Stool samples were collected at the time of engraftment (~24 days after
+
+--- Extracted Metadata ---
+Keywords: E. faecalis, E. faecium, lactase, BHI broth, butyrate, allo-HCT, microbiota, Kendall’s tau rank correlation
+Methods: lactase pretreatment, microbiota analysis, butyrate concentration measurement
+Hypothetical Questions: How does lactase pretreatment affect the growth of E. faecalis or E. faecium in BHI broth?, What are the effects of E. faecium domination on butyrate concentrations in AML patients after allo-HCT?, What is the correlation between butyrate concentrations and Enterococcus abundance in patients?",4,gvhd_paper.pdf,36,"lactase pretreatment, microbiota analysis, butyrate concentration measurement","How does lactase pretreatment affect the growth of E. faecalis or E. faecium in BHI broth?, What are the effects of E. faecium domination on butyrate concentrations in AML patients after allo-HCT?, What is the correlation between butyrate concentrations and Enterococcus abundance in patients?","E. faecalis, E. faecium, lactase, BHI broth, butyrate, allo-HCT, microbiota, Kendall’s tau rank correlation"
+36,4422e55259336b6bafaa88ae2b08a652,"ta and a posttransplant E. faecium domination [by 16S rRNA gene sequencing; 6 (out of 8) patients are presented in (A)]. (Right) Correlation of butyrate concentrations with relative abundances of the genus Enterococcus (n = 139 patients; 8 patients from left panel), and 131 allo-HCT patients from a dataset published by Haak et al. (28); statistical analysis was performed using Kendall’s tau rank correlation coefficient. (F) Stool samples were collected at the time of engraftment (~24 days after allo-HCT). Data show Kendall’s tau rank correlation of relative abundances of the genera Clostridium and Enterococcus from the dataset of Haak et al. (G) Butyrate concentration (mean ± SEM) in cecal contents of BALB/c mice transplanted with C57BL/6 BM or BM+T (1 × 106 T cells) at day +7 after HCT. Statistical analysis: *P < 0.05 [paired t test (E) or independent t test (F)].
+
+--- Extracted Metadata ---
+Keywords: Enterococcus, butyrate, allo-HCT, 16S rRNA sequencing, Clostridium, BM transplantation, Kendall’s tau rank correlation, statistical analysis
+Methods: 16S rRNA gene sequencing, statistical analysis, Kendall’s tau rank correlation coefficient, paired t test, independent t test
+Hypothetical Questions: How does the presence of Enterococcus relate to butyrate concentrations in posttransplant patients?, What statistical methods were used to analyze the correlation of bacterial genera in the study?, What is the effect of different BM transplantation conditions on butyrate concentrations in mice?",4,gvhd_paper.pdf,37,"16S rRNA gene sequencing, statistical analysis, Kendall’s tau rank correlation coefficient, paired t test, independent t test","How does the presence of Enterococcus relate to butyrate concentrations in posttransplant patients?, What statistical methods were used to analyze the correlation of bacterial genera in the study?, What is the effect of different BM transplantation conditions on butyrate concentrations in mice?","Enterococcus, butyrate, allo-HCT, 16S rRNA sequencing, Clostridium, BM transplantation, Kendall’s tau rank correlation, statistical analysis"
+37,724d7bca7548085abe625e3c1e5c61e8,4 of 7,4,gvhd_paper.pdf,38,,,
+38,31adb3a624fe33e20320d3edbe3bf9fd,"RES EARCH | R E P O R T
+
+(Fig. 2D and fig. S4B). Serum interferon-g con- centrations were significantly elevated in E. faecalis–colonized mice (fig. S4C), and we observed a significantly increased num- ber of donor T cells, an increase of acti-
+
+vated and proliferating CD4+ T cells (fig. S4D; CD4+CD25+; CD4+Ki67+), and an increased number and percentage of CD4+RORg+ T helper 17 (TH17) cells in colon lamina propria (fig. S4D). Posttransplant administration of E. faecalis
+
+OG1RF to conventionally housed, T cell–replete bone marrow (BM+T)–transplanted BALB/c mice also aggravated GVHD (fig. S5A). These findings indicate that E. faecalis can aggravate GVHD severity.
+
+--- Extracted Metadata ---
+Keywords: E. faecalis, GVHD, T cells, serum interferon-g, CD4+ T cells, TH17 cells
+Methods: GVHD severity assessment, T cell analysis, serum interferon-g measurement
+Hypothetical Questions: How does E. faecalis affect GVHD severity?, What is the role of CD4+ T cells in the presence of E. faecalis?, What changes occur in serum interferon-g levels in E. faecalis–colonized mice?",5,gvhd_paper.pdf,39,"GVHD severity assessment, T cell analysis, serum interferon-g measurement","How does E. faecalis affect GVHD severity?, What is the role of CD4+ T cells in the presence of E. faecalis?, What changes occur in serum interferon-g levels in E. faecalis–colonized mice?","E. faecalis, GVHD, T cells, serum interferon-g, CD4+ T cells, TH17 cells"
+39,adb546eb9f289c23d648fe7f48a5c418,"Fig. 4. Lactose-free diet reduces experimental GVHD and lactase genotypes associated with microbiota dynamics after allo-HCT in humans. (A) (Left) Schematic showing that BALB/c recipient mice received C57BL/6 BM or BM+T (5 × 105 T cells) and were fed control chow (ctr) versus lactose-free chow (LF) from day −7 to +14 relative to transplant. Comparison of survival between BM and BM+T mice (middle) and relative abundance of the genus Enterococcus in mouse feces (right) are shown. Scatter plot data presented as means ± SEM; *P < 0.05 (independent t test). (B) (Left) Schematic showing HCT of LP/J BM versus BM+T (4 × 106 T cells) into C57BL/6 mice after chemotherapy conditioning. Comparison of survival between BM and BM+T mice (middle) and relative abundance of the genus Enterococcus at different time points relative to HCT (right) are shown. Scatter plot data presented as means ±
+
+Stein-Thoeringer et al., Science 366, 1143–1149 (2019)
+
+29 November 2019
+
+--- Extracted Metadata ---
+Keywords: GVHD, lactose-free diet, allo-HCT, lactase genotypes, microbiota dynamics, Enterococcus, survival rates
+Methods: dietary intervention, allo-HCT
+Hypothetical Questions: How does a lactose-free diet impact survival rates in transplant mice?, What is the role of lactase genotypes in microbiota dynamics post-transplant?, How does the presence of T cells affect enterococcus abundance after HCT?",5,gvhd_paper.pdf,40,"dietary intervention, allo-HCT","How does a lactose-free diet impact survival rates in transplant mice?, What is the role of lactase genotypes in microbiota dynamics post-transplant?, How does the presence of T cells affect enterococcus abundance after HCT?","GVHD, lactose-free diet, allo-HCT, lactase genotypes, microbiota dynamics, Enterococcus, survival rates"
+40,e25765e8d7c1457562751a039b6f8d31,"SEM; *P < 0.05 (independent t test). (C) (Left) Relative abundance (log10) of Enterococcus (genus) by days relative to the day of antibiotic cessation (broad- spectrum antibiotics for neutropenic fever: intravenous piperacillin-tazobactam, intravenous imipenem-cilastatin, or intravenous meropenem). Box plot inserts display the median relative abundances of the genus Enterococcus of time binned in the indicated day ranges relative to antibiotic cessation; whiskers represent maximum and minimum. Statistical analysis of box plot data: *P < 0.05 (Wilcoxon rank test). (D) Cumulative incidence of acute GVHD grade 2 to 4 in rs4988235 SNP-genotyped MSKCC patients (T cell–depleted grafts excluded; graft source: BM/PBSC unmodified = 213 patients; cord blood = 102 patients; C/C = 175, T/C+T/T = 140). The cumulative incidence of grade 2 to 4 acute GVHD was compared between genotype groups using the R package cmprsk.
+
+5 of 7
+
+D o w n o a d e d
+
+l
+
+--- Extracted Metadata ---
+Keywords: Enterococcus, acute GVHD, SNP, piperacillin-tazobactam, imipenem-cilastatin, meropenem, neutropenic fever
+Methods: independent t test, Wilcoxon rank test
+Hypothetical Questions: What is the statistical significance of the difference in relative abundance of Enterococcus relative to antibiotic cessation?, How does the cumulative incidence of acute GVHD vary based on different SNP genotypes in MSKCC patients?",5,gvhd_paper.pdf,41,"independent t test, Wilcoxon rank test","What is the statistical significance of the difference in relative abundance of Enterococcus relative to antibiotic cessation?, How does the cumulative incidence of acute GVHD vary based on different SNP genotypes in MSKCC patients?","Enterococcus, acute GVHD, SNP, piperacillin-tazobactam, imipenem-cilastatin, meropenem, neutropenic fever"
+41,6f81ebd3eff1fb7cf262ede5a573ddc9,"f r o m h t t p : / / s c e n c e . s c e n c e m a g . o r g / o n N o v e m b e r
+
+i
+
+i
+
+2 8 ,
+
+2 0 1 9
+
+--- Extracted Metadata ---
+Keywords: November 2019, Science Magazine",5,gvhd_paper.pdf,42,,,"November 2019, Science Magazine"
+42,9e533649f64cf364e006aa4f587da6ac,RES EARCH | R E P O R T,6,gvhd_paper.pdf,43,,,
+43,9a70b08e098dc29a35801130ceb3668e,"We next considered whether posttransplant defects of mucosal defense mechanisms facil- itate enterococcal expansion. Immunoglobulin A (IgA) coating of intestinal bacteria can be protective in colitis and is important for maintaining mucosal integrity (20). How- ever, we did not observe members of the genus Enterococcus to be enriched in either IgA- negative or IgA-positive fecal fractions, even though total fecal IgA was significantly re- duced in allo-HCT recipients with GVHD (fig. S5, B to D). Reduction of IgA by transplant- ing IgA-deficient bone marrow (BM) from activation-induced cytidine deaminase knock- out mice did not further increase enterococcal expansion (fig. S5E). Intestinal antimicrobial peptides of the Reg3 family can suppress the growth of VRE (21) and are reported to play a major role in GVHD (22). Accordingly, we found that both Reg3B/G transcripts and interleukin-22 protein, which regulates Reg3 expression (23), were reduced in the ileum of GVHD mice (fig. S5F).
+
+--- Extracted Metadata ---
+Keywords: Immunoglobulin A, Enterococcus, GVHD, intestinal antimicrobial peptides, Reg3 family
+Methods: IgA coating, transplantation, GVHD, antimicrobial peptides
+Hypothetical Questions: Does IgA deficiency correlate with increased enterococcal expansion after transplantation?, What is the role of Reg3 family antimicrobial peptides in GVHD?, How does GVHD affect mucosal integrity in intestinal defense mechanisms?",6,gvhd_paper.pdf,44,"IgA coating, transplantation, GVHD, antimicrobial peptides","Does IgA deficiency correlate with increased enterococcal expansion after transplantation?, What is the role of Reg3 family antimicrobial peptides in GVHD?, How does GVHD affect mucosal integrity in intestinal defense mechanisms?","Immunoglobulin A, Enterococcus, GVHD, intestinal antimicrobial peptides, Reg3 family"
+44,09e627c1900efbf183f89303d3bd1d27,"Next, we analyzed microbiota-intrinsic fac- tors and used shotgun metagenomic sequenc- ing to characterize the metabolic potential of the Enterococcus-dominated fecal microbiota. Pre- and posttransplant fecal samples from MSKCC patients who received allo-HCT for acute myeloid leukemia were selected for sequencing on the basis of having a highly diverse pre-HCT microbiota and posttrans- plant E. faecium domination (by 16S rRNA gene sequencing). We focused on microbial metabolic pathways that specifically charac- terize domination by comparing them with the highly diverse pretransplant microbiota from the same patients. Pathways involved in DNA synthesis and, notably, in lactose and galactose degradation were enriched in the E. faecium–dominated, posttransplant micro- biota. In contrast, amino acid synthesis and starch-degradation pathways were more prev- alent in pretransplant specimens (Fig. 3A). The lactose-and-galactose degradation path- way was also significantly enriched in the
+
+--- Extracted Metadata ---
+Keywords: microbiota, metabolic potential, Enterococcus, allo-HCT, acute myeloid leukemia, DNA synthesis, lactose degradation, galactose degradation, amino acid synthesis, starch degradation
+Methods: shotgun metagenomic sequencing
+Hypothetical Questions: What are the metabolic pathways involved in Enterococcus dominance post-transplant?, How does the microbiota change after allo-HCT for acute myeloid leukemia?",6,gvhd_paper.pdf,45,shotgun metagenomic sequencing,"What are the metabolic pathways involved in Enterococcus dominance post-transplant?, How does the microbiota change after allo-HCT for acute myeloid leukemia?","microbiota, metabolic potential, Enterococcus, allo-HCT, acute myeloid leukemia, DNA synthesis, lactose degradation, galactose degradation, amino acid synthesis, starch degradation"
+45,6dcb518c9863dcea6dc2952d83ea34f1,"pecifically charac- terize domination by comparing them with the highly diverse pretransplant microbiota from the same patients. Pathways involved in DNA synthesis and, notably, in lactose and galactose degradation were enriched in the E. faecium–dominated, posttransplant micro- biota. In contrast, amino acid synthesis and starch-degradation pathways were more prev- alent in pretransplant specimens (Fig. 3A). The lactose-and-galactose degradation path- way was also significantly enriched in the posttransplant E. faecalis–dominated samples of mice with GVHD (Fig. 3B). Comparison of whole-genome sequencing from isolates of E. faecium (from a human allo-HCT patient) and of E. faecalis (from a mouse with GVHD) revealed that genes encoding lactose and galactose metabolism accounted for ~3% of their genomes (Fig. 3C). In silico analysis of these Enterococcus genomes and publicly available genomes of other members of the gnotobiotic six-strain consortium revealed that enterococci are
+
+--- Extracted Metadata ---
+Keywords: Enterococcus, microbiota, DNA synthesis, lactose degradation, galactose degradation, amino acid synthesis, starch degradation, whole-genome sequencing
+Methods: whole-genome sequencing
+Hypothetical Questions: What are the differences in metabolic pathways between pretransplant and posttransplant microbiota?, How do the metabolic pathways of E. faecium and E. faecalis compare in the context of lactose and galactose degradation?, What is the genomic significance of lactose and galactose metabolism in Enterococcus species?",6,gvhd_paper.pdf,46,whole-genome sequencing,"What are the differences in metabolic pathways between pretransplant and posttransplant microbiota?, How do the metabolic pathways of E. faecium and E. faecalis compare in the context of lactose and galactose degradation?, What is the genomic significance of lactose and galactose metabolism in Enterococcus species?","Enterococcus, microbiota, DNA synthesis, lactose degradation, galactose degradation, amino acid synthesis, starch degradation, whole-genome sequencing"
+46,b739f9580d3ffaff781fe3cf10f0b0b2,"in the posttransplant E. faecalis–dominated samples of mice with GVHD (Fig. 3B). Comparison of whole-genome sequencing from isolates of E. faecium (from a human allo-HCT patient) and of E. faecalis (from a mouse with GVHD) revealed that genes encoding lactose and galactose metabolism accounted for ~3% of their genomes (Fig. 3C). In silico analysis of these Enterococcus genomes and publicly available genomes of other members of the gnotobiotic six-strain consortium revealed that enterococci are specifically enriched in enzymes of the tagatose-type galactose path- way for galactose-to-glucose degradation (24) (materials and methods and fig. S6, A and B). Enterococcal growth depends on lactose in vitro, as both E. faecalis and E. faecium strains cultured in brain-heart
+
+--- Extracted Metadata ---
+Keywords: Enterococcus faecalis, Enterococcus faecium, galactose metabolism, lactose metabolism, GVHD, whole-genome sequencing, gnotobiotic consortia
+Methods: whole-genome sequencing, in silico analysis
+Hypothetical Questions: What metabolic pathways are enriched in Enterococcus species?, How does Enterococcus metabolism affect host health in GVHD?, What is the impact of lactose on Enterococcus growth in vitro?",6,gvhd_paper.pdf,47,"whole-genome sequencing, in silico analysis","What metabolic pathways are enriched in Enterococcus species?, How does Enterococcus metabolism affect host health in GVHD?, What is the impact of lactose on Enterococcus growth in vitro?","Enterococcus faecalis, Enterococcus faecium, galactose metabolism, lactose metabolism, GVHD, whole-genome sequencing, gnotobiotic consortia"
+47,6be00c21d477610143c27a8bf41e1bdf,"Stein-Thoeringer et al., Science 366, 1143–1149 (2019)
+
+--- Extracted Metadata ---
+Keywords: gene editing, CRISPR, genetic modification, biotechnology
+Methods: gene editing, CRISPR
+Hypothetical Questions: How does gene editing impact genetic diseases?, What are the ethical implications of CRISPR technology?",6,gvhd_paper.pdf,48,"gene editing, CRISPR","How does gene editing impact genetic diseases?, What are the ethical implications of CRISPR technology?","gene editing, CRISPR, genetic modification, biotechnology"
+48,bb7f4c80d3220c4de93e251927615b1a,"infusion (BHI) broth depleted of lactose (by lactase; fig. S7A) did not grow (Fig. 3D). Growth was reinstated upon transfer to re- gular BHI, excluding antibacterial effects of lactase treatment (Fig. 3D). Enterococcal expansion after allo-HCT was accompanied by a loss of Clostridium spp. in the microbiota of allo-HCT patients (Fig. 3, A and F) and of mice with GVHD (fig. S8, A to C, and table S7). This may be important for allo-HCT patients, as high abundances of clostridia are associated with better survival and low- er incidence of GVHD (12, 25). Commen- sal clostridia are known to produce large amounts of butyrate (26), which mitigates lethal GVHD in mice through protecting energy homeostasis of enterocytes (27). We observed that posttransplant enterococcal domination and a loss of clostridia were accompanied by a significant reduction in fecal butyrate in both allo-HCT patients and mice with GVHD (Fig. 3, E and G) (28). A loss of this key metabolite may contribute to the poor
+
+--- Extracted Metadata ---
+Keywords: allo-HCT, Clostridium spp., lactase, butyrate, GVHD, enterococci, microbiota
+Methods: allo-HCT, lactase treatment
+Hypothetical Questions: What is the effect of lactase treatment on bacterial growth in BHI broth?, How does the loss of Clostridium spp. affect the health of allo-HCT patients?, What role does butyrate play in the survival of allo-HCT patients?, How is enterococcal expansion related to GVHD in post-transplant patients?",6,gvhd_paper.pdf,49,"allo-HCT, lactase treatment","What is the effect of lactase treatment on bacterial growth in BHI broth?, How does the loss of Clostridium spp. affect the health of allo-HCT patients?, What role does butyrate play in the survival of allo-HCT patients?, How is enterococcal expansion related to GVHD in post-transplant patients?","allo-HCT, Clostridium spp., lactase, butyrate, GVHD, enterococci, microbiota"
+49,6768c0eeaeb286f8da7ad768efc7cf4a,"ith better survival and low- er incidence of GVHD (12, 25). Commen- sal clostridia are known to produce large amounts of butyrate (26), which mitigates lethal GVHD in mice through protecting energy homeostasis of enterocytes (27). We observed that posttransplant enterococcal domination and a loss of clostridia were accompanied by a significant reduction in fecal butyrate in both allo-HCT patients and mice with GVHD (Fig. 3, E and G) (28). A loss of this key metabolite may contribute to the poor outcomes in Enterococcus-dominated patients and mice.
+
+--- Extracted Metadata ---
+Keywords: GVHD, butyrate, allos transplantation, clostridia, Enterococcus
+Methods: allo-HCT
+Hypothetical Questions: What are the effects of clostridia on GVHD?, How does butyrate production affect survival rates after transplant?, What is the relationship between enterococcal dominance and fecal butyrate levels?",6,gvhd_paper.pdf,50,allo-HCT,"What are the effects of clostridia on GVHD?, How does butyrate production affect survival rates after transplant?, What is the relationship between enterococcal dominance and fecal butyrate levels?","GVHD, butyrate, allos transplantation, clostridia, Enterococcus"
+50,f92d6c9c8ec54912236a90a82470690e,"Given that the optimal growth of enterococci depends on lactose availability in vitro, we investigated whether enterococcal expansion can be mitigated by feeding mice lactose-free chow (fig. S7B and table S8). In the C57BL/ 6→BALB/c model, the absence of dietary lactose significantly reduced posttransplant Enterococcus bloom and mitigated GVHD (Fig. 4A and fig. S9B). Flow cytometric anal- ysis of donor T cells on day +14 revealed a reduction in the percentage of activated and proliferating CD4+ T cells (CD4+CD69+; CD4+ Ki67+) as well as a reduction in the percent- age of CD4+Tbet+ (TH1) T cells (fig. S9). The effect of a lactose-free diet on enterococcal outgrowth and GVHD was replicated in the LP/J→C57BL/6 mouse model (Fig. 4B and table S9 for changes in non-enterococcal taxa). Intestinal mucosal damage by irradiation or allo-reactive T cells may affect the expres- sion of lactase, the enzyme found on small- intestine enterocytes that facilitates lactose absorption through
+
+--- Extracted Metadata ---
+Keywords: enterococci, GVHD, lactose, C57BL/6, BALB/c, CD4+ T cells, intestinal mucosal damage, lactase
+Methods: flow cytometry
+Hypothetical Questions: How does lactose availability impact enterococcal expansion in mice?, What are the effects of a lactose-free diet on post-transplant GVHD in mice?, How does irradiative damage to the intestine affect lactase expression?",6,gvhd_paper.pdf,51,flow cytometry,"How does lactose availability impact enterococcal expansion in mice?, What are the effects of a lactose-free diet on post-transplant GVHD in mice?, How does irradiative damage to the intestine affect lactase expression?","enterococci, GVHD, lactose, C57BL/6, BALB/c, CD4+ T cells, intestinal mucosal damage, lactase"
+51,466c56e7c71f95d0d2f8ae81139786ac,"ating CD4+ T cells (CD4+CD69+; CD4+ Ki67+) as well as a reduction in the percent- age of CD4+Tbet+ (TH1) T cells (fig. S9). The effect of a lactose-free diet on enterococcal outgrowth and GVHD was replicated in the LP/J→C57BL/6 mouse model (Fig. 4B and table S9 for changes in non-enterococcal taxa). Intestinal mucosal damage by irradiation or allo-reactive T cells may affect the expres- sion of lactase, the enzyme found on small- intestine enterocytes that facilitates lactose absorption through disaccharide cleavage. Duodenal lactase transcript abundance pro- gressively declined in BM+T recipients over the course of transplantation (fig. S9C), which may induce a lactose-intolerant–like state in mice, allowing nondigested lactose to reach the lower intestinal tract and serve as a car- bon source for bacteria.
+
+--- Extracted Metadata ---
+Keywords: CD4+ T cells, lactase, allo-reactive T cells, GVHD, intestinal mucosal damage, enterococcal outgrowth
+Methods: lactose-free diet, GVHD
+Hypothetical Questions: How does a lactose-free diet affect T cell populations in mice?, What is the impact of intestinal mucosal damage on lactase expression?, How might nondigested lactose influence bacterial growth in the intestines?",6,gvhd_paper.pdf,52,"lactose-free diet, GVHD","How does a lactose-free diet affect T cell populations in mice?, What is the impact of intestinal mucosal damage on lactase expression?, How might nondigested lactose influence bacterial growth in the intestines?","CD4+ T cells, lactase, allo-reactive T cells, GVHD, intestinal mucosal damage, enterococcal outgrowth"
+52,f09a12596f5a19f868b2015ee4c6e5bc,"Next, we explored whether enterococci ex- pansion is associated with lactose tolerance in human allo-HCT patients by genotyping 602 patients from the MSKCC cohort with available pretransplant germline DNA sam- ples for the gene polymorphism rs4988235 (-13910*T). This single-nucleotide polymorphism (SNP) regulates lactase expression and pre- dicts lactose absorption and/or tolerance (C/T
+
+29 November 2019
+
+or T/T alleles) and malabsorption (C/C alleles) in the upper gut (29). Although abundance of the genus Enterococcus increased comparably during exposure to broad-spectrum antibiotics in both lactose absorbers and malabsorbers, enterococcal domination was significantly prolonged in malabsorbers after cessation of antibiotics (Fig. 4D and fig. S10). This finding suggests that the maintenance of enterococ- cal domination and microbiota recovery after broad-spectrum antibiotic exposure is signif- icantly modulated by the luminal availability of lactose as a growth substrate.
+
+--- Extracted Metadata ---
+Keywords: Enterococcus, lactose tolerance, gene polymorphism, rs4988235, lactase expression, antibiotics, allo-HCT, microbiota
+Methods: genotyping
+Hypothetical Questions: Is there a relationship between enterococci expansion and lactose tolerance in allo-HCT patients?, How does the SNP rs4988235 influence lactase expression and lactose absorption?, What is the impact of broad-spectrum antibiotics on the abundance of Enterococcus in lactose absorbers versus malabsorbers?",6,gvhd_paper.pdf,53,genotyping,"Is there a relationship between enterococci expansion and lactose tolerance in allo-HCT patients?, How does the SNP rs4988235 influence lactase expression and lactose absorption?, What is the impact of broad-spectrum antibiotics on the abundance of Enterococcus in lactose absorbers versus malabsorbers?","Enterococcus, lactose tolerance, gene polymorphism, rs4988235, lactase expression, antibiotics, allo-HCT, microbiota"
+53,7e9beef898af98b97f94263ef5e9f5ae,"Fecal domination by Enterococcus spp. is a significant risk factor for the development of acute GVHD and for increased overall and GVHD-related mortality after allo-HCT. Our findings extend previous reports from smaller single-center analyses that posttransplant VRE bacteremia and fecal domination are associated with worse outcomes after allo-HCT (7, 8, 30). In gnotobiotic mouse models, enterococci exacerbate GVHD, consistent with previous reports of aggravated colitis in models of in- flammatory bowel disease (14) or systemic autoimmune responses (31). We previously identified Blautia abundance (a genus within class Clostridia) as a predictor of protection from lethal GVHD (12), whereas here we describe Enterococcus domination as a risk factor for GVHD. These two findings are noteworthy in light of our recent observa- tion that a B. producta strain can inhibit VRE growth via the production of a lantibiotic pro- tein (32). We identified a microbiota-intrinsic mechanism that is
+
+--- Extracted Metadata ---
+Keywords: Enterococcus, GVHD, allo-HCT, bacteremia, microbiota, Blautia, lantibiotic
+Methods: bacteremia, microbiota manipulation
+Hypothetical Questions: What role does Enterococcus spp. play in acute GVHD development?, How does Blautia abundance correlate with the risks of GVHD?, What are the potential mechanisms by which a B. producta strain inhibits VRE growth?",6,gvhd_paper.pdf,54,"bacteremia, microbiota manipulation","What role does Enterococcus spp. play in acute GVHD development?, How does Blautia abundance correlate with the risks of GVHD?, What are the potential mechanisms by which a B. producta strain inhibits VRE growth?","Enterococcus, GVHD, allo-HCT, bacteremia, microbiota, Blautia, lantibiotic"
+54,116ac047b5ec9a6753d95618f9af21c0,"lammatory bowel disease (14) or systemic autoimmune responses (31). We previously identified Blautia abundance (a genus within class Clostridia) as a predictor of protection from lethal GVHD (12), whereas here we describe Enterococcus domination as a risk factor for GVHD. These two findings are noteworthy in light of our recent observa- tion that a B. producta strain can inhibit VRE growth via the production of a lantibiotic pro- tein (32). We identified a microbiota-intrinsic mechanism that is dependent on lactose uti- lization and favors the expansion of enterococci. This process may be triggered through a loss of lactase produced by enterocytes damaged by conditioning or allo-reactive T cells. We validated this concept experimentally, by showing that depletion of lactose in vitro and in vivo inhibited enterococcal expan- sion and mitigated GVHD, and clinically, by showing that patients harboring a lactose- malabsorption allele experienced prolonged Enterococcus domination after
+
+--- Extracted Metadata ---
+Keywords: inflammatory bowel disease, autoimmune responses, Blautia, Enterococcus, GVHD, lactose utilization, microbiota, lactase, VRE growth, lantibiotic protein
+Methods: microbiota-intrinsic mechanism, lactose utilization, in vitro and in vivo experimentation
+Hypothetical Questions: What are the factors that influence Enterococcus domination in patients with GVHD?, How does lactose utilization by the microbiota affect the risk of GVHD?, What is the relationship between Blautia abundance and protection from GVHD?",6,gvhd_paper.pdf,55,"microbiota-intrinsic mechanism, lactose utilization, in vitro and in vivo experimentation","What are the factors that influence Enterococcus domination in patients with GVHD?, How does lactose utilization by the microbiota affect the risk of GVHD?, What is the relationship between Blautia abundance and protection from GVHD?","inflammatory bowel disease, autoimmune responses, Blautia, Enterococcus, GVHD, lactose utilization, microbiota, lactase, VRE growth, lantibiotic protein"
+55,df3c7d08b5427be53ef04f45278075d8,"is dependent on lactose uti- lization and favors the expansion of enterococci. This process may be triggered through a loss of lactase produced by enterocytes damaged by conditioning or allo-reactive T cells. We validated this concept experimentally, by showing that depletion of lactose in vitro and in vivo inhibited enterococcal expan- sion and mitigated GVHD, and clinically, by showing that patients harboring a lactose- malabsorption allele experienced prolonged Enterococcus domination after antibiotic ex- posure. These observations in mice and allo- HCT patients provide proof-of-concept for a novel, non–antibiotic-based therapeutic strategy, such as a lactose-free diet, to attenu- ate the outgrowth of pathobionts like enter- ococci and possibly improve clinical outcomes by modulating dietary sources of nutrients for pathogenic bacteria.
+
+--- Extracted Metadata ---
+Keywords: lactose, enterococci, GVHD, microbiota, diet, pathobionts
+Methods: dietary manipulation, lactose depletion
+Hypothetical Questions: How does lactose consumption affect enterococcal expansion in patients?, What is the role of the lactase enzyme in maintaining gut microbiota balance?, Can a lactose-free diet improve clinical outcomes in patients with enterococcal domination?",6,gvhd_paper.pdf,56,"dietary manipulation, lactose depletion","How does lactose consumption affect enterococcal expansion in patients?, What is the role of the lactase enzyme in maintaining gut microbiota balance?, Can a lactose-free diet improve clinical outcomes in patients with enterococcal domination?","lactose, enterococci, GVHD, microbiota, diet, pathobionts"
+56,53c62f87f2078f1ddea2f4a5c892baa0,"REFERENCES AND NOTES
+
+1. Y. Litvak, M. X. Byndloss, A. J. Bäumler, Science 362, eaat9076 (2018).
+
+2. M. S. Gilmore, F. Lebreton, W. van Schaik, Curr. Opin. Microbiol. 16, 10–16 (2013).
+
+3. S. Schloissnig et al., Nature 493, 45–50 (2013). 4. F. Lebreton et al., Cell 169, 849–861.e13 (2017). 5. Y. Taur et al., Clin. Infect. Dis. 55, 905–914 (2012). 6. C. Ubeda et al., J. Clin. Invest. 120, 4332–4341 (2010). 7. E. Holler et al., Biol. Blood Marrow Transplant. 20, 640–645 (2014).
+
+6 of 7
+
+D o w n o a d e d
+
+l
+
+f r o m h t t p : / / s c e n c e . s c e n c e m a g . o r g / o n N o v e m b e r
+
+i
+
+i
+
+2 8 ,
+
+2 0 1 9
+
+--- Extracted Metadata ---
+Keywords: microbiology, infections, clinical research, blood, marrow transplant",6,gvhd_paper.pdf,57,,,"microbiology, infections, clinical research, blood, marrow transplant"
+57,2312af693b6e95c7e6721640d890ca39,"RES EARCH | R E P O R T
+
+8. C. D. Ford et al., Biol. Blood Marrow Transplant. 23, 340–346
+
+(2017).
+
+9. H. J. Khoury et al., Haematologica 102 , 958–966 (2017). 10. Y. Shono et al., Sci. Transl. Med. 8, 339ra71 (2016). 11. Y. Taur et al., Blood 124, 1174–1182 (2014). 12. R. R. Jenq et al., Biol. Blood Marrow Transplant. 21, 1373–1383 (2015).
+
+13. Y. Taur et al., Sci. Transl. Med. 10, eaap9489 (2018). 14. N. Steck et al., Gastroenterology 141, 959–971 (2011). 15. N. Geva-Zatorsky et al., Cell 168, 928–943.e11 (2017). 16. K. Riesner, M. Kalupa, Y. Shi, S. Elezkurtaj, O. Penack, Bone Marrow Transplant. 51, 410–417 (2016).
+
+17. K. Dubin, E. G. Pamer, Microbiol. Spectr. doi:10.1128/ microbiolspec.BAD-0014-2016 (2014).
+
+--- Extracted Metadata ---
+Keywords: Hematopoietic Stem Cell Transplantation, Microbiome, Blood, Bone Marrow Transplant, Infection, Antimicrobials
+Methods: Haematopoietic Stem Cell Transplantation, Microbiome Analysis
+Hypothetical Questions: What are the effects of microbiome diversity on hematopoietic stem cell transplantation outcomes?, How do antibiotics influence the microbiome in patients undergoing bone marrow transplants?",7,gvhd_paper.pdf,58,"Haematopoietic Stem Cell Transplantation, Microbiome Analysis","What are the effects of microbiome diversity on hematopoietic stem cell transplantation outcomes?, How do antibiotics influence the microbiome in patients undergoing bone marrow transplants?","Hematopoietic Stem Cell Transplantation, Microbiome, Blood, Bone Marrow Transplant, Infection, Antimicrobials"
+58,bf0923ff51be4b2a7ae42b9061f367f8,"18. R. R. Jenq et al., J. Exp. Med. 209, 903–911 (2012). 19. S. Caballero et al., Cell Host Microbe 21, 592–602.e4 (2017). 20. N. W. Palm et al., Cell 158, 1000–1010 (2014). 21. K. Brandl et al., Nature 455, 804–807 (2008). 22. D. Zhao et al., J. Clin. Invest. 128, 4970–4979 (2018). 23. C. A. Lindemans et al., Nature 528, 560–564 (2015). 24. K. H. Schleifer, A. Hartinger, F. Götz, FEMS Microbiol. Lett. 3, 9–11 (1978)
+
+25. D. Weber et al., Biol. Blood Marrow Transplant. 23, 845–852 (2017).
+
+26. P. A. Gill, M. C. van Zelm, J. G. Muir, P. R. Gibson, Aliment. Pharmacol. Ther. 48 , 15–34 (2018).
+
+27. N. D. Mathewson et al., Nat. Immunol. 17, 505–513 (2016). 28. B. W. Haak et al., Blood 131, 2978–2986 (2018). 29. C. J. Ingram, C. A. Mulcare, Y. Itan, M. G. Thomas, D. M. Swallow, Hum. Genet. 124, 579–591 (2009). 30. J. Vydra et al., Clin. Infect. Dis. 55, 764–770 (2012). 31. S. Manfredo Vieira et al., Science 359, 1156–1161 (2018). 32. S. G. Kim et al., Nature 572, 665–669 (2019).
+
+--- Extracted Metadata ---
+Keywords: microbiome, immunology, gastroenterology, transplantation, infections, genetics, intestinal health, cell biology, human health",7,gvhd_paper.pdf,59,,,"microbiome, immunology, gastroenterology, transplantation, infections, genetics, intestinal health, cell biology, human health"
+59,1b8221fab342f3129b2927015c8ea56d,"ACKN OW LEDG MEN TS
+
+We thank G. M. Dunny and J. Willett (Department of Microbiology, University of Minnesota) as well as R. Zbasnik and V. Schlegel (Department of Food Science, University of Nebraska) for helpful discussion and for providing materials for revision of the manuscript. Funding: This work was supported by a German Research Foundation (DFG) scholarship to
+
+--- Extracted Metadata ---
+Keywords: Microbiology, Food Science, German Research Foundation, Scholarship",7,gvhd_paper.pdf,60,,,"Microbiology, Food Science, German Research Foundation, Scholarship"
+60,8d80b1cca0d6cf99d6f0c2c5201f1ca5,"C.K.S.-T.; a Young-Investigator-Award by American Society of Bone Marrow Transplantation to C.K.S.-T.; partially supported by the DFG research consortium TR221 “GvH/GvL” (project B13) to E.H.; by NCI awards R01-CA228358 (M.R.M.v.d.B.), R01-CA228308 (M.R.M.v.d.B.), MSKCC Cancer Center Core Grant P30 CA008748, and Project 4 of P01-CA023766 (M.R.M.v.d.B.); NHLBI award R01-HL125571 (M.R.M.v.d.B.), R01-HL123340 (M.R.M.v.d.B.), and K08-HL143189 (J.U.P.); NIA National Institute of Aging award Project 2 of P01-AG052359 (M.R.M.v.d.B.); NIAID award U01 AI124275 (M.R.M.v.d.B.); R01 AI032135 (E.G.P.); AI095706 (E.G.P.); U01 AI124275 (E.G.P. and J.B.X.); Tri-Institutional Stem Cell Initiative award 2016-013 (M.R.M.v.d.B.); the Lymphoma Foundation (M.R.M.v.d.B. and N.K.); the Susan and Peter Solomon Divisional Genomics Program (M.R.M.v.d.B.); the Parker Institute for Cancer Immunotherapy at Memorial Sloan Kettering Cancer Center (M.R.M.v.d.B. and J.U.P.); the Sawiris Foundation (J.U.P.); the Society
+
+--- Extracted Metadata ---
+Keywords: bone marrow transplantation, cancer immunotherapy, funding sources, research awards, stem cell initiatives
+Methods: bone marrow transplantation, cancer immunotherapy
+Hypothetical Questions: What are the contributions of various funding sources to research in bone marrow transplantation?, How do different awards influence research projects in stem cell initiatives?, What impact does the collaboration between institutions have on cancer research funding?",7,gvhd_paper.pdf,61,"bone marrow transplantation, cancer immunotherapy","What are the contributions of various funding sources to research in bone marrow transplantation?, How do different awards influence research projects in stem cell initiatives?, What impact does the collaboration between institutions have on cancer research funding?","bone marrow transplantation, cancer immunotherapy, funding sources, research awards, stem cell initiatives"
+61,5d6ac014bebbab8a332bcd86142ee30f,"of P01-AG052359 (M.R.M.v.d.B.); NIAID award U01 AI124275 (M.R.M.v.d.B.); R01 AI032135 (E.G.P.); AI095706 (E.G.P.); U01 AI124275 (E.G.P. and J.B.X.); Tri-Institutional Stem Cell Initiative award 2016-013 (M.R.M.v.d.B.); the Lymphoma Foundation (M.R.M.v.d.B. and N.K.); the Susan and Peter Solomon Divisional Genomics Program (M.R.M.v.d.B.); the Parker Institute for Cancer Immunotherapy at Memorial Sloan Kettering Cancer Center (M.R.M.v.d.B. and J.U.P.); the Sawiris Foundation (J.U.P.); the Society of Memorial Sloan Kettering Cancer Center (J.U.P.); MSKCC Cancer Systems Immunology Pilot Grant (J.U.P.); Empire Clinical Research Investigator Program (J.U.P.); Seres Therapeutics (M.R.M.v.d.B., J.U.P., J.B.S., A.L.C.G., A.G.C., A.E.S., and A.D.S.); Japan Society for the Promotion of Science KAKENHI (17H04206 to T.T. and 17K09945 to D.H.); the Center of Innovation Program from Japan Science and Technology Agency (T.T.); Mochida Memorial Foundation for Medical and Pharmaceutical Research (D.H.);
+
+--- Extracted Metadata ---
+Keywords: cancer, immunotherapy, funding, stem cells, genomics
+Methods: genomic analysis, immunotherapy, stem cell research
+Hypothetical Questions: What are the funding sources for cancer research projects?, How do various institutions contribute to stem cell initiatives?, What awards support immunotherapy research?",7,gvhd_paper.pdf,62,"genomic analysis, immunotherapy, stem cell research","What are the funding sources for cancer research projects?, How do various institutions contribute to stem cell initiatives?, What awards support immunotherapy research?","cancer, immunotherapy, funding, stem cells, genomics"
+62,6bc707798a3bdcc77c1667d45d7da0be,"f Memorial Sloan Kettering Cancer Center (J.U.P.); MSKCC Cancer Systems Immunology Pilot Grant (J.U.P.); Empire Clinical Research Investigator Program (J.U.P.); Seres Therapeutics (M.R.M.v.d.B., J.U.P., J.B.S., A.L.C.G., A.G.C., A.E.S., and A.D.S.); Japan Society for the Promotion of Science KAKENHI (17H04206 to T.T. and 17K09945 to D.H.); the Center of Innovation Program from Japan Science and Technology Agency (T.T.); Mochida Memorial Foundation for Medical and Pharmaceutical Research (D.H.); R56 AI137269-01 (J.B.X.); Conquer Cancer Foundation Young Investigator Award/Gilead Sciences (N.K.); NIH KL2 TR001115-03 (NCATS CTSA to A.D.S.); NIA 2P30AG028716-11 (Claude D. Pepper Older Americans Independence Center to A.D.S.); NCI R01CA203950-01 (to N.J.C., A.D.S., L.B., M.L, and A.B.); NIH 1R01HL124112-01A (A.D.S. and R.R.J.); and NIA R21AG066388- 01 (A.D.S. and N.J.C.). Author contributions: C.K.S.-T., E.G.P., J.U.P, and M.R.M.v.d.B. conceptualized the project; C.K.S.-T., A.L.C.G., A.S.,
+
+--- Extracted Metadata ---
+Keywords: Memorial Sloan Kettering Cancer Center, Cancer Systems Immunology, Seres Therapeutics, Japan Society for the Promotion of Science KAKENHI, Center of Innovation Program, Mochida Memorial Foundation, Conquer Cancer Foundation Young Investigator Award, NIH, investigator awards",7,gvhd_paper.pdf,63,,,"Memorial Sloan Kettering Cancer Center, Cancer Systems Immunology, Seres Therapeutics, Japan Society for the Promotion of Science KAKENHI, Center of Innovation Program, Mochida Memorial Foundation, Conquer Cancer Foundation Young Investigator Award, NIH, investigator awards"
+63,0d47e691092745cfe0664febc9c40994,"R56 AI137269-01 (J.B.X.); Conquer Cancer Foundation Young Investigator Award/Gilead Sciences (N.K.); NIH KL2 TR001115-03 (NCATS CTSA to A.D.S.); NIA 2P30AG028716-11 (Claude D. Pepper Older Americans Independence Center to A.D.S.); NCI R01CA203950-01 (to N.J.C., A.D.S., L.B., M.L, and A.B.); NIH 1R01HL124112-01A (A.D.S. and R.R.J.); and NIA R21AG066388- 01 (A.D.S. and N.J.C.). Author contributions: C.K.S.-T., E.G.P., J.U.P, and M.R.M.v.d.B. conceptualized the project; C.K.S.-T., A.L.C.G., A.S., S.D., A.P., J.R.C., Y.T., R.R.J., J.B.X., E.R.L., and J.U.P. were involved in data curation and formal analyses; C.K.S.-T., K.B.N., A.L., M.D.D., A.E.S., J.B.S., A.G.C., G.A., Y.S., M.B.d.S., K.A.M., D.B., R.P., A.T., S.M., M.E.A., A.J.P., M.M., R.J.W., L.A.A., E.F., D.P., M.A.J., D.W., A.D.S., D.H., C.S., J.A.M., K.R., M.L., A.B., L.B., K.H., and Y.H. conducted research and collected data; M.J.G.T.V., D.M.P., M.A.P., S.A.G.,
+
+--- Extracted Metadata ---
+Keywords: Conquer Cancer Foundation, NIH, NIA, NCI, clinical research, data curation, project conceptualization",7,gvhd_paper.pdf,64,,,"Conquer Cancer Foundation, NIH, NIA, NCI, clinical research, data curation, project conceptualization"
+64,64f12efb365dbb12b344c8f0b8c62e83,"T.T., E.H., N.J.C., E.G.P., and M.R.M.v.d.B. supervised the project and provided validation; and C.K.S.-T., J.U.P., A.L.C.G., and M.R.M.v.d.B. prepared data presentation and wrote the manuscript with contributions from all other authors. Competing interests: M.R.M.v.d.B has received research support from Seres Therapeutics; has consulted, received honorarium from, or participated in advisory boards for Seres Therapeutics, Flagship Ventures, Novartis, Evelo, Jazz Pharmaceuticals, Therakos, Amgen, Magenta Therapeutics, Merck & Co, Inc., Acute Leukemia Forum (ALF), and DKMS Medical Council (Board); and has IP Licensing with Seres Therapeutics and Juno Therapeutics and stock options from Smart Immune. J.U.P. reports research funding, intellectual property fees, and travel reimbursement from Seres Therapeutics and consulting fees from Davolterra. A.D.S. received research support from Seres Therapeutics, Merck, and Novartis. E.G.P. has received speaker honoraria from Bristol-Myer Squibb,
+
+--- Extracted Metadata ---
+Keywords: research support, consultation, intellectual property, manuscript preparation, data presentation",7,gvhd_paper.pdf,65,,,"research support, consultation, intellectual property, manuscript preparation, data presentation"
+65,d73cb54a29a162c90c029bc5c5eddcba,"en, Magenta Therapeutics, Merck & Co, Inc., Acute Leukemia Forum (ALF), and DKMS Medical Council (Board); and has IP Licensing with Seres Therapeutics and Juno Therapeutics and stock options from Smart Immune. J.U.P. reports research funding, intellectual property fees, and travel reimbursement from Seres Therapeutics and consulting fees from Davolterra. A.D.S. received research support from Seres Therapeutics, Merck, and Novartis. E.G.P. has received speaker honoraria from Bristol-Myer Squibb, Celgene, Seres Therapeutics, MedImmune, Novartis, and Ferring Pharmaceuticals; is an inventor on patent application number WPO2015179437A1, entitled “Methods and compositions for reducing Clostridium difficile infection,” and patent number WPO2017091753A1, entitled “Methods and compositions for reducing vancomycin-resistant Enterococci infection or colonization”; and holds patents that receive royalties from Seres Therapeutics Inc. Other authors have no competing interests. Data and materials
+
+--- Extracted Metadata ---
+Keywords: Intellectual Property, Acute Leukemia, Seres Therapeutics, Merck, Research Funding, Patents
+Methods: IP Licensing, Research Funding, Consulting Fees, Speaker Honoraria, Patent Application
+Hypothetical Questions: What are the potential conflicts of interest in the research conducted?, How do financial relationships influence research outcomes?, What types of funding are common in biopharmaceutical collaborations?",7,gvhd_paper.pdf,66,"IP Licensing, Research Funding, Consulting Fees, Speaker Honoraria, Patent Application","What are the potential conflicts of interest in the research conducted?, How do financial relationships influence research outcomes?, What types of funding are common in biopharmaceutical collaborations?","Intellectual Property, Acute Leukemia, Seres Therapeutics, Merck, Research Funding, Patents"
+66,94a40de6c7dc06012ec2dc99c0cdc67a,", Celgene, Seres Therapeutics, MedImmune, Novartis, and Ferring Pharmaceuticals; is an inventor on patent application number WPO2015179437A1, entitled “Methods and compositions for reducing Clostridium difficile infection,” and patent number WPO2017091753A1, entitled “Methods and compositions for reducing vancomycin-resistant Enterococci infection or colonization”; and holds patents that receive royalties from Seres Therapeutics Inc. Other authors have no competing interests. Data and materials availability: All data are available in the manuscript or the supplementary materials. Sequencing data have been deposited into Sequence Read Archive under Bioproject number PRJNA545312.
+
+--- Extracted Metadata ---
+Keywords: Clostridium difficile, vancomycin-resistant Enterococci, patent, therapeutics, sequencing data
+Methods: patent application, composition methods
+Hypothetical Questions: What methods can be used to reduce Clostridium difficile infection?, How can vancomycin-resistant Enterococci infection or colonization be reduced?, What are the implications of patenting methods for medical treatments?",7,gvhd_paper.pdf,67,"patent application, composition methods","What methods can be used to reduce Clostridium difficile infection?, How can vancomycin-resistant Enterococci infection or colonization be reduced?, What are the implications of patenting methods for medical treatments?","Clostridium difficile, vancomycin-resistant Enterococci, patent, therapeutics, sequencing data"
+67,765decdef7b796c34ee56f0f9b1027fc,"SUPPLEMENTARY MATERIALS
+
+science.sciencemag.org/content/366/6469/1143/suppl/DC1 Materials and Methods Table S1 to S10 Fig S1 to S10 References (33–53)
+
+View/request a protocol for this paper from Bio-protocol.
+
+18 March 2019; accepted 22 October 2019 10.1126/science.aax3760
+
+D o w n o a d e d
+
+l
+
+f r o m h t t p : / / s c e n c e . s c e n c e m a g . o r g / o n N o v e m b e r
+
+i
+
+i
+
+2 8 ,
+
+2 0 1 9
+
+Stein-Thoeringer et al., Science 366, 1143–1149 (2019)
+
+29 November 2019
+
+7 of 7
+
+--- Extracted Metadata ---
+Keywords: science, materials and methods, protocol, bio-protocol, Stein-Thoeringer",7,gvhd_paper.pdf,68,,,"science, materials and methods, protocol, bio-protocol, Stein-Thoeringer"
+68,fe3fe06e5d21a26c1a5080a14cad9d39,"Lactose drives C. K. Stein-Thoeringer, K. B. Nichols, A. Lazrak, M. D. Docampo, A. E. Slingerland, J. B. Slingerland, A. G. Clurman, G. Armijo, A. L. C. Gomes, Y. Shono, A. Staffas, M. Burgos da Silva, S. M. Devlin, K. A. Markey, D. Bajic, R. Pinedo, A. Tsakmaklis, E. R. Littmann, A. Pastore, Y. Taur, S. Monette, M. E. Arcila, A. J. Pickard, M. Maloy, R. J. Wright, L. A. Amoretti, E. Fontana, D. Pham, M. A. Jamal, D. Weber, A. D. Sung, D. Hashimoto, C. Scheid, J. B. Xavier, J. A. Messina, K. Romero, Lew, A. Bush, L. Bohannon, K. Hayasaka, Y. Hasegawa, M. J. G. T. Vehreschild, J. R. Cross, D. M. Ponce, M. A. Perales, S. A. Giralt, R. R. Jenq, T. Teshima, E. Holler, N. J. Chao, E. G. Pamer, J. U. Peled and M. R. M. van den Brink
+
+Enterococcus
+
+expansion to promote graft-versus-host disease
+
+M.
+
+Science DOI: 10.1126/science.aax3760
+
+366
+
+(6469), 1143-1149.
+
+Lactose can fuel GVHD
+
+--- Extracted Metadata ---
+Keywords: lactose, graft-versus-host disease, GVHD, Enterococcus, science
+Methods: graft-versus-host disease (GVHD) promotion
+Hypothetical Questions: What role does lactose play in graft-versus-host disease?, How does lactose affect the immune response in GVHD?, Can lactose be used therapeutically to promote GVHD in certain conditions?",8,gvhd_paper.pdf,69,graft-versus-host disease (GVHD) promotion,"What role does lactose play in graft-versus-host disease?, How does lactose affect the immune response in GVHD?, Can lactose be used therapeutically to promote GVHD in certain conditions?","lactose, graft-versus-host disease, GVHD, Enterococcus, science"
+69,51096f8c7e8ffedfb97549f852a66ac7,"Allogeneic hematopoietic cell transplantation (allo-HCT) is used to treat certain hematopoietic malignancies, but
+
+patients have a risk of developing graft-versus-host disease (GVHD). Stein-Thoeringer analysis of more than 1300 patients treated with allo-HCT across four clinical centers (see the Perspective by Zitvogel and Kroemer). High levels of bacteria from the mortality. Lactose appears to provide a substrate for genotype had a greater abundance of Enterococcus. severity of GVHD, and improved survival in gnotobiotic mouse models.
+
+performed a large-scale
+
+et al.
+
+Enterococcus
+
+genus were associated with greater incidence of GVHD and
+
+Enterococcus A lactose-free diet limited
+
+growth, and patients with a lactose-malabsorption
+
+Enterococcus
+
+growth, reduced the
+
+Science
+
+, this issue p. 1143; see also p. 1077
+
+ARTICLE TOOLS
+
+http://science.sciencemag.org/content/366/6469/1143
+
+SUPPLEMENTARY MATERIALS
+
+http://science.sciencemag.org/content/suppl/2019/11/25/366.6469.1143.DC1
+
+--- Extracted Metadata ---
+Keywords: graft-versus-host disease, Allogeneic hematopoietic cell transplantation, Enterococcus, lactose, hematopoietic malignancies
+Methods: Allogeneic hematopoietic cell transplantation (allo-HCT)
+Hypothetical Questions: How does Enterococcus affect graft-versus-host disease (GVHD) in allo-HCT patients?, What is the impact of diet on the abundance of Enterococcus in patients undergoing allo-HCT?, Can lactose influence the severity of GVHD in allo-HCT recipients?",8,gvhd_paper.pdf,70,Allogeneic hematopoietic cell transplantation (allo-HCT),"How does Enterococcus affect graft-versus-host disease (GVHD) in allo-HCT patients?, What is the impact of diet on the abundance of Enterococcus in patients undergoing allo-HCT?, Can lactose influence the severity of GVHD in allo-HCT recipients?","graft-versus-host disease, Allogeneic hematopoietic cell transplantation, Enterococcus, lactose, hematopoietic malignancies"
+70,44bd4c9b1714c51388887595b8d20c03,"RELATED CONTENT
+
+http://science.sciencemag.org/content/sci/366/6469/1077.full
+
+REFERENCES
+
+This article cites 52 articles, 15 of which you can access for free http://science.sciencemag.org/content/366/6469/1143#BIBL
+
+D o w n o a d e d
+
+l
+
+f r o m h t t p : / / s c e n c e . s c e n c e m a g . o r g / o n N o v e m b e r
+
+i
+
+i
+
+2 8 ,
+
+2 0 1 9
+
+PERMISSIONS
+
+http://www.sciencemag.org/help/reprints-and-permissions
+
+Use of this article is subject to the
+
+Terms of Service
+
+Science Science, 1200 New York Avenue NW, Washington, DC 20005. The title
+
+(print ISSN 0036-8075; online ISSN 1095-9203) is published by the American Association for the Advancement of
+
+Science
+
+is a registered trademark of AAAS.
+
+Copyright © 2019 The Authors, some rights reserved; exclusive licensee American Association for the Advancement of Science. No claim to original U.S. Government Works
+
+--- Extracted Metadata ---
+Keywords: Science, research, AAAS, permissions, copyright",8,gvhd_paper.pdf,71,,,"Science, research, AAAS, permissions, copyright"
