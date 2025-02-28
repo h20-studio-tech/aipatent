@@ -9,6 +9,7 @@ import asyncio
 import logging
 import time
 import aiofiles 
+import pprint
 
 from unstructured_client.models import operations, shared
 from lancedb.pydantic import LanceModel, Vector
@@ -73,9 +74,9 @@ class RagWorkflow:
             element_id: str
             page_number: int
             filename: str
-            keywords : List[str]
-            hypothetical_questions: list[str]
-            method: list[str]
+            keywords : str
+            hypothetical_questions: str
+            method: str
             chunk_id: int
             
 
@@ -155,17 +156,17 @@ class RagWorkflow:
         clean_df = reviewed_df[reviewed_df["relevant"] != False]
         return clean_df
                 
-    async def extract_metadata(self, text: str) -> dict:
+    async def extract_metadata(self, text: str, chunk_id: str) -> dict:
         """
         Asynchronously extract metadata (keywords, methods, hypothetical questions)
         from a given text chunk by wrapping the blocking API call.
         """
         try:
-            model = "gpt-3.5-turbo"
+            model = "gpt-4o-mini"
             messages = [
                 {
                     "role": "system",
-                    "content": "Your role is to extract data from the following document and create a set of topics."
+                    "content": "Your role is to extract data from the following document."
                 },
                 {"role": "user", "content": text},
             ]
@@ -176,10 +177,13 @@ class RagWorkflow:
                 response_model=Extraction,
                 messages=messages
             )
-            # extraction is assumed to be a Pydantic model; convert to dict
-            return extraction.model_dump()
+            extraction_for_debug = dict(extraction)
+            extraction_for_debug["chunk_id"] = chunk_id
+            
+            # logging.info("Raw metadata with chunk id: %s", pprint.pformat(extraction_for_debug))
+            return extraction.model_dump() # return the original extraction 
         except Exception as e:
-            logging.error(f"Error extracting metadata: {e}")
+            logging.info(f"Error extracting metadata: {e}")
             # Return empty metadata in case of error
             return {"keywords": [], "method": [], "hypothetical_questions": []}
         
@@ -249,32 +253,49 @@ class RagWorkflow:
                 data.append(row)
 
             # concurrently extract metadata for each text chunk
-            tasks = [self.extract_metadata(row["text"]) for row in data]
+            tasks = [self.extract_metadata(row["text"], row["chunk_id"]) for row in data]
             metadata_results = await asyncio.gather(*tasks)
 
-            # update each row with the extracted metadata
+            # update rows with the extracted metadata
             for row, metadata in zip(data, metadata_results):
-                # keep metadata in separate columns for convenience
+                
+                metadata_for_chunks = json.loads(json.dumps(metadata))
+                # convert list fields to strings
+                for key in ["keywords", "hypothetical_questions", "method"]:
+                    if key not in metadata:
+                        # If the field doesn't exist, set it to empty string
+                        metadata[key] = ""
+                    else:
+                        value = metadata[key]
+                        if isinstance(value, list):
+                            # Convert each item to string and then join with ", "
+                            metadata[key] = ', '.join(value)
+                        elif not isinstance(value, str):
+                            # If it's neither a list nor a string, default to empty string
+                            metadata[key] = ""
+                    
+                        
                 row.update(metadata)
 
                 # formatted metadata section
                 meta_lines = []
-                if metadata.get("keywords"):
-                    meta_lines.append(f"Keywords: {', '.join(metadata['keywords'])}")
-                if metadata.get("method"):
-                    meta_lines.append(f"Methods: {', '.join(metadata['method'])}")
-                if metadata.get("hypothetical_questions"):
-                    meta_lines.append(f"Hypothetical Questions: {', '.join(metadata['hypothetical_questions'])}")
+                if metadata_for_chunks.get("keywords"):
+                    meta_lines.append(f"Keywords: {', '.join(metadata_for_chunks['keywords'])}")
+                if metadata_for_chunks.get("method"):
+                    meta_lines.append(f"Methods: {', '.join(metadata_for_chunks['method'])}")
+                if metadata_for_chunks.get("hypothetical_questions"):
+                    meta_lines.append(f"Hypothetical Questions: {', '.join(metadata_for_chunks['hypothetical_questions'])}")
 
                 # if we actually have metadata to add, append it to the text
                 if meta_lines:
                     metadata_str = "\n\n--- Extracted Metadata ---\n" + "\n".join(meta_lines)
                     # append the metadata string to the original text
                     row["text"] = row["text"] + metadata_str
-                row.update(metadata)
+                
 
             # Create a Pandas DataFrame from the processed data
             df = pd.DataFrame(data)
+            df.to_csv("experiments/unstructured/results/result.csv")
             csv_path = file_path.replace(".pdf", ".csv")
             loop = asyncio.get_running_loop()
             # Write CSV using ThreadPoolExecutor to avoid blocking the event loop
@@ -529,6 +550,13 @@ class RagWorkflow:
         
     def add_df_to_table(self, df: pd.DataFrame):
         df = df[df["text"].str.strip() != ""]
+    
+        for col in ["keywords", "hypothetical_questions", "method"]:
+            missing_count = df[col].isnull().sum()
+            logging.info(f"Filling {missing_count} missing values in column '{col}' with empty strings.")
+            df[col] = df[col].fillna("")        
+        
+        
         print(f"checking rows with missing text: {df['text'].isnull().sum()} ")
         print(f"add_df_to_table: {df.shape[0]}")
 
@@ -617,8 +645,8 @@ class RagWorkflow:
 # async def main():
 #     rag = RagWorkflow()
 #     res = await rag.aprocess_file(
-#         rf"C:\Users\vtorr\Work\Projects\aipatent\experiments\unstructured\docs\ald_paper.pdf",
-#         "ald_paper"
+#         rf"C:\Users\vtorr\Work\Projects\aipatent\experiments\unstructured\docs\gvhd_paper.pdf",
+#         "gvhd_paper"
 #     )
 
 # if __name__ == "__main__":
