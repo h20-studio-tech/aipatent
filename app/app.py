@@ -766,6 +766,7 @@ def server(input, output, session):
             filepath  = filedata[0]["approach_filepath"]
             filename = filedata[0]["approach_filename"]
             if filepath:
+                ui.notification_show(f"successfully uploaded {filename}", duration=3, type="message")
                 result = await approach_rag.aprocess_file(filepath, filename)
                 
                 # check if the file already exists in the database
@@ -781,18 +782,21 @@ def server(input, output, session):
             file_tuples = []
             logging.info(f"uploaded multiple approach files")
             for file in filedata:    
+                filename = file["approach_filename"]
                 filepath = file["approach_filepath"]
-                filepaths.append(filepath)
+                ui.notification_show(f"successfully uploaded {file['approach_filename']}", duration=3, type="message")
                 
-                filename = normalize_filename(file["approach_filename"])
+                
+                filepaths.append(filepath)
+                filename = normalize_filename(filename)
                 file = (filepath, filename)
                 
                 file_tuples.append(file)
                 
-                logging.info(f"appended file: {file}")
+                logging.info(f"appended file: {file}")                
                 
             if file_tuples:
-                result = approach_rag.process_files(file_tuples)
+                result = await approach_rag.process_files(file_tuples)
                 approach_rag.create_table_from_files(filepaths)
         
         logging.info("on_approach_file_upload completed successfully")

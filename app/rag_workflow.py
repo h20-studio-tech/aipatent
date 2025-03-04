@@ -74,10 +74,10 @@ class RagWorkflow:
             element_id: str
             page_number: int
             filename: str
-            keywords : str
-            hypothetical_questions: str
-            method: str
             chunk_id: int
+            # keywords : str
+            # hypothetical_questions: str
+            # method: str
             
 
         self.schema = Schema
@@ -205,7 +205,7 @@ class RagWorkflow:
 
         if not os.path.exists(file_path):
             logging.info("The file does not exist")
-            return FileProcessedError(is_processed=False, error="File does not exist.")
+            return
 
         logging.info(f"Processing file: {file_path}")
 
@@ -260,22 +260,23 @@ class RagWorkflow:
             for row, metadata in zip(data, metadata_results):
                 
                 metadata_for_chunks = json.loads(json.dumps(metadata))
-                # convert list fields to strings
-                for key in ["keywords", "hypothetical_questions", "method"]:
-                    if key not in metadata:
-                        # If the field doesn't exist, set it to empty string
-                        metadata[key] = ""
-                    else:
-                        value = metadata[key]
-                        if isinstance(value, list):
-                            # Convert each item to string and then join with ", "
-                            metadata[key] = ', '.join(value)
-                        elif not isinstance(value, str):
-                            # If it's neither a list nor a string, default to empty string
-                            metadata[key] = ""
+                
+                # # convert list fields to strings
+                # for key in ["keywords", "hypothetical_questions", "method"]:
+                #     if key not in metadata:
+                #         # If the field doesn't exist, set it to empty string
+                #         metadata[key] = ""
+                #     else:
+                #         value = metadata[key]
+                #         if isinstance(value, list):
+                #             # Convert each item to string and then join with ", "
+                #             metadata[key] = ', '.join(value)
+                #         elif not isinstance(value, str):
+                #             # If it's neither a list nor a string, default to empty string
+                #             metadata[key] = ""
                     
                         
-                row.update(metadata)
+                # row.update(metadata)
 
                 # formatted metadata section
                 meta_lines = []
@@ -387,7 +388,7 @@ class RagWorkflow:
     
     FileTuple = Tuple[str, str]
 
-    def process_files(self, file_list: List[FileTuple]) -> List[Union[dict, FileProcessedError]]:
+    async def process_files(self, file_list: List[FileTuple]) -> List[Union[dict, FileProcessedError]]:
         """
         Process a list of files by partitioning each document into chunks.
         For each file, the partitioned data is saved as JSON and CSV.
@@ -400,40 +401,39 @@ class RagWorkflow:
         
         for file_path, filename in file_list:
             if not os.path.exists(file_path):
-                logging.info(f"The file does not exist: {file_path}")
+                logging.info(f"The file does not exist: {filename}")
                 results.append(FileProcessedError(is_processed=False))
                 continue
 
-            logging.info(f"Processing file: {file_path}")
+            logging.info(f"Processing file: {filename}")
+            
+            req = operations.PartitionRequest(
+                partition_parameters=shared.PartitionParameters(
+                    files=shared.Files(
+                        content=open(file_path, "rb"),
+                        file_name=filename,
+                    ),
+                    combine_under_n_chars=120,
+                    chunking_strategy=shared.ChunkingStrategy.BY_PAGE,
+                    strategy=shared.Strategy.FAST,
+                    languages=["eng"],
+                    split_pdf_page=True,
+                    split_pdf_allow_failed=True,
+                    split_pdf_concurrency_level=15,
+                    max_characters=1000,
+                    overlap=500
+                ),
+            )
             try:
-                # Open the file in binary mode using a context manager
-                with open(file_path, "rb") as file_content:
-                    req = operations.PartitionRequest(
-                        partition_parameters=shared.PartitionParameters(
-                            files=shared.Files(
-                                content=file_content,
-                                file_name=filename,
-                            ),
-                            combine_under_n_chars=120,
-                            chunking_strategy=shared.ChunkingStrategy.BY_PAGE,
-                            strategy=shared.Strategy.FAST,
-                            languages=["eng"],
-                            split_pdf_page=True,
-                            split_pdf_allow_failed=True,
-                            split_pdf_concurrency_level=15,
-                            max_characters=1000,
-                            overlap=500
-                        ),
-                    )
-                    res = self.client.general.partition(request=req)
+                res = await asyncio.to_thread(self.client.general.partition, request=req)
                 
                 # Extract partitioned elements
                 element_dicts = [element for element in res.elements]
                 
                 # Save the raw partitioned data as JSON for record-keeping
                 json_path = file_path.replace(".pdf", ".json")
-                with open(json_path, "w") as json_file:
-                    json.dump(element_dicts, json_file)
+                async with aiofiles.open(json_path, "w") as jf:
+                    await jf.write(json.dumps(element_dicts))
                 
                 # Process each partition element into a row for the DataFrame
                 data = []
@@ -448,10 +448,16 @@ class RagWorkflow:
                         "chunk_id": chunk_counter,
                     }
                     data.append(new_row)
-                
+                    
+                logging.info(f"Processing file completed successfully for: {filename}")
                 df = pd.DataFrame(data=data)
                 csv_path = file_path.replace(".pdf", ".csv")
-                df.to_csv(csv_path, index=False)
+                
+                loop = asyncio.get_running_loop()
+                
+                # Write CSV using ThreadPoolExecutor to avoid blocking the event loop
+                with ThreadPoolExecutor() as pool:
+                    await loop.run_in_executor(pool, lambda: df.to_csv(csv_path, index=False))
                 
                 results.append({"df": df, "filepath": file_path})
             except Exception as e:
@@ -642,15 +648,17 @@ class RagWorkflow:
             
 
 
-# async def main():
-#     rag = RagWorkflow()
-#     res = await rag.aprocess_file(
-#         rf"C:\Users\vtorr\Work\Projects\aipatent\experiments\unstructured\docs\gvhd_paper.pdf",
-#         "gvhd_paper"
-#     )
+async def main():
+    rag = RagWorkflow()
+    res = await rag.process_files(
+        [(rf"C:\Users\vtorr\Work\Projects\aipatent\experiments\unstructured\docs\gvhd_paper.pdf",
+        "gvhd_paper"),
+         (rf"C:\Users\vtorr\Work\Projects\aipatent\experiments\unstructured\docs\ald_paper.pdf",
+        "ald_paper")]
+    )
 
-# if __name__ == "__main__":
-#     asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())
 
 # # ans = rag.multiquery_search("posttransplant expansion appearances")
 
