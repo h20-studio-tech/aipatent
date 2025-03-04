@@ -766,8 +766,9 @@ def server(input, output, session):
             filepath  = filedata[0]["approach_filepath"]
             filename = filedata[0]["approach_filename"]
             if filepath:
-                ui.notification_show(f"successfully uploaded {filename}", duration=3, type="message")
+                filename = normalize_filename(filename)
                 result = await approach_rag.aprocess_file(filepath, filename)
+                ui.notification_show(f"successfully uploaded {filename}", duration=3, type="message")
                 
                 # check if the file already exists in the database
                 if isinstance(result, FileProcessedError):
@@ -829,6 +830,7 @@ def server(input, output, session):
             filepath  = filedata[0]["technology_filepath"]
             filename = filedata[0]["technology_filename"]
             if filepath:
+                filename = normalize_filename(filename)
                 result = await technology_rag.aprocess_file(filepath, filename)
                 ui.notification_show(f"successfully uploaded {filename}", duration=3, type="message")
                 
@@ -891,6 +893,7 @@ def server(input, output, session):
             filepath  = filedata[0]["innovation_filepath"]
             filename = filedata[0]["innovation_filename"]
             if filepath:
+                filename = normalize_filename(filename)
                 result = await innovation_rag.aprocess_file(filepath, filename)
                 ui.notification_show(f"successfully uploaded {filename}", duration=3, type="message")
                 # check if the file already exists in the database
