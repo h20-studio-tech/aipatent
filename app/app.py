@@ -807,7 +807,6 @@ def server(input, output, session):
     def on_generate_approach():
         prompt = input.approach_prompt()
         
-        # display a warning if prompt is empty
         if prompt == "":
             ui.notification_show("please provide an approach input",type="error", duration=3) 
             return
