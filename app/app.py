@@ -784,7 +784,7 @@ def server(input, output, session):
             for file in filedata:    
                 filename = file["approach_filename"]
                 filepath = file["approach_filepath"]
-                ui.notification_show(f"successfully uploaded {file['approach_filename']}", duration=3, type="message")
+                ui.notification_show(f"successfully uploaded {filename}", duration=3, type="message")
                 
                 
                 filepaths.append(filepath)
@@ -830,6 +830,7 @@ def server(input, output, session):
             filename = filedata[0]["technology_filename"]
             if filepath:
                 result = await technology_rag.aprocess_file(filepath, filename)
+                ui.notification_show(f"successfully uploaded {filename}", duration=3, type="message")
                 
                 # check if the file already exists in the database
                 if isinstance(result, FileProcessedError):
@@ -844,10 +845,12 @@ def server(input, output, session):
             file_tuples = []
             logging.info(f"uploaded multiple technology files")
             for file in filedata:    
+                filename = file["technology_filename"]
                 filepath = file["technology_filepath"]
                 filepaths.append(filepath)
+                ui.notification_show(f"successfully uploaded {filename}", duration=3, type="message")
                 
-                filename = normalize_filename(file["technology_filename"])
+                filename = normalize_filename(filename)
                 file = (filepath, filename)
                 
                 file_tuples.append(file)
@@ -889,7 +892,7 @@ def server(input, output, session):
             filename = filedata[0]["innovation_filename"]
             if filepath:
                 result = await innovation_rag.aprocess_file(filepath, filename)
-                
+                ui.notification_show(f"successfully uploaded {filename}", duration=3, type="message")
                 # check if the file already exists in the database
                 if isinstance(result, FileProcessedError):
                     # make the rag workflow point to the existing table 
@@ -903,10 +906,11 @@ def server(input, output, session):
             file_tuples = []
             logging.info(f"uploaded multiple innovation files")
             for file in filedata:    
+                filename = file["innovation_filename"]
                 filepath = file["innovation_filepath"]
                 filepaths.append(filepath)
-                
-                filename = normalize_filename(file["innovation_filename"])
+                ui.notification_show(f"successfully uploaded {filename}", duration=3, type="message")
+                filename = normalize_filename(filename)
                 file = (filepath, filename)
                 
                 file_tuples.append(file)
