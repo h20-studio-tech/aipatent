@@ -557,10 +557,10 @@ class RagWorkflow:
     def add_df_to_table(self, df: pd.DataFrame):
         df = df[df["text"].str.strip() != ""]
     
-        for col in ["keywords", "hypothetical_questions", "method"]:
-            missing_count = df[col].isnull().sum()
-            logging.info(f"Filling {missing_count} missing values in column '{col}' with empty strings.")
-            df[col] = df[col].fillna("")        
+        # for col in ["keywords", "hypothetical_questions", "method"]:
+        #     missing_count = df[col].isnull().sum()
+        #     logging.info(f"Filling {missing_count} missing values in column '{col}' with empty strings.")
+        #     df[col] = df[col].fillna("")        
         
         
         print(f"checking rows with missing text: {df['text'].isnull().sum()} ")
