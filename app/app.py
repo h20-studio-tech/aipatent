@@ -2292,4 +2292,4 @@ def server(input, output, session):
 
 # Run App
 app = shiny.App(app_ui, server)
-app.run()
+app.run(host="0.0.0.0", port=8000)
