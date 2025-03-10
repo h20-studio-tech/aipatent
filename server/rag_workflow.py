@@ -261,24 +261,6 @@ class RagWorkflow:
                 
                 metadata_for_chunks = json.loads(json.dumps(metadata))
                 
-                # # convert list fields to strings
-                # for key in ["keywords", "hypothetical_questions", "method"]:
-                #     if key not in metadata:
-                #         # If the field doesn't exist, set it to empty string
-                #         metadata[key] = ""
-                #     else:
-                #         value = metadata[key]
-                #         if isinstance(value, list):
-                #             # Convert each item to string and then join with ", "
-                #             metadata[key] = ', '.join(value)
-                #         elif not isinstance(value, str):
-                #             # If it's neither a list nor a string, default to empty string
-                #             metadata[key] = ""
-                    
-                        
-                # row.update(metadata)
-
-                # formatted metadata section
                 meta_lines = []
                 if metadata_for_chunks.get("keywords"):
                     meta_lines.append(f"Keywords: {', '.join(metadata_for_chunks['keywords'])}")
@@ -648,20 +630,5 @@ class RagWorkflow:
             
 
 
-async def main():
-    rag = RagWorkflow()
-    res = await rag.process_files(
-        [(rf"C:\Users\vtorr\Work\Projects\aipatent\experiments\unstructured\docs\gvhd_paper.pdf",
-        "gvhd_paper"),
-         (rf"C:\Users\vtorr\Work\Projects\aipatent\experiments\unstructured\docs\ald_paper.pdf",
-        "ald_paper")]
-    )
-
-if __name__ == "__main__":
-    asyncio.run(main())
-
-# # ans = rag.multiquery_search("posttransplant expansion appearances")
-
-# # print(ans)
 
 
