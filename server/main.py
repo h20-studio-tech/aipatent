@@ -27,13 +27,11 @@ async def upload_file(file: UploadFile):
     content = await file.read()
     filename = file.filename
     
-    await supabase_upload(content, filename)
+    supabase_upload(content, filename, partition = False)
     
     unstructured_request = await partition_request(content, filename)
     
-    response = unstructured.general.partition(request=unstructured_request)
+    # response = unstructured.general.partition(request=unstructured_request)
     
-    
-
     
     return {"filename": file.filename}

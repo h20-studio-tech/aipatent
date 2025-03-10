@@ -39,25 +39,25 @@ async def partition_request(filename: str, content: bytes) -> PartitionRequest:
     )
 
 
-def supabase_upload(file: bytes, filename: str):
+def supabase_upload(file: bytes, filename: str, partition: bool):
     bucket_name = os.getenv("SUPABASE_BUCKET_NAME")
-
+    
+    
+    files = supabase.storage.from_(bucket_name).list("files")
+    
+    if filename in [file.name for file in files]:
+        logging.info(f"file {filename} already exists in storage")
+    
+    
+    folder = "partitions" if partition else "files"
+    
     try:
         res = supabase.storage.from_(bucket_name).upload(
             file=file,
-            path=f"public/{filename}",
+            path=f"{folder}/{filename}",
             file_options={"cache-control": "3600", "upsert": "false"},
         )
         logging.info(f"uploaded file to path {res.path}")
     except Exception as e:
         logging.error(f"Error during processing: {e}")
 
-
-def main():
-    with open("server/experiments/docs/ald_paper.pdf", "rb") as f:
-        file_content = f.read()
-    supabase_upload(file_content, "ald_paper.pdf")
-
-
-if __name__ == "__main__":
-    main()
