@@ -13,3 +13,4 @@ evaluation_results_field_of_invention.csv
 evaluation_results_summary.csv
 .replit
 replit.nix
+.venv
