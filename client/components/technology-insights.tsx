@@ -1,0 +1,197 @@
+"use client"
+
+import { useState, forwardRef, useImperativeHandle } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { FileText, Loader2 } from "lucide-react"
+import { useToast } from "@/components/ui/use-toast"
+import { Toaster } from "@/components/ui/toaster"
+
+// Define the ref type
+interface TechnologyInsightsRef {
+  generateContent: () => void
+}
+
+const TechnologyInsights = forwardRef<TechnologyInsightsRef>((props, ref) => {
+  const [content, setContent] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const { toast } = useToast()
+
+  // Expose the generateContent function to parent components via ref
+  useImperativeHandle(ref, () => ({
+    generateContent: () => {
+      generateContent()
+    },
+  }))
+
+  const generateContent = () => {
+    setIsLoading(true)
+
+    // Simulate API call delay
+    setTimeout(() => {
+      setContent(`# iPhone Technology Framework
+
+Our analysis of the technical specifications and research papers has yielded the following technology framework for the iPhone:
+
+## 1. Core Technologies
+
+The iPhone leverages several cutting-edge technologies:
+
+- **A-series/M-series Chips:** Custom ARM-based processors designed by Apple for optimal performance and energy efficiency
+- **Neural Engine:** Dedicated neural network hardware for AI and ML operations
+- **ProMotion Display:** Adaptive refresh rate technology up to 120Hz
+- **TrueDepth Camera:** Advanced 3D sensing system for Face ID and AR applications
+- **5G Modem:** Advanced cellular connectivity with mmWave support
+
+## 2. Technical Architecture
+
+The system architecture consists of four primary layers:
+
+- **Hardware Layer:** Custom silicon, sensors, and input/output systems
+- **System Software:** iOS core operating system and drivers
+- **Services Layer:** iCloud, App Store, and other platform services
+- **Application Layer:** First-party and third-party applications
+
+## 3. Technical Innovations
+
+Key technological innovations include:
+
+- Custom silicon design with integrated CPU, GPU, and Neural Engine
+- Advanced computational photography using multiple camera systems
+- Secure Enclave for hardware-level security
+- ProRAW image format for professional photography
+- Ceramic Shield display technology for enhanced durability
+
+## 4. Technical Specifications
+
+Current specifications include:
+
+- Display: Super Retina XDR OLED with ProMotion
+- Processor: Latest A-series chip with 6-core CPU
+- Memory: Up to 1TB storage and 6GB RAM
+- Camera System: Triple 48MP, 12MP, 12MP rear cameras
+- Battery: Up to 29 hours video playback
+- Connectivity: 5G, Wi-Fi 6E, Ultra Wideband
+
+## 5. Implementation Technologies
+
+Key implementation technologies include:
+
+- LTPO OLED display technology
+- Advanced machine learning algorithms
+- LiDAR scanning for AR applications
+- MagSafe wireless charging system
+- Ceramic Shield front cover
+
+This technology framework demonstrates Apple's leadership in mobile computing, showcasing innovations in silicon design, display technology, camera systems, and security features.`)
+      setIsLoading(false)
+    }, 2000)
+  }
+
+  const handleSave = () => {
+    setIsSaving(true)
+
+    // Simulate saving delay
+    setTimeout(() => {
+      setIsSaving(false)
+      toast({
+        title: "Insights saved successfully",
+        description: "Your technology insights have been saved to the project.",
+        duration: 3000,
+      })
+    }, 1000)
+  }
+
+  return (
+    <>
+      <Card className="border-2 border-primary shadow-lg">
+        <CardHeader className="bg-primary/5">
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center">
+              <FileText className="h-5 w-5 mr-2" />
+              Technology Insights
+            </div>
+            <div className="flex items-center gap-2">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    Meta-data
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Technology Meta-data</DialogTitle>
+                  </DialogHeader>
+                  <div className="bg-muted p-4 rounded-md max-h-[400px] overflow-y-auto">
+                    <pre className="text-xs whitespace-pre-wrap">
+                      {`{
+  "section": "Technology",
+  "metadata": {
+    "lastUpdated": "${new Date().toISOString()}",
+    "status": "In Progress",
+    "completionPercentage": 68,
+    "contributors": ["AI Assistant", "Engineering Team"],
+    "relatedDocuments": 5,
+    "wordCount": 756,
+    "keyTechnologies": 8
+  }
+}`}
+                    </pre>
+                  </div>
+                </DialogContent>
+              </Dialog>
+              <Button size="sm" onClick={handleSave} disabled={!content || isSaving}>
+                {isSaving ? "Saving..." : "Save"}
+              </Button>
+            </div>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6 relative">
+          {content ? (
+            <div className="prose max-w-none">
+              {content.split("\n").map((line, index) => {
+                if (line.startsWith("# ")) {
+                  return <h3 key={index}>{line.replace("# ", "")}</h3>
+                } else if (line.startsWith("## ")) {
+                  return <h4 key={index}>{line.replace("## ", "")}</h4>
+                } else if (line.startsWith("- ")) {
+                  return <li key={index}>{line.replace("- ", "")}</li>
+                } else if (line.trim() === "") {
+                  return <br key={index} />
+                } else {
+                  return <p key={index}>{line}</p>
+                }
+              })}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="bg-muted/50 p-8 rounded-lg text-center">
+                <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium mb-2">No insights generated yet</h3>
+                <p className="text-muted-foreground">Send a message in the chat to generate insights.</p>
+              </div>
+            </div>
+          )}
+
+          {isLoading && (
+            <div className="absolute inset-0 bg-background/80 flex items-center justify-center rounded-lg">
+              <div className="text-center">
+                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+                <p className="font-medium">Generating Technology Insights...</p>
+                <p className="text-sm text-muted-foreground mt-1">This may take a few moments</p>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+      <Toaster />
+    </>
+  )
+})
+
+TechnologyInsights.displayName = "TechnologyInsights"
+
+export default TechnologyInsights
+
