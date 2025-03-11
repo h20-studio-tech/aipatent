@@ -102,7 +102,7 @@ def multiquery_search(query:str, table_name:str, n_queries: str = 3) -> str:
                 messages=[{"role": "user", "content": prompt}],
             )
             logging.info(f"MultiQuery questions: \n{chr(10).join(f'- {q}' for q in multiquery.questions)}\n")
-            
+            logging.info(f"Retrieving chunks from table: {table_name}")
             retrieved = [search(q, table_name=table_name) for q in multiquery.questions]
           
             chunks = [result for results in retrieved for result in results]

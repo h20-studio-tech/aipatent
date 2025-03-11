@@ -60,8 +60,9 @@ async def get_files():
 
 @app.post("/api/v1/rag/multiquery-search/")
 async def query_search(query: str, target_file: str):
+    table_name = target_file.replace(".pdf", "")
     try:
-        res = multiquery_search(query, table_name = target_file)
+        res = multiquery_search(query, table_name = table_name)
         return {"response": res}
     except Exception as e:
         logging.info(f"Error during processing {e}")
