@@ -12,10 +12,25 @@ import unstructured_client
 from unstructured_client.models import shared
 from unstructured_client.models.operations import PartitionRequest
 from supabase import create_client
-from models.workflow import FileProcessedError
-from models.metadata_extraction import Extraction
+from models.pdf_workflow import FileProcessedError
+# from models.metadata_extraction import Extraction
 from openai import OpenAI, AsyncOpenAI
-from utils.lance import db
+from pydantic import BaseModel, Field
+from lancedb.db import AsyncConnection
+
+
+class Extraction(BaseModel):
+    method: list[str] = Field(
+        default_factory=list, 
+        description="method or methods observed/applied in the document. E.g., gene editing, CRISPR, PCR, fermentation, etc")
+    hypothetical_questions: list[str] = Field(
+        default_factory=list,
+        description="Hypothetical questions that this document could answer",
+    ) 
+    keywords: list[str] = Field(
+        default_factory=list, description="Biology related keywords that this document is about or MeSH headings for p apers"
+    ) 
+
 
 openai = instructor.from_openai(OpenAI())
 asyncopenai = instructor.from_openai(AsyncOpenAI())
@@ -121,7 +136,7 @@ async def extract_metadata(text: str, chunk_id: str) -> dict:
         # Return empty metadata in case of error
         return {"keywords": [], "method": [], "hypothetical_questions": []}
 
-async def process_file(content: bytes, filename: str) -> dict | FileProcessedError:
+async def process_file(content: bytes, filename: str, db: AsyncConnection) -> dict | FileProcessedError:
     """
     Asynchronously process a PDF file by partitioning its text into chunks,
     extracting metadata concurrently for each chunk, and saving the results
@@ -135,7 +150,7 @@ async def process_file(content: bytes, filename: str) -> dict | FileProcessedErr
     
     # Create a table name by removing the .pdf extension
     table_name = filename.replace(".pdf", "")
-    if table_name in db.table_names():
+    if table_name in await db.table_names():
         logging.info("File already exists in database, skipping processing")
         return FileProcessedError(is_processed=True, error="File already processed.")
 
