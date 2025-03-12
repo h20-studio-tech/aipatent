@@ -13,6 +13,7 @@ from rag import multiquery_search, create_table_from_file, chunks_summary
 from contextlib import asynccontextmanager
 from lancedb.db import AsyncConnection
 from pdf_processing import partition_request, supabase_upload, process_file, supabase_files
+from utils.normalize_filename import normalize_filename
 
 class FileUploadResponse(BaseModel):
     filename: str = Field(..., description="The name of the uploaded file")
@@ -58,24 +59,28 @@ async def lifespan(app: FastAPI):
     yield
     db_connection.clear()
 
+
 app = FastAPI(title="aipatent", version="0.1.0", lifespan=lifespan)
-    
-CORSMiddleware(
-    app,
-    allow_origins='*',
+
+origins = [
+    "http://192.168.0.236:3000",
+    "http://localhost:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=("*"),
-    allow_headers=("*"),
+    allow_methods=["*"],
+    allow_headers=["*"],
     allow_origin_regex=None,
-    expose_headers=None,
-    max_age=600,
 )
 
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
 
-@app.post("/api/v1/documents/", response_model=FileUploadResponse, status_code=200)
+@app.post("/api/v1/documents/", response_model=FileUploadResponse, status_code=200 )
 async def upload_file(file: UploadFile):
     """
     Upload and process a document file.
@@ -101,7 +106,9 @@ async def upload_file(file: UploadFile):
     # Read file content asynchronously
     content = await file.read()
     filename = file.filename
-
+    
+    # normalized filename
+    filename = normalize_filename(filename)
     try:
         # Step 1: Upload the file content to Supabase storage
         supabase_upload(content, filename, partition=False)
