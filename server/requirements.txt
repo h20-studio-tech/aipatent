@@ -1,6 +1,7 @@
 asyncio
 cohere
 fastapi
+fastapi[standard]
 instructor
 lancedb
 langfuse
