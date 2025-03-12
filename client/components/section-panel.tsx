@@ -16,6 +16,7 @@ import {
 import { FileUp, Send, FileText, X, File } from "lucide-react";
 import type { PDF } from "@/lib/types";
 import { backendUrl } from "../config/config";
+import type { Dispatch, SetStateAction } from "react"; // ✅ Fix missing import
 
 interface SectionPanelProps {
   sectionId: string;
@@ -23,6 +24,21 @@ interface SectionPanelProps {
   pdfs: PDF[];
   onPdfUpload: (sectionId: string, file: File) => void;
   hideInsights?: boolean;
+  chats: { role: "user" | "ai"; message: string }[]; // ✅ Updated chat structure
+  setChats: Dispatch<
+    SetStateAction<{ role: "user" | "ai"; message: string }[]>
+  >; // ✅ Function to update chats
+  setMetaData: Dispatch<
+    SetStateAction<
+      {
+        chunk_id: Number;
+        filename: string;
+        page_number: Number;
+        text: string;
+      }[]
+    >
+  >;
+  setInsightResponse: Dispatch<SetStateAction<string>>;
 }
 
 export default function SectionPanel({
@@ -31,6 +47,10 @@ export default function SectionPanel({
   pdfs,
   onPdfUpload,
   hideInsights = false,
+  chats,
+  setChats,
+  setInsightResponse,
+  setMetaData,
 }: SectionPanelProps) {
   const [userInput, setUserInput] = useState("");
   const [chatHistory, setChatHistory] = useState<string[]>([]);
@@ -66,6 +86,7 @@ export default function SectionPanel({
     if (!userInput.trim()) return;
 
     setChatHistory((prev) => [...prev, `You: ${userInput}`]);
+
     setIsLoading(true);
 
     try {
@@ -94,6 +115,21 @@ export default function SectionPanel({
           ...prev,
           `AI: ${JSON.stringify(data.message, null, 2)}`,
         ]);
+
+        setInsightResponse(data.message);
+        setChats((prevChats: any) => [
+          ...prevChats,
+          {
+            id: 6,
+            section: title,
+            question: userInput,
+            answer: data.message,
+            timestamp: new Date(),
+            saved: true,
+          },
+        ]);
+
+        setMetaData(data.data);
       } else {
         alert("Unexpected API response format.");
       }
@@ -106,9 +142,11 @@ export default function SectionPanel({
   };
 
   const handlePdfSelect = (pdfId: string) => {
-    if (!selectedPdfIds.includes(pdfId)) {
-      setSelectedPdfIds([...selectedPdfIds, pdfId]);
-    }
+    setSelectedPdfIds((prev) =>
+      prev.includes(pdfId)
+        ? prev.filter((id) => id !== pdfId)
+        : [...prev, pdfId]
+    );
   };
 
   const fetchDocuments = async () => {
@@ -148,15 +186,33 @@ export default function SectionPanel({
     >
       <div className="space-y-4">
         <div className="flex items-center gap-2 flex-wrap">
-          <Select onValueChange={handlePdfSelect}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Select PDF" />
+          <Select>
+            <SelectTrigger className="w-[300px]">
+              <SelectValue placeholder="Select PDFs">
+                {selectedPdfIds.length > 0
+                  ? selectedPdfIds
+                      .map(
+                        (id) => availablePdfs.find((pdf) => pdf.id === id)?.name
+                      )
+                      .join(", ")
+                  : "Select PDFs"}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               {availablePdfs.map((pdf) => (
-                <SelectItem key={pdf.id} value={pdf.id}>
+                <div
+                  key={pdf.id}
+                  className="flex items-center px-3 py-2 cursor-pointer hover:bg-gray-100"
+                  onClick={() => handlePdfSelect(pdf.id)}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedPdfIds.includes(pdf.id)}
+                    onChange={() => handlePdfSelect(pdf.id)}
+                    className="mr-2"
+                  />
                   {pdf.name}
-                </SelectItem>
+                </div>
               ))}
             </SelectContent>
           </Select>
