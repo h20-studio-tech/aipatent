@@ -28,6 +28,16 @@ interface SectionPanelProps {
   setChats: Dispatch<
     SetStateAction<{ role: "user" | "ai"; message: string }[]>
   >; // ✅ Function to update chats
+  setMetaData: Dispatch<
+    SetStateAction<
+      {
+        chunk_id: Number;
+        filename: string;
+        page_number: Number;
+        text: string;
+      }[]
+    >
+  >;
   setInsightResponse: Dispatch<SetStateAction<string>>;
 }
 
@@ -40,6 +50,7 @@ export default function SectionPanel({
   chats,
   setChats,
   setInsightResponse,
+  setMetaData,
 }: SectionPanelProps) {
   const [userInput, setUserInput] = useState("");
   const [chatHistory, setChatHistory] = useState<string[]>([]);
@@ -117,6 +128,8 @@ export default function SectionPanel({
             saved: true,
           },
         ]);
+
+        setMetaData(data.data);
       } else {
         alert("Unexpected API response format.");
       }

@@ -60,6 +60,14 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="aipatent", version="0.1.0", lifespan=lifespan)
     
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],  # Allow all origins (use specific domain in production)
+#     allow_credentials=True,
+#     allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
+#     allow_headers=["*"],  # Allow all headers
+# )
+
 CORSMiddleware(
     app,
     allow_origins='*',

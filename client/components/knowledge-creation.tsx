@@ -28,6 +28,7 @@ export default function KnowledgeCreation({
   const [pdfs, setPdfs] = useState(mockPdfs);
   const [activeTab, setActiveTab] = useState("approach");
   const [insightResponse, setInsightResponse] = useState("");
+  const [metaData, setMetaData] = useState([]);
   const approachInsightsRef = useRef(null);
   const technologyInsightsRef = useRef(null);
   const innovationInsightsRef = useRef(null);
@@ -109,6 +110,7 @@ export default function KnowledgeCreation({
               <SectionPanel
                 chats={chats}
                 setChats={setChats}
+                setMetaData={setMetaData}
                 setInsightResponse={setInsightResponse}
                 sectionId="approach"
                 title="Approach"
@@ -124,6 +126,7 @@ export default function KnowledgeCreation({
               <SectionPanel
                 chats={chats}
                 setChats={setChats}
+                setMetaData={setMetaData}
                 setInsightResponse={setInsightResponse}
                 sectionId="technology"
                 title="Technology"
@@ -139,6 +142,7 @@ export default function KnowledgeCreation({
               <SectionPanel
                 chats={chats}
                 setChats={setChats}
+                setMetaData={setMetaData}
                 setInsightResponse={setInsightResponse}
                 sectionId="innovation"
                 title="Innovation"
@@ -157,14 +161,23 @@ export default function KnowledgeCreation({
       {activeTab === "approach" && (
         <ApproachInsights
           response={insightResponse}
+          metaData={metaData}
           ref={approachInsightsRef}
         />
       )}
       {activeTab === "technology" && (
-        <TechnologyInsights ref={technologyInsightsRef} />
+        <TechnologyInsights
+          response={insightResponse}
+          metaData={metaData}
+          ref={technologyInsightsRef}
+        />
       )}
       {activeTab === "innovation" && (
-        <InnovationInsights ref={innovationInsightsRef} />
+        <InnovationInsights
+          response={insightResponse}
+          metaData={metaData}
+          ref={innovationInsightsRef}
+        />
       )}
     </div>
   );

@@ -21,10 +21,16 @@ interface ApproachInsightsRef {
 
 interface ApproachInsightsProps {
   response: string;
+  metaData: {
+    chunk_id: number;
+    filename: string;
+    page_number: number;
+    text: string;
+  }[]; // ✅ Fix: metaData is an array of objects
 }
 
 const ApproachInsights = forwardRef<ApproachInsightsRef>(
-  ({ response }, ref) => {
+  ({ response, metaData }, ref) => {
     const [content, setContent] = useState<string | null>(response);
     const [isSaving, setIsSaving] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -68,25 +74,50 @@ const ApproachInsights = forwardRef<ApproachInsightsRef>(
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                      <DialogTitle>Approach Meta-data</DialogTitle>
-                    </DialogHeader>
-                    <div className="bg-muted p-4 rounded-md max-h-[400px] overflow-y-auto">
-                      <pre className="text-xs whitespace-pre-wrap">
-                        {`{
-  "section": "Approach",
-  "metadata": {
-    "lastUpdated": "${new Date().toISOString()}",
-    "status": "In Progress",
-    "completionPercentage": 75,
-    "contributors": ["AI Assistant", "Research Team"],
-    "relatedDocuments": 3,
-    "wordCount": 842,
-    "keyInsights": 12
-  }
-}`}
-                      </pre>
-                    </div>
+                    <DialogContent className="sm:max-w-[500px]">
+                      <DialogHeader>
+                        <DialogTitle>Approach Meta-data</DialogTitle>
+                      </DialogHeader>
+                      <div className="bg-muted p-4 rounded-md max-h-[400px] overflow-y-auto">
+                        {metaData.length > 0 ? (
+                          <div className="space-y-3 text-sm">
+                            {metaData.map((item, index) => (
+                              <div
+                                key={item.chunk_id}
+                                className="border border-gray-300 p-3 rounded-md"
+                              >
+                                <p>
+                                  <span className="font-semibold">
+                                    Chunk ID:
+                                  </span>{" "}
+                                  {item.chunk_id}
+                                </p>
+                                <p>
+                                  <span className="font-semibold">
+                                    Filename:
+                                  </span>{" "}
+                                  {item.filename}
+                                </p>
+                                <p>
+                                  <span className="font-semibold">
+                                    Page Number:
+                                  </span>{" "}
+                                  {item.page_number}
+                                </p>
+                                <p>
+                                  <span className="font-semibold">Text:</span>{" "}
+                                  <span className="italic">{item.text}</span>
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-gray-500 text-center">
+                            No metadata available.
+                          </p>
+                        )}
+                      </div>
+                    </DialogContent>
                   </DialogContent>
                 </Dialog>
                 <Button
