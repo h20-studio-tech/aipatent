@@ -1,10 +1,15 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Database } from "lucide-react"
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Database } from "lucide-react";
 
 // Mock data for stored knowledge
 const mockStoredKnowledge = [
@@ -62,10 +67,18 @@ const mockStoredKnowledge = [
     timestamp: "2025-03-04T16:28:17Z",
     saved: true,
   },
-]
+];
 
-export default function StoredKnowledge() {
-  const [open, setOpen] = useState(false)
+interface StoredKnowledgeProps {
+  chats: any[];
+}
+
+export default function StoredKnowledge({ chats }) {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    console.log("Cahst", chats);
+  }, [chats]);
 
   return (
     <>
@@ -89,14 +102,18 @@ export default function StoredKnowledge() {
 
           <ScrollArea className="h-[60vh] pr-4">
             <div className="space-y-6">
-              {mockStoredKnowledge.map((item) => (
-                <div key={item.id} className="border rounded-lg overflow-hidden">
+              {chats.map((item: any, index: any) => (
+                <div key={index} className="border rounded-lg overflow-hidden">
                   <div className="bg-muted px-4 py-2 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{item.section}</span>
-                      <span className="text-muted-foreground text-sm">{new Date(item.timestamp).toLocaleString()}</span>
+                      <span className="text-muted-foreground text-sm">
+                        {new Date(item.timestamp).toLocaleString()}
+                      </span>
                     </div>
-                    <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">Saved</span>
+                    <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+                      Saved
+                    </span>
                   </div>
                   <div className="p-4 space-y-3">
                     <div className="bg-accent/30 p-3 rounded-md">
@@ -113,6 +130,5 @@ export default function StoredKnowledge() {
         </DialogContent>
       </Dialog>
     </>
-  )
+  );
 }
-
