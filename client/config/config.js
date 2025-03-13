@@ -1,1 +1,1 @@
-export const backendUrl = "http://127.0.0.1:8000/api";
+export const backendUrl = "https://aipatent-api-b13a8af5f49e.herokuapp.com/api";
