@@ -78,10 +78,58 @@ const ApproachInsights = forwardRef<ApproachInsightsRef>(
                       <DialogHeader>
                         <DialogTitle>Approach Meta-data</DialogTitle>
                       </DialogHeader>
-                      <div className="bg-muted p-4 rounded-md max-h-[400px] overflow-y-auto">
+                      <div
+                        className="bg-muted p-4 rounded-md max-h-[400px] overflow-y-auto cursor-grab active:cursor-grabbing"
+                        ref={(el) => {
+                          if (!el) return;
+
+                          let isDown = false;
+                          let startY: number;
+                          let scrollTop: number;
+
+                          // ✅ Enable Native Two-Finger Scrolling
+                          el.style.overflowY = "auto";
+                          el.style.webkitOverflowScrolling = "touch"; // iOS-like smooth scrolling
+
+                          // ✅ Mouse Drag Scrolling (Optional)
+                          el.addEventListener("mousedown", (e) => {
+                            isDown = true;
+                            el.classList.add("active");
+                            startY = e.pageY - el.offsetTop;
+                            scrollTop = el.scrollTop;
+                          });
+
+                          el.addEventListener("mouseleave", () => {
+                            isDown = false;
+                            el.classList.remove("active");
+                          });
+
+                          el.addEventListener("mouseup", () => {
+                            isDown = false;
+                            el.classList.remove("active");
+                          });
+
+                          el.addEventListener("mousemove", (e) => {
+                            if (!isDown) return;
+                            e.preventDefault();
+                            const y = e.pageY - el.offsetTop;
+                            const walk = (y - startY) * 2; // Adjust scrolling speed
+                            el.scrollTop = scrollTop - walk;
+                          });
+
+                          // ✅ Allow Touchpad & Mobile Scrolling (Fixes Two-Finger Scroll Issue)
+                          el.addEventListener(
+                            "touchmove",
+                            (e) => {
+                              if (e.cancelable) e.stopPropagation(); // Ensure event propagates
+                            },
+                            { passive: true } // Improves performance
+                          );
+                        }}
+                      >
                         {metaData.length > 0 ? (
                           <div className="space-y-3 text-sm">
-                            {metaData.map((item, index) => (
+                            {metaData.map((item: any, index: any) => (
                               <div
                                 key={item.chunk_id}
                                 className="border border-gray-300 p-3 rounded-md"
