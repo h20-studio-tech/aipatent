@@ -27,8 +27,12 @@ export default function KnowledgeCreation({
 }: KnowledgeCreationProps) {
   const [pdfs, setPdfs] = useState(mockPdfs);
   const [activeTab, setActiveTab] = useState("approach");
-  const [insightResponse, setInsightResponse] = useState("");
-  const [metaData, setMetaData] = useState([]);
+  const [innovationResponse, setInnovationResponse] = useState("");
+  const [approachResponse, setApproachResponse] = useState("");
+  const [technologyResponse, setTechnologyResponse] = useState("");
+  const [approachmetaData, setApproachMetaData] = useState([]);
+  const [innovationmetaData, setInnovationMetaData] = useState([]);
+  const [technologymetaData, setTechnologyMetaData] = useState([]);
   const approachInsightsRef = useRef(null);
   const technologyInsightsRef = useRef(null);
   const innovationInsightsRef = useRef(null);
@@ -110,8 +114,8 @@ export default function KnowledgeCreation({
               <SectionPanel
                 chats={chats}
                 setChats={setChats}
-                setMetaData={setMetaData}
-                setInsightResponse={setInsightResponse}
+                setMetaData={setApproachMetaData}
+                setInsightResponse={setApproachResponse}
                 sectionId="approach"
                 title="Approach"
                 pdfs={pdfs.filter(
@@ -126,8 +130,8 @@ export default function KnowledgeCreation({
               <SectionPanel
                 chats={chats}
                 setChats={setChats}
-                setMetaData={setMetaData}
-                setInsightResponse={setInsightResponse}
+                setMetaData={setTechnologyMetaData}
+                setInsightResponse={setTechnologyResponse}
                 sectionId="technology"
                 title="Technology"
                 pdfs={pdfs.filter(
@@ -142,8 +146,8 @@ export default function KnowledgeCreation({
               <SectionPanel
                 chats={chats}
                 setChats={setChats}
-                setMetaData={setMetaData}
-                setInsightResponse={setInsightResponse}
+                setMetaData={setInnovationMetaData}
+                setInsightResponse={setInnovationResponse}
                 sectionId="innovation"
                 title="Innovation"
                 pdfs={pdfs.filter(
@@ -160,22 +164,22 @@ export default function KnowledgeCreation({
       {/* Conditional Insights Section based on active tab */}
       {activeTab === "approach" && (
         <ApproachInsights
-          response={insightResponse}
-          metaData={metaData}
+          response={approachResponse}
+          metaData={approachmetaData}
           ref={approachInsightsRef}
         />
       )}
       {activeTab === "technology" && (
         <TechnologyInsights
-          response={insightResponse}
-          metaData={metaData}
+          response={technologyResponse}
+          metaData={technologymetaData}
           ref={technologyInsightsRef}
         />
       )}
       {activeTab === "innovation" && (
         <InnovationInsights
-          response={insightResponse}
-          metaData={metaData}
+          response={innovationResponse}
+          metaData={innovationmetaData}
           ref={innovationInsightsRef}
         />
       )}

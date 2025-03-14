@@ -13,7 +13,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FileUp, Send, FileText, X, File } from "lucide-react";
+import {
+  FileUp,
+  Send,
+  FileText,
+  X,
+  File,
+  CheckCircle,
+  Loader2,
+} from "lucide-react";
 import type { PDF } from "@/lib/types";
 import { backendUrl } from "../config/config";
 import type { Dispatch, SetStateAction } from "react"; // ✅ Fix missing import
@@ -57,27 +65,37 @@ export default function SectionPanel({
   const [selectedPdfIds, setSelectedPdfIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [pdfList, setPdfList] = useState<PDF[]>([]);
+  const [selectedPdfs, setSelectedPdfs] = useState<PDF[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setIsLoading(true);
 
       try {
+        setIsUploading(true); // ✅ Start spinner
+
         const formData = new FormData();
         formData.append("file", file);
 
-        const { data } = await axios.post(
-          `${backendUrl}/v1/documents/`,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
+        await axios.post(`${backendUrl}/v1/documents/`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
+        fetchDocuments();
+
+        // ✅ Show success icon for 5 seconds
+        setUploadSuccess(true);
+        setTimeout(() => {
+          setUploadSuccess(false);
+        }, 5000);
       } catch (error) {
+        console.error(error);
       } finally {
+        setIsUploading(false); // ✅ Stop spinner
       }
     }
   };
@@ -118,7 +136,6 @@ export default function SectionPanel({
 
         setInsightResponse(data.message);
         setChats((prevChats: any) => [
-          ...prevChats,
           {
             id: 6,
             section: title,
@@ -127,6 +144,7 @@ export default function SectionPanel({
             timestamp: new Date(),
             saved: true,
           },
+          ...prevChats,
         ]);
 
         setMetaData(data.data);
@@ -142,11 +160,12 @@ export default function SectionPanel({
   };
 
   const handlePdfSelect = (pdfId: string) => {
-    setSelectedPdfIds((prev) =>
-      prev.includes(pdfId)
-        ? prev.filter((id) => id !== pdfId)
-        : [...prev, pdfId]
-    );
+    setSelectedPdfIds((prev) => {
+      const updatedIds = prev.includes(pdfId)
+        ? prev.filter((id) => id !== pdfId) // Remove if already selected
+        : [...prev, pdfId]; // Add if not selected
+      return [...updatedIds]; // ✅ Ensure a new array is returned
+    });
   };
 
   const fetchDocuments = async () => {
@@ -155,7 +174,14 @@ export default function SectionPanel({
 
       if (data.response) {
         console.log("Fetched Documents:", data.response);
-        setPdfList(data.response); // Store PDFs in state
+
+        // ✅ Sort documents by created_at (Newest first)
+        const sortedDocuments = data.response.sort(
+          (a: any, b: any) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+
+        setPdfList(sortedDocuments); // Store sorted PDFs in state
       } else {
         console.error("Unexpected API response format", data);
       }
@@ -172,7 +198,12 @@ export default function SectionPanel({
     (pdf) => pdf.section === sectionId || !pdf.section
   );
 
-  const selectedPdfs = pdfs.filter((pdf) => selectedPdfIds.includes(pdf.id));
+  useEffect(() => {
+    const updatedSelectedPdfs = pdfList.filter((pdf) =>
+      selectedPdfIds.includes(pdf.id)
+    );
+    setSelectedPdfs([...updatedSelectedPdfs]); // ✅ Ensure state updates
+  }, [selectedPdfIds, pdfList]); // ✅ Depend on `pdfList` as well
 
   useEffect(() => {
     fetchDocuments();
@@ -228,9 +259,15 @@ export default function SectionPanel({
             <Button variant="outline" size="sm" asChild>
               <label
                 htmlFor={`pdf-upload-${sectionId}`}
-                className="cursor-pointer"
+                className="cursor-pointer flex items-center"
               >
-                <FileUp className="h-4 w-4 mr-2" />
+                {isUploading ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2 text-primary" />
+                ) : uploadSuccess ? (
+                  <CheckCircle className="h-4 w-4 text-green-500 mr-2 transition-all duration-300" />
+                ) : (
+                  <FileUp className="h-4 w-4 mr-2 transition-all duration-300" />
+                )}
                 Upload PDF
               </label>
             </Button>
@@ -275,7 +312,7 @@ export default function SectionPanel({
             className="w-full"
           >
             {isLoading ? (
-              "Processing..."
+              "Thinking..."
             ) : (
               <>
                 <Send className="h-4 w-4 mr-2" />
