@@ -1,9 +1,10 @@
 "use client";
 
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import Confetti from "react-confetti";
 import axios from "axios";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -32,10 +33,16 @@ interface SectionPanelProps {
   pdfs: PDF[];
   onPdfUpload: (sectionId: string, file: File) => void;
   hideInsights?: boolean;
-  chats: { role: "user" | "ai"; message: string }[]; // ✅ Updated chat structure
+  chats: { role: "user" | "ai"; message: string }[];
   setChats: Dispatch<
     SetStateAction<{ role: "user" | "ai"; message: string }[]>
-  >; // ✅ Function to update chats
+  >;
+  selectedPdfIds: string[]; // ✅ Receive selected PDF IDs from parent
+  setSelectedPdfIds: Dispatch<SetStateAction<string[]>>; // ✅ Function to update selected PDFs
+  selectedPdfs: PDF[]; // ✅ Selected PDFs for this section
+  setSelectedPdfs: Dispatch<SetStateAction<PDF[]>>; // ✅ Function to update selected PDFs
+  pdfList: PDF[]; // ✅ All available PDFs
+  setPdfList: Dispatch<SetStateAction<PDF[]>>; // ✅ Function to update PDF list
   setMetaData: Dispatch<
     SetStateAction<
       {
@@ -59,46 +66,78 @@ export default function SectionPanel({
   setChats,
   setInsightResponse,
   setMetaData,
+  pdfList,
+  setPdfList,
+  selectedPdfs,
+  setSelectedPdfs,
+  selectedPdfIds,
+  setSelectedPdfIds,
 }: SectionPanelProps) {
   const [userInput, setUserInput] = useState("");
   const [chatHistory, setChatHistory] = useState<string[]>([]);
-  const [selectedPdfIds, setSelectedPdfIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [pdfList, setPdfList] = useState<PDF[]>([]);
-  const [selectedPdfs, setSelectedPdfs] = useState<PDF[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [isProcessingPdf, setIsProcessingPdf] = useState(false);
+  const [processingComplete, setProcessingComplete] = useState(false);
+  const [processingFileName, setProcessingFileName] = useState("");
+  const confettiRef = useRef(null);
+  const successIconRef = useRef(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      setProcessingFileName(file.name);
+      setIsProcessingPdf(true); // ✅ Start processing UI
 
       try {
-        setIsUploading(true); // ✅ Start spinner
-
         const formData = new FormData();
         formData.append("file", file);
 
         await axios.post(`${backendUrl}/v1/documents/`, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+          headers: { "Content-Type": "multipart/form-data" },
         });
 
         fetchDocuments();
 
-        // ✅ Show success icon for 5 seconds
-        setUploadSuccess(true);
+        // ✅ Show success UI for 3 seconds
+        setIsProcessingPdf(false);
+        setProcessingComplete(true);
         setTimeout(() => {
-          setUploadSuccess(false);
-        }, 5000);
+          setProcessingComplete(false);
+        }, 3000);
       } catch (error) {
-        console.error(error);
-      } finally {
-        setIsUploading(false); // ✅ Stop spinner
+        console.error("Error uploading file:", error);
+        setIsProcessingPdf(false);
       }
     }
   };
+
+  useEffect(() => {
+    if (processingComplete && confettiRef.current && successIconRef.current) {
+      const iconRect = successIconRef.current.getBoundingClientRect();
+      const originX = iconRect.left / window.innerWidth;
+      const originY = iconRect.top / window.innerHeight;
+
+      setTimeout(() => {
+        confettiRef.current?.fire({
+          particleCount: 150,
+          spread: 360,
+          startVelocity: 30,
+          gravity: 0.8,
+          origin: { x: originX, y: originY },
+          colors: [
+            "#4CAF50",
+            "#8BC34A",
+            "#CDDC39",
+            "#FFC107",
+            "#FF9800",
+            "#FF5722",
+          ],
+        });
+      }, 100);
+    }
+  }, [processingComplete]);
 
   const handleSubmit = async () => {
     if (!userInput.trim()) return;
@@ -215,6 +254,54 @@ export default function SectionPanel({
         hideInsights ? "md:grid-cols-1" : "md:grid-cols-2"
       } gap-4 mt-4`}
     >
+      {isProcessingPdf && (
+        <div className="fixed inset-0 bg-background z-50 flex items-center justify-center">
+          <div className="text-center max-w-md mx-auto p-8">
+            <Loader2 className="h-16 w-16 animate-spin mx-auto mb-6 text-primary" />
+            <h3 className="text-xl font-medium mb-2">Processing PDF</h3>
+            <p className="text-muted-foreground mb-4">
+              Extracting insights from{" "}
+              <span className="font-medium">{processingFileName}</span>
+            </p>
+            <div className="w-full bg-muted rounded-full h-2 mb-6">
+              <div className="bg-primary h-2 rounded-full animate-pulse"></div>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              This may take a few moments.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* PDF Processing Success - Full Screen with Confetti */}
+      {processingComplete && (
+        <div className="fixed inset-0 bg-background z-50 flex items-center justify-center">
+          <Confetti
+            ref={confettiRef}
+            className="fixed inset-0 z-0 pointer-events-none"
+            manualstart={true}
+          />
+          <div className="text-center max-w-md mx-auto p-8 z-10">
+            <div
+              ref={successIconRef}
+              className="rounded-full bg-green-100 p-3 w-20 h-20 flex items-center justify-center mx-auto mb-6 relative"
+            >
+              <CheckCircle className="h-12 w-12 text-green-600" />
+            </div>
+            <h3 className="text-xl font-medium mb-2">
+              PDF Processed Successfully
+            </h3>
+            <p className="text-muted-foreground mb-4">
+              <span className="font-medium">{processingFileName}</span> is ready
+              for use.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              You can now interact with this document.
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="space-y-4">
         <div className="flex items-center gap-2 flex-wrap">
           <Select>

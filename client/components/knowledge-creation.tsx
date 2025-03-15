@@ -15,6 +15,7 @@ import TechnologyInsights from "@/components/technology-insights";
 import InnovationInsights from "@/components/innovation-insights";
 import { mockPdfs } from "@/lib/mock-data";
 import { Dispatch, SetStateAction } from "react";
+import { PDF } from "@/lib/types";
 
 interface KnowledgeCreationProps {
   chats: any[]; // ✅ Correctly defining props as an object
@@ -29,6 +30,25 @@ export default function KnowledgeCreation({
   const [activeTab, setActiveTab] = useState("approach");
   const [innovationResponse, setInnovationResponse] = useState("");
   const [approachResponse, setApproachResponse] = useState("");
+  const [approachpdfList, setapproachPdfList] = useState<PDF[]>([]);
+  const [selectedapproachPdfs, setSelectedapproachPdfs] = useState<PDF[]>([]);
+  const [selectedapproachPdfIds, setSelectedapproachPdfIds] = useState<
+    string[]
+  >([]);
+  const [innovationpdfList, setinnovationPdfList] = useState<PDF[]>([]);
+  const [selectedinnovationPdfs, setSelectedinnovationPdfs] = useState<PDF[]>(
+    []
+  );
+  const [selectedinnovationPdfIds, setSelectedinnovationPdfIds] = useState<
+    string[]
+  >([]);
+  const [technologypdfList, settechnologyPdfList] = useState<PDF[]>([]);
+  const [selectedtechnologyPdfs, setSelectedtechnologyPdfs] = useState<PDF[]>(
+    []
+  );
+  const [selectedtechnologyPdfIds, setSelectedtechnologyPdfIds] = useState<
+    string[]
+  >([]);
   const [technologyResponse, setTechnologyResponse] = useState("");
   const [approachmetaData, setApproachMetaData] = useState([]);
   const [innovationmetaData, setInnovationMetaData] = useState([]);
@@ -118,6 +138,12 @@ export default function KnowledgeCreation({
                 setInsightResponse={setApproachResponse}
                 sectionId="approach"
                 title="Approach"
+                pdfList={approachpdfList}
+                setPdfList={setapproachPdfList}
+                selectedPdfs={selectedapproachPdfs}
+                setSelectedPdfs={setSelectedapproachPdfs}
+                selectedPdfIds={selectedapproachPdfIds}
+                setSelectedPdfIds={setSelectedapproachPdfIds}
                 pdfs={pdfs.filter(
                   (pdf) => pdf.section === "approach" || !pdf.section
                 )}
@@ -134,6 +160,12 @@ export default function KnowledgeCreation({
                 setInsightResponse={setTechnologyResponse}
                 sectionId="technology"
                 title="Technology"
+                pdfList={technologypdfList}
+                setPdfList={settechnologyPdfList}
+                selectedPdfs={selectedtechnologyPdfs}
+                setSelectedPdfs={setSelectedtechnologyPdfs}
+                selectedPdfIds={selectedtechnologyPdfIds}
+                setSelectedPdfIds={setSelectedtechnologyPdfIds}
                 pdfs={pdfs.filter(
                   (pdf) => pdf.section === "technology" || !pdf.section
                 )}
@@ -150,6 +182,12 @@ export default function KnowledgeCreation({
                 setInsightResponse={setInnovationResponse}
                 sectionId="innovation"
                 title="Innovation"
+                pdfList={innovationpdfList}
+                setPdfList={setinnovationPdfList}
+                selectedPdfs={selectedinnovationPdfs}
+                setSelectedPdfs={setSelectedinnovationPdfs}
+                selectedPdfIds={selectedinnovationPdfIds}
+                setSelectedPdfIds={setSelectedinnovationPdfIds}
                 pdfs={pdfs.filter(
                   (pdf) => pdf.section === "innovation" || !pdf.section
                 )}

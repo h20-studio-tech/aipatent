@@ -1,6 +1,12 @@
 "use client";
 
-import { useState, forwardRef, useImperativeHandle, useEffect } from "react";
+import {
+  useState,
+  forwardRef,
+  useImperativeHandle,
+  useEffect,
+  useRef,
+} from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,6 +37,34 @@ interface ApproachInsightsProps {
 
 const ApproachInsights = forwardRef<ApproachInsightsRef>(
   ({ response, metaData }, ref) => {
+    const scrollRef = useRef<HTMLDivElement | null>(null);
+    const isDragging = useRef(false);
+    const startX = useRef(0);
+    const scrollLeft = useRef(0);
+
+    const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!scrollRef.current) return;
+      isDragging.current = true;
+      startX.current = e.pageX - scrollRef.current.offsetLeft;
+      scrollLeft.current = scrollRef.current.scrollLeft;
+
+      const handleMouseMove = (moveEvent: MouseEvent) => {
+        if (!isDragging.current || !scrollRef.current) return;
+        moveEvent.preventDefault();
+        const x = moveEvent.pageX - scrollRef.current.offsetLeft;
+        const walk = (x - startX.current) * 2; // Adjust speed
+        scrollRef.current.scrollLeft = scrollLeft.current - walk;
+      };
+
+      const handleMouseUp = () => {
+        isDragging.current = false;
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
+      };
+
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+    };
     const [content, setContent] = useState<string | null>(response);
     const [isSaving, setIsSaving] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -73,101 +107,53 @@ const ApproachInsights = forwardRef<ApproachInsightsRef>(
                       Meta-data
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
-                    <DialogContent className="sm:max-w-[500px]">
-                      <DialogHeader>
-                        <DialogTitle>Approach Meta-data</DialogTitle>
-                      </DialogHeader>
-                      <div
-                        className="bg-muted p-4 rounded-md max-h-[400px] overflow-y-auto cursor-grab active:cursor-grabbing"
-                        ref={(el) => {
-                          if (!el) return;
-
-                          let isDown = false;
-                          let startY: number;
-                          let scrollTop: number;
-
-                          // ✅ Enable Native Two-Finger Scrolling
-                          el.style.overflowY = "auto";
-                          el.style.webkitOverflowScrolling = "touch"; // iOS-like smooth scrolling
-
-                          // ✅ Mouse Drag Scrolling (Optional)
-                          el.addEventListener("mousedown", (e) => {
-                            isDown = true;
-                            el.classList.add("active");
-                            startY = e.pageY - el.offsetTop;
-                            scrollTop = el.scrollTop;
-                          });
-
-                          el.addEventListener("mouseleave", () => {
-                            isDown = false;
-                            el.classList.remove("active");
-                          });
-
-                          el.addEventListener("mouseup", () => {
-                            isDown = false;
-                            el.classList.remove("active");
-                          });
-
-                          el.addEventListener("mousemove", (e) => {
-                            if (!isDown) return;
-                            e.preventDefault();
-                            const y = e.pageY - el.offsetTop;
-                            const walk = (y - startY) * 2; // Adjust scrolling speed
-                            el.scrollTop = scrollTop - walk;
-                          });
-
-                          // ✅ Allow Touchpad & Mobile Scrolling (Fixes Two-Finger Scroll Issue)
-                          el.addEventListener(
-                            "touchmove",
-                            (e) => {
-                              if (e.cancelable) e.stopPropagation(); // Ensure event propagates
-                            },
-                            { passive: true } // Improves performance
-                          );
-                        }}
-                      >
-                        {metaData.length > 0 ? (
-                          <div className="space-y-3 text-sm">
-                            {metaData.map((item: any, index: any) => (
-                              <div
-                                key={item.chunk_id}
-                                className="border border-gray-300 p-3 rounded-md"
-                              >
-                                <p>
-                                  <span className="font-semibold">
-                                    Chunk ID:
-                                  </span>{" "}
-                                  {item.chunk_id}
-                                </p>
-                                <p>
-                                  <span className="font-semibold">
-                                    Filename:
-                                  </span>{" "}
-                                  {item.filename}
-                                </p>
-                                <p>
-                                  <span className="font-semibold">
-                                    Page Number:
-                                  </span>{" "}
-                                  {item.page_number}
-                                </p>
-                                <p>
-                                  <span className="font-semibold">Text:</span>{" "}
-                                  <span className="italic">{item.text}</span>
-                                </p>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="text-gray-500 text-center">
-                            No metadata available.
-                          </p>
-                        )}
-                      </div>
-                    </DialogContent>
+                  <DialogContent className="sm:max-w-[500px]">
+                    <DialogHeader>
+                      <DialogTitle>Approach Meta-data</DialogTitle>{" "}
+                      {/* ✅ Required for accessibility */}
+                    </DialogHeader>
+                    <div
+                      className="bg-muted p-4 rounded-md max-h-[400px] overflow-auto"
+                      ref={scrollRef}
+                      onMouseDown={handleMouseDown}
+                    >
+                      {metaData.length > 0 ? (
+                        <div className="space-y-3 text-sm">
+                          {metaData.map((item: any) => (
+                            <div
+                              key={item.chunk_id}
+                              className="border border-gray-300 p-3 rounded-md"
+                            >
+                              <p>
+                                <span className="font-semibold">Chunk ID:</span>{" "}
+                                {item.chunk_id}
+                              </p>
+                              <p>
+                                <span className="font-semibold">Filename:</span>{" "}
+                                {item.filename}
+                              </p>
+                              <p>
+                                <span className="font-semibold">
+                                  Page Number:
+                                </span>{" "}
+                                {item.page_number}
+                              </p>
+                              <p>
+                                <span className="font-semibold">Text:</span>{" "}
+                                <span className="italic">{item.text}</span>
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-gray-500 text-center">
+                          No metadata available.
+                        </p>
+                      )}
+                    </div>
                   </DialogContent>
                 </Dialog>
+
                 <Button
                   size="sm"
                   onClick={handleSave}
