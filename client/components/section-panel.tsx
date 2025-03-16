@@ -81,14 +81,19 @@ export default function SectionPanel({
   const [isProcessingPdf, setIsProcessingPdf] = useState(false);
   const [processingComplete, setProcessingComplete] = useState(false);
   const [processingFileName, setProcessingFileName] = useState("");
+  const [showConfetti, setShowConfetti] = useState(false);
   const confettiRef = useRef(null);
   const successIconRef = useRef(null);
 
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log("A");
     if (e.target.files && e.target.files[0]) {
+      console.log("B");
       const file = e.target.files[0];
       setProcessingFileName(file.name);
-      setIsProcessingPdf(true); // ✅ Start processing UI
+      setIsProcessingPdf(true);
 
       try {
         const formData = new FormData();
@@ -98,9 +103,33 @@ export default function SectionPanel({
           headers: { "Content-Type": "multipart/form-data" },
         });
 
-        fetchDocuments();
+        // Fetch updated documents list
+        const { data } = await axios.get(`${backendUrl}/v1/documents/`);
 
-        // ✅ Show success UI for 3 seconds
+        if (data.response) {
+          const sortedDocuments = data.response.sort(
+            (a: any, b: any) =>
+              new Date(b.created_at).getTime() -
+              new Date(a.created_at).getTime()
+          );
+
+          setPdfList(sortedDocuments);
+
+          // Find the uploaded PDF
+          const uploadedPdf = sortedDocuments.find(
+            (pdf: PDF) => pdf.name === file.name
+          );
+
+          if (uploadedPdf) {
+            setSelectedPdfIds((prev) => [...prev, uploadedPdf.id]); // ✅ Select the uploaded PDF
+          }
+        }
+
+        // ✅ Reset file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+
         setIsProcessingPdf(false);
         setProcessingComplete(true);
         setTimeout(() => {
@@ -114,28 +143,9 @@ export default function SectionPanel({
   };
 
   useEffect(() => {
-    if (processingComplete && confettiRef.current && successIconRef.current) {
-      const iconRect = successIconRef.current.getBoundingClientRect();
-      const originX = iconRect.left / window.innerWidth;
-      const originY = iconRect.top / window.innerHeight;
-
-      setTimeout(() => {
-        confettiRef.current?.fire({
-          particleCount: 150,
-          spread: 360,
-          startVelocity: 30,
-          gravity: 0.8,
-          origin: { x: originX, y: originY },
-          colors: [
-            "#4CAF50",
-            "#8BC34A",
-            "#CDDC39",
-            "#FFC107",
-            "#FF9800",
-            "#FF5722",
-          ],
-        });
-      }, 100);
+    if (processingComplete) {
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 3000); // Confetti runs for 3s
     }
   }, [processingComplete]);
 
@@ -276,11 +286,9 @@ export default function SectionPanel({
       {/* PDF Processing Success - Full Screen with Confetti */}
       {processingComplete && (
         <div className="fixed inset-0 bg-background z-50 flex items-center justify-center">
-          <Confetti
-            ref={confettiRef}
-            className="fixed inset-0 z-0 pointer-events-none"
-            manualstart={true}
-          />
+          {showConfetti && (
+            <Confetti width={window.innerWidth} height={window.innerHeight} />
+          )}
           <div className="text-center max-w-md mx-auto p-8 z-10">
             <div
               ref={successIconRef}
