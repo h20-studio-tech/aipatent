@@ -243,9 +243,9 @@ export default function SectionPanel({
     setSelectedPdfIds(selectedPdfIds.filter((id) => id !== pdfId));
   };
 
-  const availablePdfs = pdfList.filter(
-    (pdf) => pdf.section === sectionId || !pdf.section
-  );
+  const availablePdfs = pdfList
+    .filter((pdf) => pdf.section === sectionId || !pdf.section)
+    .filter((pdf) => pdf.name !== ".emptyFolderPlaceholder");
 
   useEffect(() => {
     const updatedSelectedPdfs = pdfList.filter((pdf) =>
@@ -325,21 +325,27 @@ export default function SectionPanel({
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              {availablePdfs.map((pdf) => (
-                <div
-                  key={pdf.id}
-                  className="flex items-center px-3 py-2 cursor-pointer hover:bg-gray-100"
-                  onClick={() => handlePdfSelect(pdf.id)}
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedPdfIds.includes(pdf.id)}
-                    onChange={() => handlePdfSelect(pdf.id)}
-                    className="mr-2"
-                  />
-                  {pdf.name}
+              {availablePdfs.length === 0 ? (
+                <div className="px-3 py-2 text-muted-foreground text-sm">
+                  Start by uploading a document
                 </div>
-              ))}
+              ) : (
+                availablePdfs.map((pdf) => (
+                  <div
+                    key={pdf.id}
+                    className="flex items-center px-3 py-2 cursor-pointer hover:bg-gray-100"
+                    onClick={() => handlePdfSelect(pdf.id)}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedPdfIds.includes(pdf.id)}
+                      onChange={() => handlePdfSelect(pdf.id)}
+                      className="mr-2"
+                    />
+                    {pdf.name}
+                  </div>
+                ))
+              )}
             </SelectContent>
           </Select>
 
