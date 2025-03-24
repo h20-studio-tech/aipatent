@@ -1,1 +1,1 @@
-export const backendUrl = "https://api.cloudaipatent.com/api";
+export const backendUrl = "https://api.aipatent.click/api";
