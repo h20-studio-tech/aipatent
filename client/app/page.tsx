@@ -98,7 +98,7 @@ export default function CreatePatent() {
     const response = await axios.post(`${backendUrl}/v1/project/`, formData);
 
     if (response.data.patent_id) {
-      router.push(`/KnowledgeCreation?patentId=${response.data.patent_id}`);
+      router.push(`/KnowledgeCreation`);
     }
   };
 

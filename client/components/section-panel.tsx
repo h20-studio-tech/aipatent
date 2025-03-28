@@ -29,7 +29,6 @@ import type { Dispatch, SetStateAction } from "react"; // ✅ Fix missing import
 
 interface SectionPanelProps {
   sectionId: string;
-  patentId: any;
   title: string;
   pdfs: PDF[];
   onPdfUpload: (sectionId: string, file: File) => void;
@@ -73,7 +72,6 @@ export default function SectionPanel({
   setSelectedPdfs,
   selectedPdfIds,
   setSelectedPdfIds,
-  patentId,
 }: SectionPanelProps) {
   const [userInput, setUserInput] = useState("");
   const [chatHistory, setChatHistory] = useState<string[]>([]);
@@ -194,7 +192,6 @@ export default function SectionPanel({
             answer: data.message,
             timestamp: new Date(),
             saved: true,
-            patentId: patentId,
           },
           ...prevChats,
         ]);

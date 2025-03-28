@@ -20,13 +20,11 @@ import { PDF } from "@/lib/types";
 interface KnowledgeCreationProps {
   chats: any[]; // ✅ Correctly defining props as an object
   setChats: Dispatch<SetStateAction<any[]>>;
-  patentId: any;
 }
 
 export default function KnowledgeCreation({
   chats,
   setChats,
-  patentId,
 }: KnowledgeCreationProps) {
   const [pdfs, setPdfs] = useState(mockPdfs);
   const [activeTab, setActiveTab] = useState("approach");
@@ -135,7 +133,6 @@ export default function KnowledgeCreation({
             <TabsContent value="approach">
               <SectionPanel
                 chats={chats}
-                patentId={patentId}
                 setChats={setChats}
                 setMetaData={setApproachMetaData}
                 setInsightResponse={setApproachResponse}
@@ -159,7 +156,6 @@ export default function KnowledgeCreation({
               <SectionPanel
                 chats={chats}
                 setChats={setChats}
-                patentId={patentId}
                 setMetaData={setTechnologyMetaData}
                 setInsightResponse={setTechnologyResponse}
                 sectionId="technology"
@@ -182,7 +178,6 @@ export default function KnowledgeCreation({
               <SectionPanel
                 chats={chats}
                 setChats={setChats}
-                patentId={patentId}
                 setMetaData={setInnovationMetaData}
                 setInsightResponse={setInnovationResponse}
                 sectionId="innovation"
