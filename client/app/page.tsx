@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { FileText } from "lucide-react";
 import { useNavigation } from "react-day-picker";
 import { useRouter } from "next/navigation";
+import axios from "axios";
+import { backendUrl } from "@/config/config";
 
 // Mock data for previously created IgY patents
 const previousPatents = [
@@ -77,7 +79,7 @@ const previousPatents = [
 export default function CreatePatent() {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    patentName: "",
+    name: "",
     antigen: "",
     disease: "",
   });
@@ -89,19 +91,19 @@ export default function CreatePatent() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission - navigate to next page
     console.log("Form submitted:", formData);
 
-    router.push("/KnowledgeCreation");
-    // Navigation logic would go here
+    const response = await axios.post(`${backendUrl}/v1/project/`, formData);
+
+    if (response.data.patent_id) {
+      router.push(`/KnowledgeCreation?patentId=${response.data.patent_id}`);
+    }
   };
 
   const handlePatentClick = (patent: (typeof previousPatents)[0]) => {
     console.log("Selected patent:", patent);
-    // In a real app, this would navigate to the next page with the selected patent
-    // For example: router.push(`/patent/${patent.id}/details`)
   };
 
   return (
@@ -121,8 +123,8 @@ export default function CreatePatent() {
             </Label>
             <Input
               id="patentName"
-              name="patentName"
-              value={formData.patentName}
+              name="name"
+              value={formData.name}
               onChange={handleChange}
               className="w-full p-2 border rounded"
               placeholder="Enter patent name"
