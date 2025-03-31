@@ -12,70 +12,6 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { backendUrl } from "@/config/config";
 
-// Mock data for previously created IgY patents
-const previousPatents = [
-  {
-    id: 1,
-    name: "IgY-based Therapy for H5N1",
-    antigen: "Avian Influenza H5N1 Hemagglutinin",
-    disease: "Avian Influenza",
-  },
-  {
-    id: 2,
-    name: "IgY Antibodies Against Salmonella",
-    antigen: "Salmonella Enteritidis Outer Membrane Proteins",
-    disease: "Salmonellosis",
-  },
-  {
-    id: 3,
-    name: "Egg-derived IgY for Rotavirus",
-    antigen: "Rotavirus VP6 Protein",
-    disease: "Rotaviral Gastroenteritis",
-  },
-  {
-    id: 4,
-    name: "IgY Treatment for Dental Caries",
-    antigen: "Streptococcus mutans Surface Antigens",
-    disease: "Dental Caries",
-  },
-  {
-    id: 5,
-    name: "Anti-Helicobacter pylori IgY",
-    antigen: "H. pylori Urease",
-    disease: "Peptic Ulcer Disease",
-  },
-  {
-    id: 6,
-    name: "IgY for Pseudomonas Infections",
-    antigen: "Pseudomonas aeruginosa Flagellin",
-    disease: "Pseudomonas Respiratory Infections",
-  },
-  {
-    id: 7,
-    name: "Avian IgY Against E. coli",
-    antigen: "E. coli O157:H7 Intimin",
-    disease: "E. coli Infections",
-  },
-  {
-    id: 8,
-    name: "IgY Therapy for Candidiasis",
-    antigen: "Candida albicans Cell Wall Mannoproteins",
-    disease: "Oral Candidiasis",
-  },
-  {
-    id: 9,
-    name: "IgY-based Vaccine for Newcastle Disease",
-    antigen: "Newcastle Disease Virus F Protein",
-    disease: "Newcastle Disease",
-  },
-  {
-    id: 10,
-    name: "IgY Against Clostridium difficile",
-    antigen: "C. difficile Toxin A and B",
-    disease: "C. difficile Infection",
-  },
-];
-
 export default function CreatePatent() {
   const router = useRouter();
   const [patents, setPatents] = useState([]);
@@ -99,7 +35,7 @@ export default function CreatePatent() {
     const response = await axios.post(`${backendUrl}/v1/project/`, formData);
 
     if (response.data.patent_id) {
-      router.push(`/KnowledgeCreation`);
+      router.push(`/KnowledgeCreation?patentName=${formData.name}`);
     }
   };
 
