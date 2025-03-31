@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -78,6 +78,7 @@ const previousPatents = [
 
 export default function CreatePatent() {
   const router = useRouter();
+  const [patents, setPatents] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
     antigen: "",
@@ -102,9 +103,23 @@ export default function CreatePatent() {
     }
   };
 
+  const getPatents = async () => {
+    try {
+      const response = await axios.get(`${backendUrl}/v1/projects/`);
+
+      console.log("Patents", response);
+      setPatents(response.data.projects);
+    } catch (err) {
+      console.log(err);
+    }
+  };
   const handlePatentClick = (patent: (typeof previousPatents)[0]) => {
     console.log("Selected patent:", patent);
   };
+
+  useEffect(() => {
+    getPatents();
+  }, []);
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
@@ -180,7 +195,7 @@ export default function CreatePatent() {
 
         <div className="max-h-[300px] overflow-y-auto pr-2">
           <div className="grid gap-3">
-            {previousPatents.map((patent) => (
+            {patents?.map((patent: any) => (
               <div
                 key={patent.id}
                 className="p-4 border rounded-md cursor-pointer hover:bg-gray-50 transition-colors"

@@ -27,6 +27,8 @@ interface ApproachInsightsRef {
 
 interface ApproachInsightsProps {
   response: string;
+  saveChats: (chat: any) => void;
+  question: string;
   metaData: {
     chunk_id: number;
     filename: string;
@@ -36,7 +38,7 @@ interface ApproachInsightsProps {
 }
 
 const ApproachInsights = forwardRef<ApproachInsightsRef>(
-  ({ response, metaData }, ref) => {
+  ({ response, metaData, saveChats, question }, ref) => {
     const scrollRef = useRef<HTMLDivElement | null>(null);
     const isDragging = useRef(false);
     const startX = useRef(0);
@@ -81,6 +83,14 @@ const ApproachInsights = forwardRef<ApproachInsightsRef>(
 
     const handleSave = () => {
       setIsSaving(true);
+      saveChats({
+        id: 6,
+        section: "Approach",
+        question: question,
+        answer: response,
+        timestamp: new Date(),
+        saved: true,
+      });
       setTimeout(() => {
         setIsSaving(false);
         toast({
@@ -119,9 +129,9 @@ const ApproachInsights = forwardRef<ApproachInsightsRef>(
                     >
                       {metaData.length > 0 ? (
                         <div className="space-y-3 text-sm">
-                          {metaData.map((item: any) => (
+                          {metaData.map((item: any, index: number) => (
                             <div
-                              key={item.chunk_id}
+                              key={`${item.chunk_id}-${index}`} // ✅ Ensure the key is unique
                               className="border border-gray-300 p-3 rounded-md"
                             >
                               <p>
