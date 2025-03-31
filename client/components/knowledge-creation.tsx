@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
@@ -13,9 +13,12 @@ import SectionPanel from "@/components/section-panel";
 import ApproachInsights from "@/components/approach-insights";
 import TechnologyInsights from "@/components/technology-insights";
 import InnovationInsights from "@/components/innovation-insights";
+import { Suspense } from "react";
 import { mockPdfs } from "@/lib/mock-data";
 import { Dispatch, SetStateAction } from "react";
 import { PDF } from "@/lib/types";
+import { useRouter } from "next/router";
+import { useSearchParams } from "next/navigation";
 
 interface KnowledgeCreationProps {
   chats: any[]; // ✅ Correctly defining props as an object
@@ -28,6 +31,14 @@ export default function KnowledgeCreation({
   setChats,
   saveChats,
 }: KnowledgeCreationProps) {
+  const [patentName, setPatentName] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      setPatentName(params.get("patentName"));
+    }
+  }, []);
   const [pdfs, setPdfs] = useState(mockPdfs);
   const [activeTab, setActiveTab] = useState("approach");
   const [question, setQuestion] = useState<string>("");
@@ -106,7 +117,7 @@ export default function KnowledgeCreation({
     <div className="space-y-6">
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-bold tracking-tight">
-          Knowledge Creation
+          {patentName ? patentName : "Knowledge Creation"}
         </h1>
         <p className="text-muted-foreground">
           Synthesize knowledge from existing sources to craft a new patent
