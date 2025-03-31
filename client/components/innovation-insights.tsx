@@ -21,6 +21,8 @@ interface InnovationInsightsRef {
 
 interface InnovationInsightsProps {
   response: string;
+  saveChats: (chat: any) => void;
+  question: string;
   metaData: {
     chunk_id: number;
     filename: string;
@@ -30,7 +32,7 @@ interface InnovationInsightsProps {
 }
 
 const InnovationInsights = forwardRef<InnovationInsightsRef>(
-  ({ response, metaData }, ref) => {
+  ({ response, metaData, saveChats, question }, ref) => {
     const [content, setContent] = useState<string | null>(response);
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
@@ -111,6 +113,15 @@ This innovation framework demonstrates Apple's commitment to pushing boundaries 
     const handleSave = () => {
       setIsSaving(true);
 
+      saveChats({
+        id: 6,
+        section: "Innovation",
+        question: question,
+        answer: response,
+        timestamp: new Date(),
+        saved: true,
+      });
+
       // Simulate saving delay
       setTimeout(() => {
         setIsSaving(false);
@@ -139,51 +150,45 @@ This innovation framework demonstrates Apple's commitment to pushing boundaries 
                       Meta-data
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
-                    <DialogContent className="sm:max-w-[500px]">
-                      <DialogHeader>
-                        <DialogTitle>Approach Meta-data</DialogTitle>
-                      </DialogHeader>
-                      <div className="bg-muted p-4 rounded-md max-h-[400px] overflow-y-auto">
-                        {metaData.length > 0 ? (
-                          <div className="space-y-3 text-sm">
-                            {metaData.map((item, index) => (
-                              <div
-                                key={item.chunk_id}
-                                className="border border-gray-300 p-3 rounded-md"
-                              >
-                                <p>
-                                  <span className="font-semibold">
-                                    Chunk ID:
-                                  </span>{" "}
-                                  {item.chunk_id}
-                                </p>
-                                <p>
-                                  <span className="font-semibold">
-                                    Filename:
-                                  </span>{" "}
-                                  {item.filename}
-                                </p>
-                                <p>
-                                  <span className="font-semibold">
-                                    Page Number:
-                                  </span>{" "}
-                                  {item.page_number}
-                                </p>
-                                <p>
-                                  <span className="font-semibold">Text:</span>{" "}
-                                  <span className="italic">{item.text}</span>
-                                </p>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="text-gray-500 text-center">
-                            No metadata available.
-                          </p>
-                        )}
-                      </div>
-                    </DialogContent>
+                  <DialogContent className="sm:max-w-[500px]">
+                    <DialogHeader>
+                      <DialogTitle>Approach Meta-data</DialogTitle>
+                    </DialogHeader>
+                    <div className="bg-muted p-4 rounded-md max-h-[400px] overflow-y-auto">
+                      {metaData.length > 0 ? (
+                        <div className="space-y-3 text-sm">
+                          {metaData.map((item: any, index: number) => (
+                            <div
+                              key={`${item.chunk_id}-${index}`} // ✅ Ensure the key is unique
+                              className="border border-gray-300 p-3 rounded-md"
+                            >
+                              <p>
+                                <span className="font-semibold">Chunk ID:</span>{" "}
+                                {item.chunk_id}
+                              </p>
+                              <p>
+                                <span className="font-semibold">Filename:</span>{" "}
+                                {item.filename}
+                              </p>
+                              <p>
+                                <span className="font-semibold">
+                                  Page Number:
+                                </span>{" "}
+                                {item.page_number}
+                              </p>
+                              <p>
+                                <span className="font-semibold">Text:</span>{" "}
+                                <span className="italic">{item.text}</span>
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-gray-500 text-center">
+                          No metadata available.
+                        </p>
+                      )}
+                    </div>
                   </DialogContent>
                 </Dialog>
                 <Button

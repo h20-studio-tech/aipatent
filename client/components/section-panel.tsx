@@ -34,9 +34,7 @@ interface SectionPanelProps {
   onPdfUpload: (sectionId: string, file: File) => void;
   hideInsights?: boolean;
   chats: { role: "user" | "ai"; message: string }[];
-  setChats: Dispatch<
-    SetStateAction<{ role: "user" | "ai"; message: string }[]>
-  >;
+  setQuestion: Dispatch<SetStateAction<"">>;
   selectedPdfIds: string[]; // ✅ Receive selected PDF IDs from parent
   setSelectedPdfIds: Dispatch<SetStateAction<string[]>>; // ✅ Function to update selected PDFs
   selectedPdfs: PDF[]; // ✅ Selected PDFs for this section
@@ -54,6 +52,7 @@ interface SectionPanelProps {
     >
   >;
   setInsightResponse: Dispatch<SetStateAction<string>>;
+  saveChats: (chat: any) => void;
 }
 
 export default function SectionPanel({
@@ -63,7 +62,8 @@ export default function SectionPanel({
   onPdfUpload,
   hideInsights = false,
   chats,
-  setChats,
+  setQuestion,
+  saveChats,
   setInsightResponse,
   setMetaData,
   pdfList,
@@ -184,17 +184,7 @@ export default function SectionPanel({
         ]);
 
         setInsightResponse(data.message);
-        setChats((prevChats: any) => [
-          {
-            id: 6,
-            section: title,
-            question: userInput,
-            answer: data.message,
-            timestamp: new Date(),
-            saved: true,
-          },
-          ...prevChats,
-        ]);
+        setQuestion(userInput);
 
         setMetaData(data.data);
       } else {
