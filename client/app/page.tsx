@@ -51,6 +51,7 @@ export default function CreatePatent() {
   };
   const handlePatentClick = (patent: (typeof previousPatents)[0]) => {
     console.log("Selected patent:", patent);
+    router.push(`/KnowledgeCreation?patentName=${patent.name}`);
   };
 
   useEffect(() => {
