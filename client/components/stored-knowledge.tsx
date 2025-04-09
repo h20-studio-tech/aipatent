@@ -71,9 +71,15 @@ const mockStoredKnowledge = [
 
 interface StoredKnowledgeProps {
   chats: any[];
+  stage: any;
+  setStage: (stage: any) => void;
 }
 
-export default function StoredKnowledge({ chats }) {
+export default function StoredKnowledge({
+  chats,
+  stage,
+  setStage,
+}: StoredKnowledgeProps) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -89,6 +95,19 @@ export default function StoredKnowledge({ chats }) {
       >
         <Database className="h-4 w-4" />
         Stored Knowledge
+      </Button>
+
+      <Button
+        variant="default"
+        size="lg"
+        className="absolute top-4 right-4 z-10"
+        onClick={() => {
+          if (stage === 1) {
+            setStage(2);
+          }
+        }}
+      >
+        Next
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
