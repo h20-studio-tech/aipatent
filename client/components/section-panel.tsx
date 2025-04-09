@@ -8,6 +8,11 @@ import Confetti from "react-confetti";
 import axios from "axios";
 import { Card, CardContent } from "@/components/ui/card";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -22,10 +27,12 @@ import {
   File,
   CheckCircle,
   Loader2,
+  CornerDownLeft,
 } from "lucide-react";
 import type { PDF } from "@/lib/types";
 import { backendUrl } from "../config/config";
 import type { Dispatch, SetStateAction } from "react"; // ✅ Fix missing import
+import { useToast } from "./ui/use-toast";
 
 interface SectionPanelProps {
   sectionId: string;
@@ -82,8 +89,11 @@ export default function SectionPanel({
   const [processingComplete, setProcessingComplete] = useState(false);
   const [processingFileName, setProcessingFileName] = useState("");
   const [showConfetti, setShowConfetti] = useState(false);
+  const [userNotes, setUserNotes] = useState("");
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const confettiRef = useRef(null);
   const successIconRef = useRef(null);
+  const { toast } = useToast();
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -233,6 +243,31 @@ export default function SectionPanel({
     setSelectedPdfIds(selectedPdfIds.filter((id) => id !== pdfId));
   };
 
+  const saveResearchNotes = () => {
+    if (!userNotes.trim()) return;
+
+    // Use the global function to add the research note to stored knowledge
+    if (typeof window !== "undefined" && window.addResearchNote) {
+      window.addResearchNote(title, userNotes);
+    } else {
+      // Fallback if the global function is not available
+      console.log("Saving research note to stored knowledge:", userNotes);
+    }
+
+    // Show success toast
+    toast({
+      title: "Research Note Saved",
+      description: "Your research note has been added to Stored Knowledge.",
+      duration: 3000,
+    });
+
+    // Close the popover
+    setIsPopoverOpen(false);
+
+    // Optionally clear the notes after saving
+    setUserNotes("");
+  };
+
   const availablePdfs = pdfList
     .filter((pdf) => pdf.section === sectionId || !pdf.section)
     .filter((pdf) => pdf.name !== ".emptyFolderPlaceholder");
@@ -363,6 +398,50 @@ export default function SectionPanel({
               </label>
             </Button>
           </div>
+          <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm">
+                <FileText className="h-4 w-4 mr-2" />
+                Research Notes
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium text-sm">Research Notes</h4>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => setUserNotes("")}
+                  >
+                    Clear
+                  </Button>
+                </div>
+                <Textarea
+                  placeholder="Add your research notes here..."
+                  value={userNotes}
+                  onChange={(e) => setUserNotes(e.target.value)}
+                  className="min-h-[250px] text-sm"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && e.ctrlKey) {
+                      e.preventDefault();
+                      saveResearchNotes();
+                    }
+                  }}
+                />
+                <div className="flex justify-between items-center mt-2">
+                  <p className="text-xs text-muted-foreground">
+                    Press Ctrl+Enter to save
+                  </p>
+                  <Button size="sm" onClick={saveResearchNotes}>
+                    <CornerDownLeft className="h-4 w-4 mr-2" />
+                    Save
+                  </Button>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
 
         {/* Selected PDFs list */}
