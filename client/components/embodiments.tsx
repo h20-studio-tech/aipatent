@@ -525,7 +525,7 @@ export default function Embodiments({
     const antigen = params.get("antigen") || "unspecified";
 
     axios
-      .post(`https://api.aipatent.clickapi/v1/embodiment`, null, {
+      .post(`${backendUrl}/v1/embodiment`, null, {
         params: {
           inspiration,
           source_embodiment,
@@ -541,7 +541,7 @@ export default function Embodiments({
           id: Date.now(),
           originalId,
           title: `Remixed ${source_embodiment}`,
-          description: result?.text || "Generated embodiment text.",
+          description: result?.content || "Generated embodiment text.",
           similarityPercentage,
           createdAt: new Date().toISOString(),
         };
