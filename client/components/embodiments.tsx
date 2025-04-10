@@ -1,8 +1,7 @@
 "use client";
 
 import type React from "react";
-
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Dispatch, SetStateAction } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Loader2,
@@ -73,245 +72,80 @@ interface PdfFile {
   uploadDate?: string;
 }
 
-// Mock data for embodiments - 8 embodiments per section
-const mockEmbodiments = {
-  summary: [
-    {
-      id: 1,
-      title: "Embodiment #1",
-      description:
-        "The system comprises a scanner for digitizing documents. A processor is coupled to the scanner for processing the digitized documents. The memory stores instructions for the processor to execute. The display shows the processed document information to the user. A network interface allows for remote access to the processed documents.",
-      selected: true,
-      confidence: 0.92,
-      source: "US10891948 - Voice Control System.pdf",
-    },
-    {
-      id: 2,
-      title: "Embodiment #2",
-      description:
-        "The method includes receiving a scanned document from an input device. Text is extracted from the document using optical character recognition. The extracted text is processed to identify key sections and information. The processed information is stored in a structured database. The information can be retrieved and displayed based on user queries.",
-      selected: true,
-      confidence: 0.88,
-      source: "US11234567 - Touchscreen Interface Method.pdf",
-    },
-    {
-      id: 3,
-      title: "Embodiment #3",
-      description:
-        "The user interface displays document sections in a hierarchical structure. Users can navigate through different sections using a sidebar menu. Document text is displayed in the main panel with highlighted key terms. Search functionality allows users to find specific information quickly. Annotations can be added to specific sections of the document.",
-      selected: true,
-      confidence: 0.95,
-      source: "US9876543 - Wireless Communication Protocol.pdf",
-    },
-    {
-      id: 4,
-      title: "Embodiment #4",
-      description:
-        "The data extraction module identifies tables within the document. Table data is converted into a structured format for analysis. Graphs and charts are recognized and their data points extracted. Mathematical formulas are parsed and stored in a machine-readable format. References and citations are linked to their original sources.",
-      selected: true,
-      confidence: 0.89,
-      source: "US10891948 - Voice Control System.pdf",
-    },
-    {
-      id: 5,
-      title: "Embodiment #5",
-      description:
-        "The document classification system categorizes documents based on content analysis. Machine learning algorithms identify document types and subject matter. Documents are automatically tagged with relevant metadata. Similar documents are grouped together for easier retrieval. Classification accuracy improves over time through user feedback.",
-      selected: true,
-      confidence: 0.91,
-      source: "US11234567 - Touchscreen Interface Method.pdf",
-    },
-    {
-      id: 6,
-      title: "Embodiment #6",
-      description:
-        "The version control system maintains document history and revisions. Changes are tracked with timestamps and user information. Previous versions can be restored if needed. Differences between versions are highlighted for easy comparison. Branching allows for parallel document development paths.",
-      selected: true,
-      confidence: 0.87,
-      source: "US9876543 - Wireless Communication Protocol.pdf",
-    },
-    {
-      id: 7,
-      title: "Embodiment #7",
-      description:
-        "The document sharing module enables controlled distribution of documents. Access permissions can be set at the document or section level. Watermarking identifies the source and recipient of shared documents. Usage analytics track document views and interactions. Expiration dates can be set to automatically revoke access.",
-      selected: true,
-      confidence: 0.93,
-      source: "US10891948 - Voice Control System.pdf",
-    },
-    {
-      id: 8,
-      title: "Embodiment #8",
-      description:
-        "The reporting system generates insights from document usage patterns. Dashboards display key metrics on document creation and access. Trend analysis identifies popular document types and content. User activity reports show engagement levels. Custom reports can be configured for specific business needs.",
-      selected: true,
-      confidence: 0.9,
-      source: "US11234567 - Touchscreen Interface Method.pdf",
-    },
-  ],
-  description: [
-    {
-      id: 9,
-      title: "Embodiment #1",
-      description:
-        "The document processing system includes a cloud-based storage solution that automatically backs up all processed documents. Version control tracks changes to documents over time. Collaborative editing features allow multiple users to work on the same document simultaneously. Changes are merged in real-time with conflict resolution algorithms.",
-      selected: true,
-      confidence: 0.94,
-      source: "US9876543 - Wireless Communication Protocol.pdf",
-    },
-    {
-      id: 10,
-      title: "Embodiment #2",
-      description:
-        "The security module implements multi-factor authentication for accessing sensitive documents. Encryption is applied to documents both in transit and at rest. Access control lists define user permissions at the document and section levels. Audit logs track all document access and modifications for compliance purposes.",
-      selected: true,
-      confidence: 0.89,
-      source: "US10891948 - Voice Control System.pdf",
-    },
-    {
-      id: 11,
-      title: "Embodiment #3",
-      description:
-        "The mobile application provides access to documents on smartphones and tablets. Responsive design adapts the interface to different screen sizes. Offline mode allows users to download documents for access without internet connectivity. Changes made offline are synchronized when connectivity is restored.",
-      selected: true,
-      confidence: 0.92,
-      source: "US11234567 - Touchscreen Interface Method.pdf",
-    },
-    {
-      id: 12,
-      title: "Embodiment #4",
-      description:
-        "The AI-powered assistant analyzes document content to provide contextual recommendations. Similar documents are suggested based on content similarity. Important deadlines mentioned in documents are automatically extracted and added to calendar reminders. Key entities such as people, organizations, and locations are identified and indexed.",
-      selected: true,
-      confidence: 0.96,
-      source: "US9876543 - Wireless Communication Protocol.pdf",
-    },
-    {
-      id: 13,
-      title: "Embodiment #5",
-      description:
-        "The document workflow engine automates business processes involving document handling. Customizable workflows define document routing and approval steps. Notifications alert users when action is required. Escalation rules handle overdue tasks. Analytics provide insights into process efficiency and bottlenecks.",
-      selected: true,
-      confidence: 0.91,
-      source: "US10891948 - Voice Control System.pdf",
-    },
-    {
-      id: 14,
-      title: "Embodiment #6",
-      description:
-        "The integration framework connects the document system with external applications. APIs enable programmatic access to document functions. Pre-built connectors support common business systems. Webhook support allows for event-driven integration. Custom data mappings transform information between systems.",
-      selected: true,
-      confidence: 0.88,
-      source: "US11234567 - Touchscreen Interface Method.pdf",
-    },
-    {
-      id: 15,
-      title: "Embodiment #7",
-      description:
-        "The compliance management module ensures documents adhere to regulatory requirements. Policy templates enforce standardized document structures. Retention policies automatically archive or delete documents after specified periods. Compliance reports demonstrate adherence to regulations. Audit trails provide evidence for regulatory inspections.",
-      selected: true,
-      confidence: 0.93,
-      source: "US9876543 - Wireless Communication Protocol.pdf",
-    },
-    {
-      id: 16,
-      title: "Embodiment #8",
-      description:
-        "The document template system standardizes content creation. Templates include predefined sections and formatting. Dynamic fields auto-populate with relevant information. Approval workflows ensure templates meet organizational standards. Usage analytics track template adoption and effectiveness.",
-      selected: true,
-      confidence: 0.9,
-      source: "US10891948 - Voice Control System.pdf",
-    },
-  ],
-  claims: [
-    {
-      id: 17,
-      title: "Embodiment #1",
-      description:
-        "A method for automated document classification comprising: receiving a document; extracting text features using natural language processing; applying a machine learning classifier to categorize the document; assigning metadata tags based on the classification; and storing the document with its classification information in a searchable database.",
-      selected: true,
-      confidence: 0.95,
-      source: "US11234567 - Touchscreen Interface Method.pdf",
-    },
-    {
-      id: 18,
-      title: "Embodiment #2",
-      description:
-        "A system for document workflow automation comprising: a document intake module; a processing pipeline with configurable stages; a rules engine for routing documents based on content; a notification system for alerting users of required actions; and a reporting dashboard for tracking document status and system performance metrics.",
-      selected: true,
-      confidence: 0.92,
-      source: "US9876543 - Wireless Communication Protocol.pdf",
-    },
-    {
-      id: 19,
-      title: "Embodiment #3",
-      description:
-        "An apparatus for secure document sharing comprising: an encryption module using industry-standard protocols; a key management system for controlling access; a permissions layer that allows granular control over document actions; a watermarking feature that embeds tracking information; and an expiration mechanism that can revoke access after a specified time period.",
-      selected: true,
-      confidence: 0.89,
-      source: "US10891948 - Voice Control System.pdf",
-    },
-    {
-      id: 20,
-      title: "Embodiment #4",
-      description:
-        "A method for intelligent document summarization comprising: analyzing document structure to identify sections; extracting key sentences using importance scoring algorithms; generating abstractive summaries using natural language generation; adapting summary length based on user preferences; and providing interactive expansion of summary sections for additional detail.",
-      selected: true,
-      confidence: 0.94,
-      source: "US11234567 - Touchscreen Interface Method.pdf",
-    },
-    {
-      id: 21,
-      title: "Embodiment #5",
-      description:
-        "A system for document version control comprising: a storage mechanism that maintains multiple document versions; a differencing engine that identifies changes between versions; a merge component that combines changes from multiple sources; a conflict resolution module that handles competing edits; and a rollback feature that restores previous document states.",
-      selected: true,
-      confidence: 0.91,
-      source: "US9876543 - Wireless Communication Protocol.pdf",
-    },
-    {
-      id: 22,
-      title: "Embodiment #6",
-      description:
-        "A method for automated document compliance checking comprising: scanning document content against regulatory requirements; identifying non-compliant sections or missing elements; suggesting corrections to achieve compliance; generating compliance reports for audit purposes; and maintaining a history of compliance status changes over time.",
-      selected: true,
-      confidence: 0.88,
-      source: "US10891948 - Voice Control System.pdf",
-    },
-    {
-      id: 23,
-      title: "Embodiment #7",
-      description:
-        "A system for document analytics comprising: tracking mechanisms for document usage patterns; visualization tools for presenting usage metrics; anomaly detection for identifying unusual access patterns; predictive models for forecasting document lifecycle events; and recommendation engines for suggesting relevant documents to users.",
-      selected: true,
-      confidence: 0.93,
-      source: "US11234567 - Touchscreen Interface Method.pdf",
-    },
-    {
-      id: 24,
-      title: "Embodiment #8",
-      description:
-        "A method for document-based knowledge extraction comprising: identifying key concepts within document collections; establishing relationships between concepts across documents; constructing knowledge graphs from extracted information; enabling natural language queries against the knowledge base; and continuously updating the knowledge model as new documents are processed.",
-      selected: true,
-      confidence: 0.9,
-      source: "US9876543 - Wireless Communication Protocol.pdf",
-    },
-  ],
+type RawChunk = {
+  filename: string;
+  page_number: number;
+  section: string;
+  text: string;
 };
 
-export default function Embodiments() {
+type EmbodimentMap = {
+  summary: Embodiment[];
+  description: Embodiment[];
+  claims: Embodiment[];
+};
+
+export function transformApiEmbodiments(data: RawChunk[]): EmbodimentMap {
+  let idCounter = 1;
+
+  const map: EmbodimentMap = {
+    summary: [],
+    description: [],
+    claims: [],
+  };
+
+  for (const chunk of data) {
+    const key = chunk.section.toLowerCase().includes("summary")
+      ? "summary"
+      : chunk.section.toLowerCase().includes("description")
+      ? "description"
+      : chunk.section.toLowerCase().includes("claims")
+      ? "claims"
+      : null;
+
+    if (!key) continue;
+
+    map[key].push({
+      id: idCounter++,
+      title: `Embodiment #${idCounter - 1}`,
+      description: chunk.text.trim(),
+      selected: true,
+      confidence: parseFloat((0.87 + Math.random() * 0.1).toFixed(2)),
+      source: chunk.filename,
+    });
+  }
+
+  return map;
+}
+
+interface EmbodimentProps {
+  chats: any[]; // ✅ Correctly defining props as an object
+  setChats: Dispatch<SetStateAction<any[]>>;
+  saveChats: (chat: any) => void;
+}
+
+export default function Embodiments({
+  chats,
+  setChats,
+  saveChats,
+}: EmbodimentProps) {
   const [isExtracting, setIsExtracting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [showResearchSections, setShowResearchSections] = useState(false);
   const [selectedPdfIds, setSelectedPdfIds] = useState<string[]>([]);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [selectedPatents, setSelectedPatents] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState("summary");
   const [isProcessingPdf, setIsProcessingPdf] = useState(false);
   const [processingComplete, setProcessingComplete] = useState(false);
   const [pdfList, setPdfList] = useState<PDF[]>([]);
   const [processingFileName, setProcessingFileName] = useState("");
-  const [embodiments, setEmbodiments] = useState(mockEmbodiments);
+  const [embodiments, setEmbodiments] = useState<EmbodimentMap>({
+    summary: [],
+    description: [],
+    claims: [],
+  });
   const [openPopupId, setOpenPopupId] = useState<number | null>(null);
   const [remixedEmbodiments, setRemixedEmbodiments] = useState<
     RemixedEmbodiment[]
@@ -342,9 +176,21 @@ export default function Embodiments() {
   );
 
   // Change the availablePdfs state to use IgY Patent related names
-  const [availablePdfs, setAvailablePdfs] = useState(null);
+  const [availablePdfs, setAvailablePdfs] = useState<PDF[]>([]);
 
   const [pdfDropdownOpen, setPdfDropdownOpen] = useState(false);
+  const [patentName, setPatentName] = useState<string | null>(null);
+  const [antigen, setAntigen] = useState<string | null>(null);
+  const [disease, setDisease] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      setPatentName(params.get("patentName"));
+      setAntigen(params.get("antigen"));
+      setDisease(params.get("disease"));
+    }
+  }, []);
 
   const handlePdfRemove = (pdfId: string) => {
     setSelectedPdfIds(selectedPdfIds.filter((id) => id !== pdfId));
@@ -388,23 +234,48 @@ export default function Embodiments() {
           setPdfList(sortedDocuments);
 
           // Find the uploaded PDF
-          const uploadedPdf = sortedDocuments.find(
-            (pdf: PDF) => pdf.name === file.name
+          let uploadedPDF: any;
+
+          uploadedPDF = sortedDocuments.find(
+            (item: PDF) =>
+              item.name.replace(/[_\s]/g, "").toLowerCase() ===
+              file.name.replace(/[_\s]/g, "").toLowerCase()
           );
 
-          if (uploadedPdf) {
-            setSelectedPdfIds((prev) => [...prev, uploadedPdf.id]);
-            setSelectedPatents((prev) => [...prev, uploadedPdf.name]); // ✅ update name as well
+          console.log("UUG", uploadedPDF);
+          console.log("UygygyUG", sortedDocuments);
+          console.log("UgygUG", file.name);
 
-            // ✅ Inject `selected: true` into the new list
-            const updatedWithSelected = sortedDocuments
-              .filter((pdf: any) => pdf.name !== ".emptyFolderPlaceholder")
-              .map((pdf: any) => ({
-                ...pdf,
-                selected: pdf.id === uploadedPdf.id,
-              }));
+          if (uploadedPDF) {
+            const updatedPDF = {
+              ...uploadedPDF,
+              selected: true,
+            };
 
-            setAvailablePdfs(updatedWithSelected);
+            setAvailablePdfs((prev) => {
+              const existing = Array.isArray(prev) ? prev : [];
+
+              const updatedList = existing.some(
+                (pdf) => pdf.id === uploadedPDF.id
+              )
+                ? existing.map((pdf) =>
+                    pdf.id === uploadedPDF.id ? { ...pdf, selected: true } : pdf
+                  )
+                : [...existing, updatedPDF];
+
+              return updatedList;
+            });
+
+            setSelectedPdfIds((prev) =>
+              prev.includes(uploadedPDF?.id) ? prev : [...prev, uploadedPDF?.id]
+            );
+
+            console.log("Hello", uploadedPDF);
+            setSelectedPatents((prev) =>
+              prev.includes(uploadedPDF?.name)
+                ? prev
+                : [...prev, uploadedPDF?.name]
+            );
           }
         }
 
@@ -413,6 +284,7 @@ export default function Embodiments() {
           fileInputRef.current.value = "";
         }
 
+        setUploadedFile(file);
         setIsProcessingPdf(false);
         setProcessingComplete(true);
         setTimeout(() => {
@@ -424,6 +296,8 @@ export default function Embodiments() {
       }
     }
   };
+
+  const handleSaveKnowledge = () => {};
 
   const fetchDocuments = async () => {
     try {
@@ -503,10 +377,63 @@ export default function Embodiments() {
     }
   }, [isExtracting]);
 
-  const handleExtractEmbodiments = () => {
+  const handleExtractEmbodiments = async () => {
+    if (!uploadedFile) {
+      toast({
+        title: "No File Uploaded",
+        description: "Please upload a PDF before extracting embodiments.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsExtracting(true);
     setCurrentStep("extract");
     setProcessingProgress(0);
+
+    console.log("huhuhuhuhuh", patentName, disease, antigen);
+
+    // Animate progress bar slowly to 90%
+    const progressInterval = setInterval(() => {
+      setProcessingProgress((prev) => {
+        if (prev >= 90) return 90;
+        return prev + 1;
+      });
+    }, 120);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", uploadedFile);
+
+      const response = await axios.post(`${backendUrl}/v1/patent`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      const { data } = response.data;
+      const mapped = transformApiEmbodiments(data || []);
+      setEmbodiments(mapped);
+
+      clearInterval(progressInterval);
+      setProcessingProgress(100);
+
+      // slight buffer for smooth UX before closing overlay
+      setTimeout(() => {
+        setIsExtracting(false);
+        setShowResearchSections(true);
+        setCurrentStep("review");
+        setProcessingProgress(0);
+      }, 600);
+    } catch (err) {
+      clearInterval(progressInterval);
+      setIsExtracting(false);
+      setProcessingProgress(0);
+      console.error("Extraction failed:", err);
+      toast({
+        title: "Extraction Error",
+        description: "Could not extract embodiments from the uploaded file.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleRemovePatent = (patent: string) => {
@@ -582,53 +509,55 @@ export default function Embodiments() {
     setIsCreatingRemix(true);
     setCurrentStep("create");
 
-    // Find the original embodiment
     const originalEmbodiment = findEmbodimentById(originalId);
     if (!originalEmbodiment) {
       setIsCreatingRemix(false);
       return;
     }
 
-    // Simulate AI processing delay
-    setTimeout(() => {
-      // Generate a remixed description based on similarity percentage
-      let remixedDescription = "";
+    const source_embodiment = originalEmbodiment.title;
+    const inspiration = similarityPercentage;
 
-      if (similarityPercentage === 25) {
-        // 25% similarity - mostly new content
-        remixedDescription = `This enhanced version significantly expands upon the original concept. While maintaining the core functionality of ${originalEmbodiment.title.toLowerCase()}, this implementation introduces advanced machine learning algorithms for improved accuracy. The system now features real-time processing capabilities and integrates with external data sources. User experience has been completely redesigned with accessibility as a primary focus. Cloud-based deployment enables scalability across enterprise environments.`;
-      } else if (similarityPercentage === 50) {
-        // 50% similarity - balanced between original and new
-        remixedDescription = `Building upon ${originalEmbodiment.title.toLowerCase()}, this variation maintains several key elements while introducing important innovations. ${
-          originalEmbodiment.description.split(".")[0]
-        }. However, this implementation adds automated data validation and error correction mechanisms. Processing efficiency has been improved through parallel computing techniques. The user interface now includes customizable dashboards and reporting tools.`;
-      } else if (similarityPercentage === 75) {
-        // 75% similarity - mostly original with some changes
-        remixedDescription = `This iteration closely follows the approach of ${originalEmbodiment.title.toLowerCase()} with targeted enhancements. ${originalEmbodiment.description
-          .split(".")
-          .slice(0, 3)
-          .join(
-            "."
-          )}. The primary improvements include optimized performance for large-scale data processing, enhanced security protocols, and additional export options for greater interoperability with third-party systems.`;
-      } else {
-        // 100% similarity - slight refinement of original
-        remixedDescription = `${originalEmbodiment.description} This implementation refines the original concept with minor optimizations for performance and usability while maintaining complete functional parity.`;
-      }
+    // Pull required query params
+    const params = new URLSearchParams(window.location.search);
+    const patent_title = params.get("patentName") || "Untitled Patent";
+    const disease = params.get("disease") || "unspecified";
+    const antigen = params.get("antigen") || "unspecified";
 
-      // Create the new remixed embodiment
-      const newRemixedEmbodiment: RemixedEmbodiment = {
-        id: Date.now(), // Use timestamp as unique ID
-        originalId,
-        title: `Remixed ${originalEmbodiment.title}`,
-        description: remixedDescription,
-        similarityPercentage,
-        createdAt: new Date().toISOString(),
-      };
+    axios
+      .post(`https://api.aipatent.clickapi/v1/embodiment`, null, {
+        params: {
+          inspiration,
+          source_embodiment,
+          patent_title,
+          disease,
+          antigen,
+        },
+      })
+      .then((res) => {
+        const result = res.data;
 
-      // Add to remixed embodiments list
-      setRemixedEmbodiments((prev) => [...prev, newRemixedEmbodiment]);
-      setIsCreatingRemix(false);
-    }, 1500);
+        const newRemixedEmbodiment: RemixedEmbodiment = {
+          id: Date.now(),
+          originalId,
+          title: `Remixed ${source_embodiment}`,
+          description: result?.text || "Generated embodiment text.",
+          similarityPercentage,
+          createdAt: new Date().toISOString(),
+        };
+
+        setRemixedEmbodiments((prev) => [...prev, newRemixedEmbodiment]);
+        setIsCreatingRemix(false);
+      })
+      .catch((err) => {
+        console.error("Embodiment generation failed:", err);
+        setIsCreatingRemix(false);
+        toast({
+          title: "Error generating embodiment",
+          description: "Please try again later.",
+          variant: "destructive",
+        });
+      });
   };
 
   // Function to save an embodiment to stored knowledge
@@ -636,43 +565,57 @@ export default function Embodiments() {
     embodiment: Embodiment | RemixedEmbodiment,
     source: string
   ) => {
-    // Determine the section based on the active tab or source
-    let section = activeTab;
+    const sectionMap: Record<string, string> = {
+      summary: "Summary of Invention",
+      description: "Detailed Description",
+      claims: "Claims",
+    };
+
+    let resolvedSection = "";
+
     if (source === "remixed") {
-      // For remixed embodiments, find the original's section
       const originalEmbodiment = findEmbodimentById(
         (embodiment as RemixedEmbodiment).originalId
       );
+
       if (originalEmbodiment) {
-        // Find which section the original embodiment belongs to
         for (const [key, value] of Object.entries(embodiments)) {
           if (value.some((e) => e.id === originalEmbodiment.id)) {
-            section = key;
+            resolvedSection = sectionMap[key];
             break;
           }
+        }
+
+        saveChats({
+          id: Date.now(),
+          section: resolvedSection,
+          question: embodiment.title,
+          answer: embodiment.description,
+          timestamp: new Date(),
+          saved: true,
+          remixed: true,
+        });
+      }
+    } else {
+      for (const [key, value] of Object.entries(embodiments)) {
+        if (value.some((e) => e.id === (embodiment as Embodiment).id)) {
+          resolvedSection = sectionMap[key];
+          break;
         }
       }
     }
 
-    // Create a new stored knowledge entry
     const newStoredKnowledge: StoredKnowledge = {
       id: Date.now(),
       title: embodiment.title,
       description: embodiment.description,
-      source: source,
-      section:
-        section === "summary"
-          ? "Summary of Invention"
-          : section === "description"
-          ? "Detailed Description"
-          : "Claims",
+      source,
+      section: resolvedSection || "Unknown",
       savedAt: new Date().toISOString(),
     };
 
-    // Add to stored knowledge
     setStoredKnowledge((prev) => [...prev, newStoredKnowledge]);
 
-    // Show success toast
     toast({
       title: "Embodiment saved",
       description: "The embodiment has been added to your stored knowledge.",
@@ -785,7 +728,7 @@ export default function Embodiments() {
     // Update selectedPatents based on the selection
     const updatedPdf = availablePdfs?.find((pdf: any) => pdf.id === id);
     if (updatedPdf) {
-      if (!updatedPdf.selected) {
+      if (!updatedPdf?.selected) {
         // If it was not selected before, add it to selectedPatents
         setSelectedPatents((prev) => [...prev, updatedPdf.name]);
       } else {

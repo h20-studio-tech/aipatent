@@ -84,7 +84,7 @@ const ApproachInsights = forwardRef<ApproachInsightsRef>(
     const handleSave = () => {
       setIsSaving(true);
       saveChats({
-        id: 6,
+        id: Date.now(),
         section: "Approach",
         question: question,
         answer: response,

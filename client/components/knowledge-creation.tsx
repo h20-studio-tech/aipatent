@@ -26,6 +26,10 @@ interface KnowledgeCreationProps {
   saveChats: (chat: any) => void;
 }
 
+type InsightsRef = {
+  generateContent: () => void;
+};
+
 export default function KnowledgeCreation({
   chats,
   setChats,
@@ -67,9 +71,9 @@ export default function KnowledgeCreation({
   const [approachmetaData, setApproachMetaData] = useState([]);
   const [innovationmetaData, setInnovationMetaData] = useState([]);
   const [technologymetaData, setTechnologyMetaData] = useState([]);
-  const approachInsightsRef = useRef(null);
-  const technologyInsightsRef = useRef(null);
-  const innovationInsightsRef = useRef(null);
+  const approachInsightsRef = useRef<InsightsRef | null>(null);
+  const technologyInsightsRef = useRef<InsightsRef | null>(null);
+  const innovationInsightsRef = useRef<InsightsRef | null>(null);
 
   const handlePdfUpload = (sectionId: string, file: File) => {
     // In a real app, we would upload the file to a server

@@ -9,10 +9,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Database } from "lucide-react";
+import { Database, FileText } from "lucide-react";
 
 // Mock data for stored knowledge
-const mockStoredKnowledge = [
+let mockStoredKnowledge = [
   {
     id: 1,
     section: "Approach",
@@ -81,20 +81,79 @@ export default function StoredKnowledge({
   setStage,
 }: StoredKnowledgeProps) {
   const [open, setOpen] = useState(false);
+  const [localChats, setLocalChats] = useState(chats);
+  const [hasNewItems, setHasNewItems] = useState(false);
 
   useEffect(() => {
-    console.log("Cahst", chats);
+    setLocalChats((prev) => {
+      console.log("Hello", prev);
+      const existingIds = new Set(prev.map((c) => c.id));
+      const newChats = chats.filter((c) => !existingIds.has(c.id));
+      return [...newChats, ...prev];
+    });
   }, [chats]);
+
+  useEffect(() => {
+    // Set the global function to update local state
+    window.addResearchNote = (section: string, content: string) => {
+      const newNote = {
+        id: Date.now(),
+        section,
+        question: "Research Note",
+        answer: content,
+        timestamp: new Date().toISOString(),
+        saved: true,
+      };
+
+      setLocalChats((prev) => [newNote, ...prev]);
+      setHasNewItems(true);
+
+      if (typeof window !== "undefined") {
+        // Create a custom event that components can listen for
+        const event = new CustomEvent("knowledgeEntryAdded", {
+          detail: "Test",
+        });
+        window.dispatchEvent(event);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleNewItem = () => {
+      setHasNewItems(true);
+    };
+
+    window.addEventListener("researchNoteAdded", handleNewItem);
+    window.addEventListener("knowledgeEntryAdded", handleNewItem);
+
+    return () => {
+      window.removeEventListener("researchNoteAdded", handleNewItem);
+      window.removeEventListener("knowledgeEntryAdded", handleNewItem);
+    };
+  }, []);
 
   return (
     <>
       <Button
         variant="outline"
         className="absolute top-4 left-4 z-10 flex items-center gap-2"
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          setOpen(true);
+          setHasNewItems(false);
+        }}
       >
-        <Database className="h-4 w-4" />
+        <div className="relative">
+          <Database className="h-4 w-4" />
+          {hasNewItems && (
+            <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full animate-pulse" />
+          )}
+        </div>
         Stored Knowledge
+        {hasNewItems && (
+          <span className="bg-primary/10 text-primary text-xs px-1.5 py-0.5 rounded-full">
+            New
+          </span>
+        )}
       </Button>
 
       <Button
@@ -121,8 +180,11 @@ export default function StoredKnowledge({
 
           <ScrollArea className="h-[60vh] pr-4">
             <div className="space-y-6">
-              {chats.map((item: any, index: any) => (
-                <div key={index} className="border rounded-lg overflow-hidden">
+              {localChats.map((item) => (
+                <div
+                  key={item.id}
+                  className="border rounded-lg overflow-hidden"
+                >
                   <div className="bg-muted px-4 py-2 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{item.section}</span>
@@ -130,17 +192,41 @@ export default function StoredKnowledge({
                         {new Date(item.timestamp).toLocaleString()}
                       </span>
                     </div>
-                    <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
-                      Saved
-                    </span>
+                    {item.saved && item.remixed ? (
+                      <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+                        Remixed
+                      </span>
+                    ) : (
+                      <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+                        Saved
+                      </span>
+                    )}
                   </div>
                   <div className="p-4 space-y-3">
-                    <div className="bg-accent/30 p-3 rounded-md">
-                      <p className="font-medium text-sm">Q: {item.question}</p>
-                    </div>
-                    <div className="bg-primary/5 p-3 rounded-md">
-                      <p className="text-sm">A: {item.answer}</p>
-                    </div>
+                    {item.question === "Research Note" ? (
+                      // Research Note format
+                      <div className="bg-primary/5 p-3 rounded-md">
+                        <div className="flex items-center gap-2 mb-2">
+                          <FileText className="h-4 w-4 text-primary" />
+                          <p className="font-medium text-sm">Research Note</p>
+                        </div>
+                        <p className="text-sm whitespace-pre-wrap">
+                          {item.answer}
+                        </p>
+                      </div>
+                    ) : (
+                      // Regular Q&A format
+                      <>
+                        <div className="bg-accent/30 p-3 rounded-md">
+                          <p className="font-medium text-sm">
+                            Q: {item.question}
+                          </p>
+                        </div>
+                        <div className="bg-primary/5 p-3 rounded-md">
+                          <p className="text-sm">A: {item.answer}</p>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               ))}
@@ -150,4 +236,18 @@ export default function StoredKnowledge({
       </Dialog>
     </>
   );
+}
+
+declare global {
+  interface Window {
+    addResearchNote?: (section: string, content: string) => any;
+    addKnowledgeEntry?: (
+      section: string,
+      question: string,
+      answer: string
+    ) => any;
+    generateApproachInsights?: () => void;
+    generateTechnologyInsights?: () => void;
+    generateInnovationInsights?: () => void;
+  }
 }
