@@ -41,7 +41,7 @@ interface SectionPanelProps {
   onPdfUpload: (sectionId: string, file: File) => void;
   hideInsights?: boolean;
   chats: { role: "user" | "ai"; message: string }[];
-  setQuestion: Dispatch<SetStateAction<"">>;
+  setQuestion: Dispatch<SetStateAction<string>>;
   selectedPdfIds: string[]; // ✅ Receive selected PDF IDs from parent
   setSelectedPdfIds: Dispatch<SetStateAction<string[]>>; // ✅ Function to update selected PDFs
   selectedPdfs: PDF[]; // ✅ Selected PDFs for this section
@@ -127,11 +127,18 @@ export default function SectionPanel({
 
           // Find the uploaded PDF
           const uploadedPdf = sortedDocuments.find(
-            (pdf: PDF) => pdf.name === file.name
+            (item: PDF) =>
+              item.name.replace(/[_\s]/g, "").toLowerCase() ===
+              file.name.replace(/[_\s]/g, "").toLowerCase()
           );
 
           if (uploadedPdf) {
             setSelectedPdfIds((prev) => [...prev, uploadedPdf.id]); // ✅ Select the uploaded PDF
+            setPdfList((prev) =>
+              prev.map((pdf) =>
+                pdf.id === uploadedPdf.id ? { ...pdf, selected: true } : pdf
+              )
+            );
           }
         }
 
@@ -211,9 +218,17 @@ export default function SectionPanel({
   const handlePdfSelect = (pdfId: string) => {
     setSelectedPdfIds((prev) => {
       const updatedIds = prev.includes(pdfId)
-        ? prev.filter((id) => id !== pdfId) // Remove if already selected
-        : [...prev, pdfId]; // Add if not selected
-      return [...updatedIds]; // ✅ Ensure a new array is returned
+        ? prev.filter((id) => id !== pdfId)
+        : [...prev, pdfId];
+
+      // Sync the selected flag inside pdfList
+      setPdfList((prevList) =>
+        prevList.map((pdf) =>
+          pdf.id === pdfId ? { ...pdf, selected: !prev.includes(pdfId) } : pdf
+        )
+      );
+
+      return updatedIds;
     });
   };
 
@@ -246,7 +261,6 @@ export default function SectionPanel({
   const saveResearchNotes = () => {
     if (!userNotes.trim()) return;
 
-    // Use the global function to add the research note to stored knowledge
     if (typeof window !== "undefined" && window.addResearchNote) {
       window.addResearchNote(title, userNotes);
     } else {

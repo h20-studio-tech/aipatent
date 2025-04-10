@@ -35,7 +35,9 @@ export default function CreatePatent() {
     const response = await axios.post(`${backendUrl}/v1/project/`, formData);
 
     if (response.data.patent_id) {
-      router.push(`/KnowledgeCreation?patentName=${formData.name}`);
+      router.push(
+        `/KnowledgeCreation?patentName=${formData.name}&antigen=${formData.antigen}&disease=${formData.disease}`
+      );
     }
   };
 
@@ -51,7 +53,9 @@ export default function CreatePatent() {
   };
   const handlePatentClick = (patent: (typeof previousPatents)[0]) => {
     console.log("Selected patent:", patent);
-    router.push(`/KnowledgeCreation?patentName=${patent.name}`);
+    router.push(
+      `/KnowledgeCreation?patentName=${patent.name}&antigen=${patent.antigen}&disease=${patent.disease}`
+    );
   };
 
   useEffect(() => {
