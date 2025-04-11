@@ -21,7 +21,6 @@ interface InnovationInsightsRef {
 
 interface InnovationInsightsProps {
   response: string;
-  saveChats: (chat: any) => void;
   question: string;
   metaData: {
     chunk_id: number;
@@ -31,30 +30,32 @@ interface InnovationInsightsProps {
   }[]; // ✅ Fix: metaData is an array of objects
 }
 
-const InnovationInsights = forwardRef<InnovationInsightsRef>(
-  ({ response, metaData, saveChats, question }, ref) => {
-    const [content, setContent] = useState<string | null>(response);
-    const [isLoading, setIsLoading] = useState(false);
-    const [isSaving, setIsSaving] = useState(false);
-    const { toast } = useToast();
+const InnovationInsights = forwardRef<
+  InnovationInsightsRef,
+  InnovationInsightsProps
+>(({ response, metaData, question }, ref) => {
+  const [content, setContent] = useState<string | null>(response);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const { toast } = useToast();
 
-    // Expose the generateContent function to parent components via ref
-    useImperativeHandle(ref, () => ({
-      generateContent: () => {
-        generateContent();
-      },
-    }));
+  // Expose the generateContent function to parent components via ref
+  useImperativeHandle(ref, () => ({
+    generateContent: () => {
+      generateContent();
+    },
+  }));
 
-    useEffect(() => {
-      setContent(response);
-    }, [response]);
+  useEffect(() => {
+    setContent(response);
+  }, [response]);
 
-    const generateContent = () => {
-      setIsLoading(true);
+  const generateContent = () => {
+    setIsLoading(true);
 
-      // Simulate API call delay
-      setTimeout(() => {
-        setContent(`# iPhone Innovation Framework
+    // Simulate API call delay
+    setTimeout(() => {
+      setContent(`# iPhone Innovation Framework
 
 Based on our market analysis and technical research, we've identified the following innovation framework for the iPhone:
 
@@ -106,152 +107,142 @@ Apple's ongoing innovation strategy includes:
 - Privacy-focused feature development
 
 This innovation framework demonstrates Apple's commitment to pushing boundaries in mobile technology while maintaining user trust and satisfaction.`);
-        setIsLoading(false);
-      }, 2000);
-    };
+      setIsLoading(false);
+    }, 2000);
+  };
 
-    const handleSave = () => {
-      setIsSaving(true);
+  const handleSave = () => {
+    setIsSaving(true);
 
-      saveChats({
-        id: 6,
-        section: "Innovation",
-        question: question,
-        answer: response,
-        timestamp: new Date(),
-        saved: true,
+    if (typeof window !== "undefined" && window.addKnowledgeEntry) {
+      window.addKnowledgeEntry("Innovation", question, response);
+    }
+
+    setTimeout(() => {
+      setIsSaving(false);
+      toast({
+        title: "Insights saved successfully",
+        description: "Your innovation insights have been saved to the project.",
+        duration: 3000,
       });
+    }, 1000);
+  };
 
-      // Simulate saving delay
-      setTimeout(() => {
-        setIsSaving(false);
-        toast({
-          title: "Insights saved successfully",
-          description:
-            "Your innovation insights have been saved to the project.",
-          duration: 3000,
-        });
-      }, 1000);
-    };
+  return (
+    <>
+      <Card className="border-2 border-primary shadow-lg">
+        <CardHeader className="bg-primary/5">
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center">
+              <FileText className="h-5 w-5 mr-2" />
+              Innovation Insights
+            </div>
+            <div className="flex items-center gap-2">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    Meta-data
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[500px]">
+                  <DialogHeader>
+                    <DialogTitle>Approach Meta-data</DialogTitle>
+                  </DialogHeader>
+                  <div className="bg-muted p-4 rounded-md max-h-[400px] overflow-y-auto">
+                    {metaData.length > 0 ? (
+                      <div className="space-y-3 text-sm">
+                        {metaData.map((item: any, index: number) => (
+                          <div
+                            key={`${item.chunk_id}-${index}`} // ✅ Ensure the key is unique
+                            className="border border-gray-300 p-3 rounded-md"
+                          >
+                            <p>
+                              <span className="font-semibold">Chunk ID:</span>{" "}
+                              {item.chunk_id}
+                            </p>
+                            <p>
+                              <span className="font-semibold">Filename:</span>{" "}
+                              {item.filename}
+                            </p>
+                            <p>
+                              <span className="font-semibold">
+                                Page Number:
+                              </span>{" "}
+                              {item.page_number}
+                            </p>
+                            <p>
+                              <span className="font-semibold">Text:</span>{" "}
+                              <span className="italic">{item.text}</span>
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 text-center">
+                        No metadata available.
+                      </p>
+                    )}
+                  </div>
+                </DialogContent>
+              </Dialog>
+              <Button
+                size="sm"
+                onClick={handleSave}
+                disabled={!content || isSaving}
+              >
+                {isSaving ? "Saving..." : "Save"}
+              </Button>
+            </div>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6 relative">
+          {content ? (
+            <div className="prose max-w-none">
+              {content.split("\n").map((line, index) => {
+                if (line.startsWith("# ")) {
+                  return <h3 key={index}>{line.replace("# ", "")}</h3>;
+                } else if (line.startsWith("## ")) {
+                  return <h4 key={index}>{line.replace("## ", "")}</h4>;
+                } else if (line.startsWith("- ")) {
+                  return <li key={index}>{line.replace("- ", "")}</li>;
+                } else if (line.trim() === "") {
+                  return <br key={index} />;
+                } else {
+                  return <p key={index}>{line}</p>;
+                }
+              })}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="bg-muted/50 p-8 rounded-lg text-center">
+                <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium mb-2">
+                  No insights generated yet
+                </h3>
+                <p className="text-muted-foreground">
+                  Send a message in the chat to generate insights.
+                </p>
+              </div>
+            </div>
+          )}
 
-    return (
-      <>
-        <Card className="border-2 border-primary shadow-lg">
-          <CardHeader className="bg-primary/5">
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center">
-                <FileText className="h-5 w-5 mr-2" />
-                Innovation Insights
+          {isLoading && (
+            <div className="absolute inset-0 bg-background/80 flex items-center justify-center rounded-lg">
+              <div className="text-center">
+                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+                <p className="font-medium">Generating Innovation Insights...</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  This may take a few moments
+                </p>
               </div>
-              <div className="flex items-center gap-2">
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      Meta-data
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[500px]">
-                    <DialogHeader>
-                      <DialogTitle>Approach Meta-data</DialogTitle>
-                    </DialogHeader>
-                    <div className="bg-muted p-4 rounded-md max-h-[400px] overflow-y-auto">
-                      {metaData.length > 0 ? (
-                        <div className="space-y-3 text-sm">
-                          {metaData.map((item: any, index: number) => (
-                            <div
-                              key={`${item.chunk_id}-${index}`} // ✅ Ensure the key is unique
-                              className="border border-gray-300 p-3 rounded-md"
-                            >
-                              <p>
-                                <span className="font-semibold">Chunk ID:</span>{" "}
-                                {item.chunk_id}
-                              </p>
-                              <p>
-                                <span className="font-semibold">Filename:</span>{" "}
-                                {item.filename}
-                              </p>
-                              <p>
-                                <span className="font-semibold">
-                                  Page Number:
-                                </span>{" "}
-                                {item.page_number}
-                              </p>
-                              <p>
-                                <span className="font-semibold">Text:</span>{" "}
-                                <span className="italic">{item.text}</span>
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-gray-500 text-center">
-                          No metadata available.
-                        </p>
-                      )}
-                    </div>
-                  </DialogContent>
-                </Dialog>
-                <Button
-                  size="sm"
-                  onClick={handleSave}
-                  disabled={!content || isSaving}
-                >
-                  {isSaving ? "Saving..." : "Save"}
-                </Button>
-              </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6 relative">
-            {content ? (
-              <div className="prose max-w-none">
-                {content.split("\n").map((line, index) => {
-                  if (line.startsWith("# ")) {
-                    return <h3 key={index}>{line.replace("# ", "")}</h3>;
-                  } else if (line.startsWith("## ")) {
-                    return <h4 key={index}>{line.replace("## ", "")}</h4>;
-                  } else if (line.startsWith("- ")) {
-                    return <li key={index}>{line.replace("- ", "")}</li>;
-                  } else if (line.trim() === "") {
-                    return <br key={index} />;
-                  } else {
-                    return <p key={index}>{line}</p>;
-                  }
-                })}
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="bg-muted/50 p-8 rounded-lg text-center">
-                  <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-medium mb-2">
-                    No insights generated yet
-                  </h3>
-                  <p className="text-muted-foreground">
-                    Send a message in the chat to generate insights.
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {isLoading && (
-              <div className="absolute inset-0 bg-background/80 flex items-center justify-center rounded-lg">
-                <div className="text-center">
-                  <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
-                  <p className="font-medium">
-                    Generating Innovation Insights...
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    This may take a few moments
-                  </p>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-        <Toaster />
-      </>
-    );
-  }
-);
+            </div>
+          )}
+        </CardContent>
+      </Card>
+      <Toaster />
+    </>
+  );
+});
 
 InnovationInsights.displayName = "InnovationInsights";
 

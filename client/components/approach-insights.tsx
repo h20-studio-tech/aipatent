@@ -27,7 +27,6 @@ interface ApproachInsightsRef {
 
 interface ApproachInsightsProps {
   response: string;
-  saveChats: (chat: any) => void;
   question: string;
   metaData: {
     chunk_id: number;
@@ -37,8 +36,8 @@ interface ApproachInsightsProps {
   }[]; // ✅ Fix: metaData is an array of objects
 }
 
-const ApproachInsights = forwardRef<ApproachInsightsRef>(
-  ({ response, metaData, saveChats, question }, ref) => {
+const ApproachInsights = forwardRef<ApproachInsightsRef, ApproachInsightsProps>(
+  ({ response, metaData, question }, ref) => {
     const scrollRef = useRef<HTMLDivElement | null>(null);
     const isDragging = useRef(false);
     const startX = useRef(0);
@@ -83,14 +82,11 @@ const ApproachInsights = forwardRef<ApproachInsightsRef>(
 
     const handleSave = () => {
       setIsSaving(true);
-      saveChats({
-        id: Date.now(),
-        section: "Approach",
-        question: question,
-        answer: response,
-        timestamp: new Date(),
-        saved: true,
-      });
+
+      if (typeof window !== "undefined" && window.addKnowledgeEntry) {
+        window.addKnowledgeEntry("Approach", question, response);
+      }
+
       setTimeout(() => {
         setIsSaving(false);
         toast({

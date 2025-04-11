@@ -32,6 +32,8 @@ import { mockPdfs } from "@/lib/mock-data";
 import { backendUrl } from "@/config/config";
 import axios from "axios";
 import { PDF } from "@/lib/types";
+import ProcessingLoader from "./processingLoader";
+import ProcessCompleteLoader from "./processCompleteLoader";
 
 // Interface for embodiment objects
 interface Embodiment {
@@ -118,17 +120,7 @@ export function transformApiEmbodiments(data: RawChunk[]): EmbodimentMap {
   return map;
 }
 
-interface EmbodimentProps {
-  chats: any[]; // ✅ Correctly defining props as an object
-  setChats: Dispatch<SetStateAction<any[]>>;
-  saveChats: (chat: any) => void;
-}
-
-export default function Embodiments({
-  chats,
-  setChats,
-  saveChats,
-}: EmbodimentProps) {
+export default function Embodiments() {
   const [isExtracting, setIsExtracting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
@@ -182,6 +174,9 @@ export default function Embodiments({
   const [patentName, setPatentName] = useState<string | null>(null);
   const [antigen, setAntigen] = useState<string | null>(null);
   const [disease, setDisease] = useState<string | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const confettiRef = useRef(null);
+  const successIconRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -297,7 +292,12 @@ export default function Embodiments({
     }
   };
 
-  const handleSaveKnowledge = () => {};
+  useEffect(() => {
+    if (processingComplete) {
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 3000); // Confetti runs for 3s
+    }
+  }, [processingComplete]);
 
   const fetchDocuments = async () => {
     try {
@@ -586,15 +586,23 @@ export default function Embodiments({
           }
         }
 
-        saveChats({
-          id: Date.now(),
-          section: resolvedSection,
-          question: embodiment.title,
-          answer: embodiment.description,
-          timestamp: new Date(),
-          saved: true,
-          remixed: true,
-        });
+        // saveChats({
+        //   id: Date.now(),
+        //   section: resolvedSection,
+        //   question: embodiment.title,
+        //   answer: embodiment.description,
+        //   timestamp: new Date(),
+        //   saved: true,
+        // });
+
+        if (typeof window !== "undefined" && window.addKnowledgeEntry) {
+          window.addKnowledgeEntry(
+            resolvedSection,
+            embodiment.title,
+            embodiment.description,
+            true
+          );
+        }
       }
     } else {
       for (const [key, value] of Object.entries(embodiments)) {
@@ -773,6 +781,18 @@ export default function Embodiments({
 
   return (
     <main className="container mx-auto px-4 py-8 relative">
+      {isProcessingPdf && (
+        <ProcessingLoader processingFileName={processingFileName} />
+      )}
+
+      {/* PDF Processing Success - Full Screen with Confetti */}
+      {processingComplete && (
+        <ProcessCompleteLoader
+          processingFileName={processingFileName}
+          showConfetti={showConfetti}
+          successIcon={successIconRef}
+        />
+      )}
       {/* Patent Documents Section - Adjust top margin since we removed the header */}
       <div className="border rounded-lg p-6 shadow-sm mb-8 mt-16">
         <div className="mb-4">

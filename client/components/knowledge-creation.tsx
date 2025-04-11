@@ -20,21 +20,11 @@ import { PDF } from "@/lib/types";
 import { useRouter } from "next/router";
 import { useSearchParams } from "next/navigation";
 
-interface KnowledgeCreationProps {
-  chats: any[]; // ✅ Correctly defining props as an object
-  setChats: Dispatch<SetStateAction<any[]>>;
-  saveChats: (chat: any) => void;
-}
-
 type InsightsRef = {
   generateContent: () => void;
 };
 
-export default function KnowledgeCreation({
-  chats,
-  setChats,
-  saveChats,
-}: KnowledgeCreationProps) {
+export default function KnowledgeCreation() {
   const [patentName, setPatentName] = useState<string | null>(null);
 
   useEffect(() => {
@@ -150,9 +140,7 @@ export default function KnowledgeCreation({
 
             <TabsContent value="approach">
               <SectionPanel
-                chats={chats}
                 setQuestion={setQuestion}
-                saveChats={saveChats}
                 setMetaData={setApproachMetaData}
                 setInsightResponse={setApproachResponse}
                 sectionId="approach"
@@ -173,9 +161,7 @@ export default function KnowledgeCreation({
 
             <TabsContent value="technology">
               <SectionPanel
-                chats={chats}
                 setQuestion={setQuestion}
-                saveChats={saveChats}
                 setMetaData={setTechnologyMetaData}
                 setInsightResponse={setTechnologyResponse}
                 sectionId="technology"
@@ -196,9 +182,7 @@ export default function KnowledgeCreation({
 
             <TabsContent value="innovation">
               <SectionPanel
-                chats={chats}
                 setQuestion={setQuestion}
-                saveChats={saveChats}
                 setMetaData={setInnovationMetaData}
                 setInsightResponse={setInnovationResponse}
                 sectionId="innovation"
@@ -225,7 +209,6 @@ export default function KnowledgeCreation({
         <ApproachInsights
           response={approachResponse}
           question={question}
-          saveChats={saveChats}
           metaData={approachmetaData}
           ref={approachInsightsRef}
         />
@@ -234,7 +217,6 @@ export default function KnowledgeCreation({
         <TechnologyInsights
           response={technologyResponse}
           question={question}
-          saveChats={saveChats}
           metaData={technologymetaData}
           ref={technologyInsightsRef}
         />
@@ -243,7 +225,6 @@ export default function KnowledgeCreation({
         <InnovationInsights
           response={innovationResponse}
           question={question}
-          saveChats={saveChats}
           metaData={innovationmetaData}
           ref={innovationInsightsRef}
         />
