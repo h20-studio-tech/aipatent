@@ -37,6 +37,9 @@ export default function KnowledgeCreation() {
   const [activeTab, setActiveTab] = useState("approach");
   const [question, setQuestion] = useState<string>("");
   const [innovationResponse, setInnovationResponse] = useState("");
+  const [lastSavedApproach, setLastSavedApproach] = useState("");
+  const [lastSavedTechnology, setLastSavedTechnology] = useState("");
+  const [lastSavedInnovation, setLastSavedInnovation] = useState("");
   const [approachResponse, setApproachResponse] = useState("");
   const [approachpdfList, setapproachPdfList] = useState<PDF[]>([]);
   const [selectedapproachPdfs, setSelectedapproachPdfs] = useState<PDF[]>([]);
@@ -211,6 +214,8 @@ export default function KnowledgeCreation() {
           question={question}
           metaData={approachmetaData}
           ref={approachInsightsRef}
+          lastSaved={lastSavedApproach}
+          setLastSaved={setLastSavedApproach}
         />
       )}
       {activeTab === "technology" && (
@@ -219,6 +224,8 @@ export default function KnowledgeCreation() {
           question={question}
           metaData={technologymetaData}
           ref={technologyInsightsRef}
+          lastSaved={lastSavedTechnology}
+          setLastSaved={setLastSavedTechnology}
         />
       )}
       {activeTab === "innovation" && (
@@ -227,6 +234,8 @@ export default function KnowledgeCreation() {
           question={question}
           metaData={innovationmetaData}
           ref={innovationInsightsRef}
+          lastSaved={lastSavedInnovation}
+          setLastSaved={setLastSavedInnovation}
         />
       )}
     </div>

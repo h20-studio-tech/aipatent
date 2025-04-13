@@ -1,6 +1,13 @@
 "use client";
 
-import { useState, forwardRef, useImperativeHandle, useEffect } from "react";
+import {
+  useState,
+  forwardRef,
+  useImperativeHandle,
+  useEffect,
+  Dispatch,
+  SetStateAction,
+} from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,13 +34,15 @@ interface InnovationInsightsProps {
     filename: string;
     page_number: number;
     text: string;
-  }[]; // ✅ Fix: metaData is an array of objects
+  }[];
+  lastSaved: string;
+  setLastSaved: Dispatch<SetStateAction<string>>;
 }
 
 const InnovationInsights = forwardRef<
   InnovationInsightsRef,
   InnovationInsightsProps
->(({ response, metaData, question }, ref) => {
+>(({ response, metaData, question, lastSaved, setLastSaved }, ref) => {
   const [content, setContent] = useState<string | null>(response);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -120,6 +129,7 @@ This innovation framework demonstrates Apple's commitment to pushing boundaries 
 
     setTimeout(() => {
       setIsSaving(false);
+      setLastSaved(response);
       toast({
         title: "Insights saved successfully",
         description: "Your innovation insights have been saved to the project.",
@@ -188,9 +198,13 @@ This innovation framework demonstrates Apple's commitment to pushing boundaries 
               <Button
                 size="sm"
                 onClick={handleSave}
-                disabled={!content || isSaving}
+                disabled={!content || isSaving || lastSaved === response}
               >
-                {isSaving ? "Saving..." : "Save"}
+                {lastSaved === response
+                  ? "Saved"
+                  : isSaving
+                  ? "Saving"
+                  : "Save"}
               </Button>
             </div>
           </CardTitle>

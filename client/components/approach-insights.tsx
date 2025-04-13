@@ -6,6 +6,8 @@ import {
   useImperativeHandle,
   useEffect,
   useRef,
+  SetStateAction,
+  Dispatch,
 } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,11 +35,13 @@ interface ApproachInsightsProps {
     filename: string;
     page_number: number;
     text: string;
-  }[]; // ✅ Fix: metaData is an array of objects
+  }[];
+  lastSaved: string;
+  setLastSaved: Dispatch<SetStateAction<string>>;
 }
 
 const ApproachInsights = forwardRef<ApproachInsightsRef, ApproachInsightsProps>(
-  ({ response, metaData, question }, ref) => {
+  ({ response, metaData, question, lastSaved, setLastSaved }, ref) => {
     const scrollRef = useRef<HTMLDivElement | null>(null);
     const isDragging = useRef(false);
     const startX = useRef(0);
@@ -89,6 +93,7 @@ const ApproachInsights = forwardRef<ApproachInsightsRef, ApproachInsightsProps>(
 
       setTimeout(() => {
         setIsSaving(false);
+        setLastSaved(response);
         toast({
           title: "Insights saved successfully",
           description: "Your approach insights have been saved to the project.",
@@ -163,9 +168,13 @@ const ApproachInsights = forwardRef<ApproachInsightsRef, ApproachInsightsProps>(
                 <Button
                   size="sm"
                   onClick={handleSave}
-                  disabled={!content || isSaving}
+                  disabled={!content || isSaving || lastSaved === response}
                 >
-                  {isSaving ? "Saving..." : "Save"}
+                  {lastSaved === response
+                    ? "Saved"
+                    : isSaving
+                    ? "Saving"
+                    : "Save"}
                 </Button>
               </div>
             </CardTitle>
