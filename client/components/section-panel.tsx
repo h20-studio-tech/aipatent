@@ -33,6 +33,8 @@ import type { PDF } from "@/lib/types";
 import { backendUrl } from "../config/config";
 import type { Dispatch, SetStateAction } from "react"; // ✅ Fix missing import
 import { useToast } from "./ui/use-toast";
+import ProcessingLoader from "./processingLoader";
+import ProcessCompleteLoader from "./processCompleteLoader";
 
 interface SectionPanelProps {
   sectionId: string;
@@ -40,7 +42,6 @@ interface SectionPanelProps {
   pdfs: PDF[];
   onPdfUpload: (sectionId: string, file: File) => void;
   hideInsights?: boolean;
-  chats: { role: "user" | "ai"; message: string }[];
   setQuestion: Dispatch<SetStateAction<string>>;
   selectedPdfIds: string[]; // ✅ Receive selected PDF IDs from parent
   setSelectedPdfIds: Dispatch<SetStateAction<string[]>>; // ✅ Function to update selected PDFs
@@ -51,15 +52,14 @@ interface SectionPanelProps {
   setMetaData: Dispatch<
     SetStateAction<
       {
-        chunk_id: Number;
+        chunk_id: number;
         filename: string;
-        page_number: Number;
+        page_number: number;
         text: string;
       }[]
     >
   >;
   setInsightResponse: Dispatch<SetStateAction<string>>;
-  saveChats: (chat: any) => void;
 }
 
 export default function SectionPanel({
@@ -68,9 +68,7 @@ export default function SectionPanel({
   pdfs,
   onPdfUpload,
   hideInsights = false,
-  chats,
   setQuestion,
-  saveChats,
   setInsightResponse,
   setMetaData,
   pdfList,
@@ -92,7 +90,7 @@ export default function SectionPanel({
   const [userNotes, setUserNotes] = useState("");
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const confettiRef = useRef(null);
-  const successIconRef = useRef(null);
+  const successIconRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -304,49 +302,16 @@ export default function SectionPanel({
       } gap-4 mt-4`}
     >
       {isProcessingPdf && (
-        <div className="fixed inset-0 bg-background z-50 flex items-center justify-center">
-          <div className="text-center max-w-md mx-auto p-8">
-            <Loader2 className="h-16 w-16 animate-spin mx-auto mb-6 text-primary" />
-            <h3 className="text-xl font-medium mb-2">Processing PDF</h3>
-            <p className="text-muted-foreground mb-4">
-              Extracting insights from{" "}
-              <span className="font-medium">{processingFileName}</span>
-            </p>
-            <div className="w-full bg-muted rounded-full h-2 mb-6">
-              <div className="bg-primary h-2 rounded-full animate-pulse"></div>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              This may take a few moments.
-            </p>
-          </div>
-        </div>
+        <ProcessingLoader processingFileName={processingFileName} />
       )}
 
       {/* PDF Processing Success - Full Screen with Confetti */}
       {processingComplete && (
-        <div className="fixed inset-0 bg-background z-50 flex items-center justify-center">
-          {showConfetti && (
-            <Confetti width={window.innerWidth} height={window.innerHeight} />
-          )}
-          <div className="text-center max-w-md mx-auto p-8 z-10">
-            <div
-              ref={successIconRef}
-              className="rounded-full bg-green-100 p-3 w-20 h-20 flex items-center justify-center mx-auto mb-6 relative"
-            >
-              <CheckCircle className="h-12 w-12 text-green-600" />
-            </div>
-            <h3 className="text-xl font-medium mb-2">
-              PDF Processed Successfully
-            </h3>
-            <p className="text-muted-foreground mb-4">
-              <span className="font-medium">{processingFileName}</span> is ready
-              for use.
-            </p>
-            <p className="text-sm text-muted-foreground">
-              You can now interact with this document.
-            </p>
-          </div>
-        </div>
+        <ProcessCompleteLoader
+          processingFileName={processingFileName}
+          showConfetti={showConfetti}
+          successIcon={successIconRef}
+        />
       )}
 
       <div className="space-y-4">
