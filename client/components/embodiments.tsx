@@ -586,14 +586,15 @@ export default function Embodiments() {
           }
         }
 
-        // saveChats({
-        //   id: Date.now(),
-        //   section: resolvedSection,
-        //   question: embodiment.title,
-        //   answer: embodiment.description,
-        //   timestamp: new Date(),
-        //   saved: true,
-        // });
+        // ✅ Avoid duplicate saves
+        if (isEmbodimentAlreadySaved(embodiment as RemixedEmbodiment)) {
+          toast({
+            title: "Already Saved",
+            description: "This remixed embodiment was already saved.",
+            variant: "default",
+          });
+          return;
+        }
 
         if (typeof window !== "undefined" && window.addKnowledgeEntry) {
           window.addKnowledgeEntry(
@@ -746,6 +747,15 @@ export default function Embodiments() {
         );
       }
     }
+  };
+
+  const isEmbodimentAlreadySaved = (embodiment: RemixedEmbodiment): boolean => {
+    return storedKnowledge.some(
+      (item) =>
+        item.title === embodiment.title &&
+        item.description === embodiment.description &&
+        item.source === "remixed"
+    );
   };
 
   // Handle file upload
@@ -1204,10 +1214,13 @@ export default function Embodiments() {
                       <button
                         className="text-xs bg-green-500 text-white px-3 py-1.5 rounded hover:bg-green-600"
                         onClick={() => saveEmbodiment(embodiment, "remixed")}
+                        disabled={isEmbodimentAlreadySaved(embodiment)}
                       >
                         <span className="flex items-center gap-1">
                           <Save className="h-3 w-3" />
-                          Save
+                          {isEmbodimentAlreadySaved(embodiment)
+                            ? "Saved"
+                            : "Save"}
                         </span>
                       </button>
                       <button
