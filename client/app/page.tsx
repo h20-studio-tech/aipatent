@@ -12,9 +12,17 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { backendUrl } from "@/config/config";
 
+type Patent = {
+  name: string;
+  antigen: string;
+  disease: string;
+  updated_at: string;
+  [key: string]: any;
+};
+
 export default function CreatePatent() {
   const router = useRouter();
-  const [patents, setPatents] = useState([]);
+  const [patents, setPatents] = useState<Patent[]>([]);
   const [formData, setFormData] = useState({
     name: "",
     antigen: "",
@@ -44,14 +52,20 @@ export default function CreatePatent() {
   const getPatents = async () => {
     try {
       const response = await axios.get(`${backendUrl}/v1/projects/`);
+      const projects = response.data.projects;
 
-      console.log("Patents", response);
-      setPatents(response.data.projects);
+      // Sort by updated_at (descending)
+      const sortedProjects = projects.sort(
+        (a: any, b: any) =>
+          new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+      );
+
+      setPatents(sortedProjects);
     } catch (err) {
       console.log(err);
     }
   };
-  const handlePatentClick = (patent: (typeof previousPatents)[0]) => {
+  const handlePatentClick = (patent: (typeof patents)[0]) => {
     console.log("Selected patent:", patent);
     router.push(
       `/KnowledgeCreation?patentName=${patent.name}&antigen=${patent.antigen}&disease=${patent.disease}`
