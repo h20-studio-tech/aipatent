@@ -33,7 +33,7 @@ export default function KnowledgeCreation() {
       setPatentName(params.get("patentName"));
     }
   }, []);
-  const [pdfs, setPdfs] = useState(mockPdfs);
+  const [pdfs, setPdfs] = useState<PDF[]>([]);
   const [activeTab, setActiveTab] = useState("approach");
   const [question, setQuestion] = useState<string>("");
   const [innovationResponse, setInnovationResponse] = useState("");
@@ -41,25 +41,7 @@ export default function KnowledgeCreation() {
   const [lastSavedTechnology, setLastSavedTechnology] = useState("");
   const [lastSavedInnovation, setLastSavedInnovation] = useState("");
   const [approachResponse, setApproachResponse] = useState("");
-  const [approachpdfList, setapproachPdfList] = useState<PDF[]>([]);
-  const [selectedapproachPdfs, setSelectedapproachPdfs] = useState<PDF[]>([]);
-  const [selectedapproachPdfIds, setSelectedapproachPdfIds] = useState<
-    string[]
-  >([]);
-  const [innovationpdfList, setinnovationPdfList] = useState<PDF[]>([]);
-  const [selectedinnovationPdfs, setSelectedinnovationPdfs] = useState<PDF[]>(
-    []
-  );
-  const [selectedinnovationPdfIds, setSelectedinnovationPdfIds] = useState<
-    string[]
-  >([]);
-  const [technologypdfList, settechnologyPdfList] = useState<PDF[]>([]);
-  const [selectedtechnologyPdfs, setSelectedtechnologyPdfs] = useState<PDF[]>(
-    []
-  );
-  const [selectedtechnologyPdfIds, setSelectedtechnologyPdfIds] = useState<
-    string[]
-  >([]);
+
   const [technologyResponse, setTechnologyResponse] = useState("");
   const [approachmetaData, setApproachMetaData] = useState([]);
   const [innovationmetaData, setInnovationMetaData] = useState([]);
@@ -67,6 +49,8 @@ export default function KnowledgeCreation() {
   const approachInsightsRef = useRef<InsightsRef | null>(null);
   const technologyInsightsRef = useRef<InsightsRef | null>(null);
   const innovationInsightsRef = useRef<InsightsRef | null>(null);
+  const [selectedPdfIds, setSelectedPdfIds] = useState<string[]>([]);
+  const [selectedPdfs, setSelectedPdfs] = useState<PDF[]>([]);
 
   const handlePdfUpload = (sectionId: string, file: File) => {
     // In a real app, we would upload the file to a server
@@ -148,12 +132,12 @@ export default function KnowledgeCreation() {
                 setInsightResponse={setApproachResponse}
                 sectionId="approach"
                 title="Approach"
-                pdfList={approachpdfList}
-                setPdfList={setapproachPdfList}
-                selectedPdfs={selectedapproachPdfs}
-                setSelectedPdfs={setSelectedapproachPdfs}
-                selectedPdfIds={selectedapproachPdfIds}
-                setSelectedPdfIds={setSelectedapproachPdfIds}
+                pdfList={pdfs}
+                setPdfList={setPdfs}
+                selectedPdfIds={selectedPdfIds}
+                setSelectedPdfIds={setSelectedPdfIds}
+                selectedPdfs={selectedPdfs}
+                setSelectedPdfs={setSelectedPdfs}
                 pdfs={pdfs.filter(
                   (pdf) => pdf.section === "approach" || !pdf.section
                 )}
@@ -169,12 +153,12 @@ export default function KnowledgeCreation() {
                 setInsightResponse={setTechnologyResponse}
                 sectionId="technology"
                 title="Technology"
-                pdfList={technologypdfList}
-                setPdfList={settechnologyPdfList}
-                selectedPdfs={selectedtechnologyPdfs}
-                setSelectedPdfs={setSelectedtechnologyPdfs}
-                selectedPdfIds={selectedtechnologyPdfIds}
-                setSelectedPdfIds={setSelectedtechnologyPdfIds}
+                pdfList={pdfs}
+                setPdfList={setPdfs}
+                selectedPdfIds={selectedPdfIds}
+                setSelectedPdfIds={setSelectedPdfIds}
+                selectedPdfs={selectedPdfs}
+                setSelectedPdfs={setSelectedPdfs}
                 pdfs={pdfs.filter(
                   (pdf) => pdf.section === "technology" || !pdf.section
                 )}
@@ -190,12 +174,12 @@ export default function KnowledgeCreation() {
                 setInsightResponse={setInnovationResponse}
                 sectionId="innovation"
                 title="Innovation"
-                pdfList={innovationpdfList}
-                setPdfList={setinnovationPdfList}
-                selectedPdfs={selectedinnovationPdfs}
-                setSelectedPdfs={setSelectedinnovationPdfs}
-                selectedPdfIds={selectedinnovationPdfIds}
-                setSelectedPdfIds={setSelectedinnovationPdfIds}
+                pdfList={pdfs}
+                setPdfList={setPdfs}
+                selectedPdfIds={selectedPdfIds}
+                setSelectedPdfIds={setSelectedPdfIds}
+                selectedPdfs={selectedPdfs}
+                setSelectedPdfs={setSelectedPdfs}
                 pdfs={pdfs.filter(
                   (pdf) => pdf.section === "innovation" || !pdf.section
                 )}

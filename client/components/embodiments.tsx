@@ -966,7 +966,7 @@ export default function Embodiments() {
               ></div>
             </div>
             <p className="text-sm text-muted-foreground">
-              This process may take a few moments as we identify and categorize
+              This process may take a few minutes as we identify and categorize
               all embodiments in your patents.
             </p>
           </div>
