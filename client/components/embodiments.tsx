@@ -43,6 +43,8 @@ interface Embodiment {
   selected: boolean;
   confidence?: number;
   source?: string;
+  pageNumber?: number; // ✅ Add this
+  section?: string; // ✅ And this
 }
 
 // Interface for remixed embodiment objects
@@ -114,6 +116,8 @@ export function transformApiEmbodiments(data: RawChunk[]): EmbodimentMap {
       selected: true,
       confidence: parseFloat((0.87 + Math.random() * 0.1).toFixed(2)),
       source: chunk.filename,
+      pageNumber: chunk.page_number, // ✅
+      section: chunk.section, // ✅
     });
   }
 
@@ -525,14 +529,12 @@ export default function Embodiments() {
     const antigen = params.get("antigen") || "unspecified";
 
     axios
-      .post(`${backendUrl}/v1/embodiment`, null, {
-        params: {
-          inspiration,
-          source_embodiment,
-          patent_title,
-          disease,
-          antigen,
-        },
+      .post(`${backendUrl}/v1/embodiment`, {
+        inspiration,
+        source_embodiment,
+        patent_title,
+        disease,
+        antigen,
       })
       .then((res) => {
         const result = res.data;
@@ -601,6 +603,7 @@ export default function Embodiments() {
             resolvedSection,
             embodiment.title,
             embodiment.description,
+            "123abc",
             true
           );
         }
@@ -1328,10 +1331,36 @@ export default function Embodiments() {
                     </div>
 
                     <div>
-                      <h3 className="font-medium mb-2">Source Text Chunks</h3>
+                      <h3 className="font-medium mb-2">Source Text Chunk</h3>
                       <div className="space-y-3">
                         {/* Mock source chunks - in a real app, these would come from the extraction process */}
-                        {[1, 2, 3].map((i) => (
+                        <div>
+                          <h3 className="font-medium mb-2">Source Info</h3>
+                          <div className="border-l-4 border-primary pl-4 py-2 bg-primary/5">
+                            <p className="text-sm text-muted-foreground">
+                              <strong>Section:</strong>{" "}
+                              {
+                                (selectedMetadataEmbodiment as Embodiment)
+                                  .section
+                              }
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              <strong>Filename:</strong>{" "}
+                              {
+                                (selectedMetadataEmbodiment as Embodiment)
+                                  .source
+                              }
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              <strong>Page Number:</strong>{" "}
+                              {
+                                (selectedMetadataEmbodiment as Embodiment)
+                                  .pageNumber
+                              }
+                            </p>
+                          </div>
+                        </div>
+                        {/* {[1, 2, 3].map((i) => (
                           <div
                             key={i}
                             className="border-l-4 border-primary pl-4 py-2 bg-primary/5"
@@ -1346,7 +1375,7 @@ export default function Embodiments() {
                               , Section {i}, Page {i + 2}
                             </div>
                           </div>
-                        ))}
+                        ))} */}
                       </div>
                     </div>
                   </div>

@@ -44,7 +44,7 @@ export default function CreatePatent() {
 
     if (response.data.patent_id) {
       router.push(
-        `/KnowledgeCreation?patentName=${formData.name}&antigen=${formData.antigen}&disease=${formData.disease}`
+        `/KnowledgeCreation?patentId=${response.data.patent_id}&patentName=${formData.name}&antigen=${formData.antigen}&disease=${formData.disease}`
       );
     }
   };
@@ -68,7 +68,7 @@ export default function CreatePatent() {
   const handlePatentClick = (patent: (typeof patents)[0]) => {
     console.log("Selected patent:", patent);
     router.push(
-      `/KnowledgeCreation?patentName=${patent.name}&antigen=${patent.antigen}&disease=${patent.disease}`
+      `/KnowledgeCreation?patentId=${patent.patent_id}&patentName=${patent.name}&antigen=${patent.antigen}&disease=${patent.disease}`
     );
   };
 

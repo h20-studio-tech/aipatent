@@ -42,6 +42,7 @@ interface SectionPanelProps {
   pdfs: PDF[];
   onPdfUpload: (sectionId: string, file: File) => void;
   hideInsights?: boolean;
+  patentId: string;
   setQuestion: Dispatch<SetStateAction<string>>;
   selectedPdfIds: string[]; // ✅ Receive selected PDF IDs from parent
   setSelectedPdfIds: Dispatch<SetStateAction<string[]>>; // ✅ Function to update selected PDFs
@@ -72,6 +73,7 @@ export default function SectionPanel({
   setInsightResponse,
   setMetaData,
   pdfList,
+  patentId,
   setPdfList,
   selectedPdfs,
   setSelectedPdfs,
@@ -260,7 +262,7 @@ export default function SectionPanel({
     if (!userNotes.trim()) return;
 
     if (typeof window !== "undefined" && window.addResearchNote) {
-      window.addResearchNote(title, userNotes);
+      window.addResearchNote(title, userNotes, patentId);
     } else {
       // Fallback if the global function is not available
       console.log("Saving research note to stored knowledge:", userNotes);

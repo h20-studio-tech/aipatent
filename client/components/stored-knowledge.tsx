@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Database, FileText } from "lucide-react";
+import axios from "axios";
+import { backendUrl } from "@/config/config";
 
 // Mock data for stored knowledge
 
@@ -28,7 +30,28 @@ export default function StoredKnowledge({
 
   useEffect(() => {
     // Set the global function to update local state
-    window.addResearchNote = (section: string, content: string) => {
+    window.addResearchNote = async (
+      section: string,
+      content: string,
+      patentId: string
+    ) => {
+      const payload = {
+        patent_id: patentId,
+        category: "Research Note",
+        content: content,
+        created_at: new Date().toISOString(),
+      };
+
+      try {
+        const response = await axios.post(
+          `${backendUrl}/v1/knowledge/research-note`,
+          payload
+        );
+        console.log("✅ API Response:", response?.data);
+      } catch (err: any) {
+        console.error("❌ API Error:", err?.response?.data || err.message);
+      }
+
       const newNote = {
         id: Date.now(),
         section,
@@ -42,36 +65,65 @@ export default function StoredKnowledge({
       setHasNewItems(true);
 
       if (typeof window !== "undefined") {
-        // Create a custom event that components can listen for
         const event = new CustomEvent("knowledgeEntryAdded", {
           detail: newNote,
         });
         window.dispatchEvent(event);
       }
+
+      return newNote;
     };
 
-    window.addKnowledgeEntry = (
+    window.addKnowledgeEntry = async (
       section: string,
       question: string,
       answer: string,
+      patentId?: string,
       remixed?: boolean
     ) => {
-      const newEntry = {
-        id: new Date(),
-        section: section,
-        question: question,
-        answer: answer,
-        timestamp: new Date().toISOString(),
-        saved: true,
-        remixed: remixed ? true : false,
+      console.log("PatentId -----------", patentId);
+
+      const payload = {
+        patent_id: patentId,
+        question,
+        answer,
+        created_at: new Date().toISOString(),
       };
 
+      try {
+        let endpoint = "";
+
+        if (section === "Approach") {
+          endpoint = `${backendUrl}/v1/knowledge/approach`;
+        } else if (section === "Technology") {
+          endpoint = `${backendUrl}/v1/knowledge/technology`;
+        } else if (section === "Innovation") {
+          endpoint = `${backendUrl}/v1/knowledge/innovation`;
+        }
+
+        if (endpoint) {
+          const response = await axios.post(endpoint, payload);
+          console.log("✅ API Success:", response?.data);
+        }
+      } catch (err: any) {
+        console.error("❌ API Error:", err?.response?.data || err?.message);
+      }
+
+      const newEntry = {
+        id: Date.now(),
+        section,
+        question,
+        answer,
+        timestamp: new Date().toISOString(),
+        saved: true,
+        remixed: remixed ?? false,
+      };
+
+      // Always store locally
       setLocalChats((prev) => [newEntry, ...prev]);
       setHasNewItems(true);
 
-      // If we have a global event system, we could trigger an event here
       if (typeof window !== "undefined") {
-        // Create a custom event that components can listen for
         const event = new CustomEvent("knowledgeEntryAdded", {
           detail: newEntry,
         });
@@ -211,11 +263,16 @@ export default function StoredKnowledge({
 
 declare global {
   interface Window {
-    addResearchNote?: (section: string, content: string) => any;
+    addResearchNote?: (
+      section: string,
+      content: string,
+      patentId: string
+    ) => any;
     addKnowledgeEntry?: (
       section: string,
       question: string,
       answer: string,
+      patentId?: string,
       remixed?: boolean
     ) => any;
     generateApproachInsights?: () => void;
