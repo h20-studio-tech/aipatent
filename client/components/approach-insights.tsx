@@ -37,11 +37,15 @@ interface ApproachInsightsProps {
     text: string;
   }[];
   lastSaved: string;
+  patentId: string;
   setLastSaved: Dispatch<SetStateAction<string>>;
 }
 
 const ApproachInsights = forwardRef<ApproachInsightsRef, ApproachInsightsProps>(
-  ({ response, metaData, question, lastSaved, setLastSaved }, ref) => {
+  (
+    { response, metaData, question, lastSaved, setLastSaved, patentId },
+    ref
+  ) => {
     const scrollRef = useRef<HTMLDivElement | null>(null);
     const isDragging = useRef(false);
     const startX = useRef(0);
@@ -88,7 +92,7 @@ const ApproachInsights = forwardRef<ApproachInsightsRef, ApproachInsightsProps>(
       setIsSaving(true);
 
       if (typeof window !== "undefined" && window.addKnowledgeEntry) {
-        window.addKnowledgeEntry("Approach", question, response);
+        window.addKnowledgeEntry("Approach", question, response, patentId);
       }
 
       setTimeout(() => {

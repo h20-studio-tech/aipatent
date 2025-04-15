@@ -26,11 +26,13 @@ type InsightsRef = {
 
 export default function KnowledgeCreation() {
   const [patentName, setPatentName] = useState<string | null>(null);
+  const [patentId, setPatentId] = useState<string>("");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       setPatentName(params.get("patentName"));
+      setPatentId(params.get("patentId"));
     }
   }, []);
   const [pdfs, setPdfs] = useState<PDF[]>([]);
@@ -128,6 +130,7 @@ export default function KnowledgeCreation() {
             <TabsContent value="approach">
               <SectionPanel
                 setQuestion={setQuestion}
+                patentId={patentId}
                 setMetaData={setApproachMetaData}
                 setInsightResponse={setApproachResponse}
                 sectionId="approach"
@@ -149,6 +152,7 @@ export default function KnowledgeCreation() {
             <TabsContent value="technology">
               <SectionPanel
                 setQuestion={setQuestion}
+                patentId={patentId}
                 setMetaData={setTechnologyMetaData}
                 setInsightResponse={setTechnologyResponse}
                 sectionId="technology"
@@ -170,6 +174,7 @@ export default function KnowledgeCreation() {
             <TabsContent value="innovation">
               <SectionPanel
                 setQuestion={setQuestion}
+                patentId={patentId}
                 setMetaData={setInnovationMetaData}
                 setInsightResponse={setInnovationResponse}
                 sectionId="innovation"
@@ -194,6 +199,7 @@ export default function KnowledgeCreation() {
       {/* Conditional Insights Section based on active tab */}
       {activeTab === "approach" && (
         <ApproachInsights
+          patentId={patentId}
           response={approachResponse}
           question={question}
           metaData={approachmetaData}
@@ -204,6 +210,7 @@ export default function KnowledgeCreation() {
       )}
       {activeTab === "technology" && (
         <TechnologyInsights
+          patentId={patentId}
           response={technologyResponse}
           question={question}
           metaData={technologymetaData}
@@ -214,6 +221,7 @@ export default function KnowledgeCreation() {
       )}
       {activeTab === "innovation" && (
         <InnovationInsights
+          patentId={patentId}
           response={innovationResponse}
           question={question}
           metaData={innovationmetaData}
