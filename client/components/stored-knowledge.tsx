@@ -13,7 +13,13 @@ import { Database, FileText } from "lucide-react";
 import axios from "axios";
 import { backendUrl } from "@/config/config";
 
-// Mock data for stored knowledge
+interface DBData {
+  patentId: number;
+  question: string;
+  answer: string;
+  section: string;
+  timestamp: string;
+}
 
 interface StoredKnowledgeProps {
   stage: number;
@@ -29,6 +35,41 @@ export default function StoredKnowledge({
   const [hasNewItems, setHasNewItems] = useState(false);
 
   useEffect(() => {
+    window.addStoredData = async (type: string, data: DBData) => {
+      if (type === "knowledge") {
+        const newNote = {
+          id: Date.now(),
+          section: data.section,
+          question: data.question,
+          answer: data.answer,
+          timestamp: data.timestamp,
+          saved: true,
+        };
+
+        setLocalChats((prev) =>
+          [newNote, ...prev].sort(
+            (a, b) =>
+              new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+          )
+        );
+      } else {
+        const newNote = {
+          id: Date.now(),
+          section: data.section,
+          question: data.question,
+          answer: data.answer,
+          timestamp: data.timestamp,
+          saved: true,
+        };
+
+        setLocalChats((prev) =>
+          [newNote, ...prev].sort(
+            (a, b) =>
+              new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+          )
+        );
+      }
+    };
     // Set the global function to update local state
     window.addResearchNote = async (
       section: string,
@@ -263,6 +304,7 @@ export default function StoredKnowledge({
 
 declare global {
   interface Window {
+    addStoredData?: (type: string, data: DBData) => any;
     addResearchNote?: (
       section: string,
       content: string,

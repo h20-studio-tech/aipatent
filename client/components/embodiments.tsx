@@ -142,6 +142,45 @@ export default function Embodiments() {
     description: [],
     claims: [],
   });
+  const [patentId, setPatentId] = useState<string>("");
+
+  const fetchEmbodiments = async () => {
+    try {
+      const response = await axios.get(
+        `${backendUrl}/v1/source-embodiments/${patentId}`
+      );
+
+      console.log("Here", response);
+      const data: RawChunk[] = response.data || [];
+
+      const mappedEmbodiments = transformApiEmbodiments(data);
+      if (
+        mappedEmbodiments.summary.length > 0 ||
+        mappedEmbodiments.description.length > 0 ||
+        mappedEmbodiments.claims.length > 0
+      ) {
+        setShowResearchSections(true);
+        setCurrentStep("review");
+      }
+      console.log("Mapped", mappedEmbodiments);
+      setEmbodiments(mappedEmbodiments);
+    } catch (err) {
+      console.log("Error fetching embodiments:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      setPatentId(params.get("patentId"));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (patentId) {
+      fetchEmbodiments();
+    }
+  }, [patentId]);
   const [openPopupId, setOpenPopupId] = useState<number | null>(null);
   const [remixedEmbodiments, setRemixedEmbodiments] = useState<
     RemixedEmbodiment[]
@@ -409,11 +448,17 @@ export default function Embodiments() {
       const formData = new FormData();
       formData.append("file", uploadedFile);
 
-      const response = await axios.post(`${backendUrl}/v1/patent`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const response = await axios.post(
+        `${backendUrl}/v1/patent/${patentId}`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
 
-      const { data } = response.data;
+      console.log("Response", response);
+
+      const data = response.data.data;
       const mapped = transformApiEmbodiments(data || []);
       setEmbodiments(mapped);
 
