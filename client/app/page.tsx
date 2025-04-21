@@ -65,8 +65,27 @@ export default function CreatePatent() {
       console.log(err);
     }
   };
-  const handlePatentClick = (patent: (typeof patents)[0]) => {
+  const handlePatentClick = async (patent: (typeof patents)[0]) => {
     console.log("Selected patent:", patent);
+
+    // const approachResponse = await axios.get(
+    //   `${backendUrl}/v1/knowledge/approach/${patent.patent_id}`
+    // );
+    // const innovationResponse = await axios.get(
+    //   `${backendUrl}/v1/knowledge/innovation/${patent.patent_id}`
+    // );
+    // const technologyResponse = await axios.get(
+    //   `${backendUrl}/v1/knowledge/technology/${patent.patent_id}`
+    // );
+    // const notesResponse = await axios.get(
+    //   `${backendUrl}/v1/knowledge/research-note/${patent.patent_id}`
+    // );
+
+    // console.log("Approach Response", approachResponse);
+    // console.log("Innovation Response", innovationResponse);
+    // console.log("Technology Response", technologyResponse);
+    // console.log("Notes Response", notesResponse);
+
     router.push(
       `/KnowledgeCreation?patentId=${patent.patent_id}&patentName=${patent.name}&antigen=${patent.antigen}&disease=${patent.disease}`
     );
