@@ -290,30 +290,9 @@ export default function Embodiments() {
               selected: true,
             };
 
-            setAvailablePdfs((prev) => {
-              const existing = Array.isArray(prev) ? prev : [];
-
-              const updatedList = existing.some(
-                (pdf) => pdf.id === uploadedPDF.id
-              )
-                ? existing.map((pdf) =>
-                    pdf.id === uploadedPDF.id ? { ...pdf, selected: true } : pdf
-                  )
-                : [...existing, updatedPDF];
-
-              return updatedList;
-            });
-
-            setSelectedPdfIds((prev) =>
-              prev.includes(uploadedPDF?.id) ? prev : [...prev, uploadedPDF?.id]
-            );
-
-            console.log("Hello", uploadedPDF);
-            setSelectedPatents((prev) =>
-              prev.includes(uploadedPDF?.name)
-                ? prev
-                : [...prev, uploadedPDF?.name]
-            );
+            setAvailablePdfs([{ ...uploadedPDF, selected: true }]);
+            setSelectedPdfIds([uploadedPDF.id]);
+            setSelectedPatents([uploadedPDF.name]);
           }
         }
 
@@ -369,9 +348,9 @@ export default function Embodiments() {
     }
   };
 
-  useEffect(() => {
-    fetchDocuments();
-  }, []);
+  // useEffect(() => {
+  //   fetchDocuments();
+  // }, []);
 
   // New state for filtering and sorting
   const [filterQuery, setFilterQuery] = useState("");

@@ -38,7 +38,7 @@ export default function StoredKnowledge({
     window.addStoredData = async (type: string, data: DBData) => {
       if (type === "knowledge") {
         const newNote = {
-          id: Date.now(),
+          id: `${Date.now()}-${Math.random()}`,
           section: data.section,
           question: data.question,
           answer: data.answer,
@@ -54,7 +54,7 @@ export default function StoredKnowledge({
         );
       } else {
         const newNote = {
-          id: Date.now(),
+          id: `${Date.now()}-${Math.random()}`,
           section: data.section,
           question: data.question,
           answer: data.answer,
@@ -94,7 +94,7 @@ export default function StoredKnowledge({
       }
 
       const newNote = {
-        id: Date.now(),
+        id: `${Date.now()}-${Math.random()}`,
         section,
         question: "Research Note",
         answer: content,
@@ -151,7 +151,7 @@ export default function StoredKnowledge({
       }
 
       const newEntry = {
-        id: Date.now(),
+        id: `${Date.now()}-${Math.random()}`,
         section,
         question,
         answer,
