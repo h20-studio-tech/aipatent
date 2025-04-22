@@ -243,10 +243,79 @@ export default function Embodiments() {
     });
   };
 
+  // const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   console.log("A");
+  //   if (e.target.files && e.target.files[0]) {
+  //     console.log("B");
+  //     const file = e.target.files[0];
+  //     setProcessingFileName(file.name);
+  //     setIsProcessingPdf(true);
+
+  //     try {
+  //       const formData = new FormData();
+  //       formData.append("file", file);
+
+  //       await axios.post(`${backendUrl}/v1/documents/`, formData, {
+  //         headers: { "Content-Type": "multipart/form-data" },
+  //       });
+
+  //       // Fetch updated documents list
+  //       const { data } = await axios.get(`${backendUrl}/v1/documents/`);
+
+  //       if (data.response) {
+  //         const sortedDocuments = data.response.sort(
+  //           (a: any, b: any) =>
+  //             new Date(b.created_at).getTime() -
+  //             new Date(a.created_at).getTime()
+  //         );
+
+  //         setPdfList(sortedDocuments);
+
+  //         // Find the uploaded PDF
+  //         let uploadedPDF: any;
+
+  //         uploadedPDF = sortedDocuments.find(
+  //           (item: PDF) =>
+  //             item.name.replace(/[_\s]/g, "").toLowerCase() ===
+  //             file.name.replace(/[_\s]/g, "").toLowerCase()
+  //         );
+
+  //         console.log("UUG", uploadedPDF);
+  //         console.log("UygygyUG", sortedDocuments);
+  //         console.log("UgygUG", file.name);
+
+  //         if (uploadedPDF) {
+  //           const updatedPDF = {
+  //             ...uploadedPDF,
+  //             selected: true,
+  //           };
+
+  //           setAvailablePdfs([{ ...uploadedPDF, selected: true }]);
+  //           setSelectedPdfIds([uploadedPDF.id]);
+  //           setSelectedPatents([uploadedPDF.name]);
+  //         }
+  //       }
+
+  //       // ✅ Reset file input
+  //       if (fileInputRef.current) {
+  //         fileInputRef.current.value = "";
+  //       }
+
+  //       setUploadedFile(file);
+  //       setIsProcessingPdf(false);
+  //       setProcessingComplete(true);
+  //       setTimeout(() => {
+  //         setProcessingComplete(false);
+  //       }, 3000);
+  //     } catch (error) {
+  //       console.error("Error uploading file:", error);
+  //       setIsProcessingPdf(false);
+  //     }
+  //   }
+  // };
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log("A");
     if (e.target.files && e.target.files[0]) {
-      console.log("B");
       const file = e.target.files[0];
       setProcessingFileName(file.name);
       setIsProcessingPdf(true);
@@ -259,44 +328,20 @@ export default function Embodiments() {
           headers: { "Content-Type": "multipart/form-data" },
         });
 
-        // Fetch updated documents list
-        const { data } = await axios.get(`${backendUrl}/v1/documents/`);
+        // Directly construct uploaded PDF metadata (no GET)
+        const generatedId = `pdf-${Date.now()}-${Math.random()
+          .toString(36)
+          .substr(2, 9)}`;
+        const uploadedPDF: PDF = {
+          id: generatedId,
+          name: file.name,
+          selected: true,
+        };
 
-        if (data.response) {
-          const sortedDocuments = data.response.sort(
-            (a: any, b: any) =>
-              new Date(b.created_at).getTime() -
-              new Date(a.created_at).getTime()
-          );
+        setAvailablePdfs([uploadedPDF]);
+        setSelectedPdfIds([uploadedPDF.id]);
+        setSelectedPatents([uploadedPDF.name]);
 
-          setPdfList(sortedDocuments);
-
-          // Find the uploaded PDF
-          let uploadedPDF: any;
-
-          uploadedPDF = sortedDocuments.find(
-            (item: PDF) =>
-              item.name.replace(/[_\s]/g, "").toLowerCase() ===
-              file.name.replace(/[_\s]/g, "").toLowerCase()
-          );
-
-          console.log("UUG", uploadedPDF);
-          console.log("UygygyUG", sortedDocuments);
-          console.log("UgygUG", file.name);
-
-          if (uploadedPDF) {
-            const updatedPDF = {
-              ...uploadedPDF,
-              selected: true,
-            };
-
-            setAvailablePdfs([{ ...uploadedPDF, selected: true }]);
-            setSelectedPdfIds([uploadedPDF.id]);
-            setSelectedPatents([uploadedPDF.name]);
-          }
-        }
-
-        // ✅ Reset file input
         if (fileInputRef.current) {
           fileInputRef.current.value = "";
         }
@@ -304,9 +349,7 @@ export default function Embodiments() {
         setUploadedFile(file);
         setIsProcessingPdf(false);
         setProcessingComplete(true);
-        setTimeout(() => {
-          setProcessingComplete(false);
-        }, 3000);
+        setTimeout(() => setProcessingComplete(false), 3000);
       } catch (error) {
         console.error("Error uploading file:", error);
         setIsProcessingPdf(false);
