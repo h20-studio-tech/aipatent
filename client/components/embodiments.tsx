@@ -176,11 +176,11 @@ export default function Embodiments() {
     }
   }, []);
 
-  useEffect(() => {
-    if (patentId) {
-      fetchEmbodiments();
-    }
-  }, [patentId]);
+  // useEffect(() => {
+  //   if (patentId) {
+  //     fetchEmbodiments();
+  //   }
+  // }, [patentId]);
   const [openPopupId, setOpenPopupId] = useState<number | null>(null);
   const [remixedEmbodiments, setRemixedEmbodiments] = useState<
     RemixedEmbodiment[]
@@ -218,6 +218,8 @@ export default function Embodiments() {
   const [antigen, setAntigen] = useState<string | null>(null);
   const [disease, setDisease] = useState<string | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [embodimentsForFileExist, setEmbodimentsForFileExist] =
+    useState<boolean>(false);
   const confettiRef = useRef(null);
   const successIconRef = useRef<HTMLDivElement>(null);
 
@@ -323,12 +325,10 @@ export default function Embodiments() {
       try {
         const formData = new FormData();
         formData.append("file", file);
-
         await axios.post(`${backendUrl}/v1/documents/`, formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
 
-        // Directly construct uploaded PDF metadata (no GET)
         const generatedId = `pdf-${Date.now()}-${Math.random()
           .toString(36)
           .substr(2, 9)}`;
@@ -338,24 +338,33 @@ export default function Embodiments() {
           selected: true,
         };
 
-        setAvailablePdfs([uploadedPDF]);
+        setAvailablePdfs((prev) => [
+          uploadedPDF,
+          ...prev.map((p) => ({ ...p, selected: false })),
+        ]);
         setSelectedPdfIds([uploadedPDF.id]);
         setSelectedPatents([uploadedPDF.name]);
-
-        if (fileInputRef.current) {
-          fileInputRef.current.value = "";
-        }
-
         setUploadedFile(file);
+        setEmbodiments({ summary: [], description: [], claims: [] }); // reset
+        setShowResearchSections(false);
+        setCurrentStep("upload");
+      } catch (error) {
+        console.error("Upload failed:", error);
+      } finally {
         setIsProcessingPdf(false);
         setProcessingComplete(true);
         setTimeout(() => setProcessingComplete(false), 3000);
-      } catch (error) {
-        console.error("Error uploading file:", error);
-        setIsProcessingPdf(false);
       }
     }
   };
+
+  const extractButtonDisabled =
+    isExtracting ||
+    (!uploadedFile &&
+      embodiments.summary.length +
+        embodiments.description.length +
+        embodiments.claims.length >
+        0);
 
   useEffect(() => {
     if (processingComplete) {
@@ -366,34 +375,30 @@ export default function Embodiments() {
 
   const fetchDocuments = async () => {
     try {
-      const { data } = await axios.get(`${backendUrl}/v1/documents/`);
+      const response = await axios.get(`${backendUrl}/v1/patent-files/`);
+      const fetched = response.data.data || [];
 
-      if (data.response) {
-        console.log("Fetched Documents:", data.response);
+      const formattedPdfs = fetched
+        .filter((pdf: any) => pdf.name !== ".emptyFolderPlaceholder")
+        .map((pdf: any) => ({
+          id: pdf.id,
+          name: pdf.filename || pdf.name,
+          selected: false,
+          size: pdf.size
+            ? `${(pdf.size / (1024 * 1024)).toFixed(1)} MB`
+            : undefined,
+          uploadDate: pdf.uploaded_at?.split("T")[0],
+        }));
 
-        // ✅ Sort documents by created_at (Newest first)
-        const sortedDocuments = data.response.sort(
-          (a: any, b: any) =>
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
-
-        setPdfList(sortedDocuments); // Store sorted PDFs in state
-        setAvailablePdfs(
-          sortedDocuments.filter(
-            (pdf: any) => pdf.name !== ".emptyFolderPlaceholder"
-          )
-        );
-      } else {
-        console.error("Unexpected API response format", data);
-      }
+      setAvailablePdfs(formattedPdfs);
     } catch (error) {
       console.error("Error fetching documents:", error);
     }
   };
 
-  // useEffect(() => {
-  //   fetchDocuments();
-  // }, []);
+  useEffect(() => {
+    fetchDocuments();
+  }, []);
 
   // New state for filtering and sorting
   const [filterQuery, setFilterQuery] = useState("");
@@ -452,18 +457,16 @@ export default function Embodiments() {
       return;
     }
 
+    // 💥 Reset state FIRST to clear prior ones
+    setEmbodiments({ summary: [], description: [], claims: [] });
+    setShowResearchSections(false);
+
     setIsExtracting(true);
     setCurrentStep("extract");
     setProcessingProgress(0);
 
-    console.log("huhuhuhuhuh", patentName, disease, antigen);
-
-    // Animate progress bar slowly to 90%
     const progressInterval = setInterval(() => {
-      setProcessingProgress((prev) => {
-        if (prev >= 90) return 90;
-        return prev + 1;
-      });
+      setProcessingProgress((prev) => (prev >= 90 ? 90 : prev + 1));
     }, 120);
 
     try {
@@ -478,8 +481,6 @@ export default function Embodiments() {
         }
       );
 
-      console.log("Response", response);
-
       const data = response.data.data;
       const mapped = transformApiEmbodiments(data || []);
       setEmbodiments(mapped);
@@ -487,7 +488,6 @@ export default function Embodiments() {
       clearInterval(progressInterval);
       setProcessingProgress(100);
 
-      // slight buffer for smooth UX before closing overlay
       setTimeout(() => {
         setIsExtracting(false);
         setShowResearchSections(true);
@@ -498,7 +498,6 @@ export default function Embodiments() {
       clearInterval(progressInterval);
       setIsExtracting(false);
       setProcessingProgress(0);
-      console.error("Extraction failed:", err);
       toast({
         title: "Extraction Error",
         description: "Could not extract embodiments from the uploaded file.",
@@ -508,14 +507,33 @@ export default function Embodiments() {
   };
 
   const handleRemovePatent = (patent: string) => {
-    setSelectedPatents(selectedPatents.filter((p) => p !== patent));
-
-    // Also update the availablePdfs state
-    setAvailablePdfs((pdfs: any) =>
-      pdfs.map((pdf: any) =>
-        pdf.name === patent ? { ...pdf, selected: false } : pdf
-      )
+    setSelectedPatents((prev) => prev.filter((p) => p !== patent));
+    setSelectedPdfIds((prev) =>
+      prev.filter((id) => {
+        const matchingPdf = availablePdfs.find((pdf) => pdf.id === id);
+        return matchingPdf?.name !== patent;
+      })
     );
+
+    setAvailablePdfs(
+      (prev) =>
+        prev
+          .map((pdf) => {
+            if (pdf.name !== patent) return pdf;
+
+            // Remove if uploaded, else just deselect
+            const isUploaded = uploadedFile?.name === patent;
+            return isUploaded ? null : { ...pdf, selected: false };
+          })
+          .filter(Boolean) // Remove `null` values
+    );
+
+    if (uploadedFile?.name === patent) {
+      setUploadedFile(null);
+    }
+
+    console.log("Uploaded file", uploadedFile);
+    console.log("Updated PDFs", availablePdfs);
   };
 
   const handleTabClick = (tab: string) => {
@@ -797,25 +815,36 @@ export default function Embodiments() {
   };
 
   // Add a function to toggle PDF selection
-  const togglePdfSelection = (id: string) => {
-    setAvailablePdfs((pdfs: any) =>
-      pdfs.map((pdf: any) =>
-        pdf.id === id ? { ...pdf, selected: !pdf.selected } : pdf
-      )
-    );
+  const togglePdfSelection = async (id: string) => {
+    const updatedList = availablePdfs.map((pdf) => ({
+      ...pdf,
+      selected: pdf.id === id,
+    }));
+    const selectedDoc = updatedList.find((pdf) => pdf.id === id);
 
-    // Update selectedPatents based on the selection
-    const updatedPdf = availablePdfs?.find((pdf: any) => pdf.id === id);
-    if (updatedPdf) {
-      if (!updatedPdf?.selected) {
-        // If it was not selected before, add it to selectedPatents
-        setSelectedPatents((prev) => [...prev, updatedPdf.name]);
-      } else {
-        // If it was selected before, remove it from selectedPatents
-        setSelectedPatents((prev) =>
-          prev.filter((name) => name !== updatedPdf.name)
-        );
-      }
+    setAvailablePdfs(updatedList);
+    setSelectedPdfIds([id]);
+    setSelectedPatents(selectedDoc ? [selectedDoc.name] : []);
+    setUploadedFile(null);
+
+    try {
+      const res = await axios.get(`${backendUrl}/v1/source-embodiments/${id}`);
+      const data: RawChunk[] = res.data || [];
+
+      // ✅ Correctly assign filename to each chunk
+      const updatedChunks = data.map((chunk) => ({
+        ...chunk,
+        filename: selectedDoc?.name || chunk.filename,
+      }));
+
+      const newEmbodiments = transformApiEmbodiments(updatedChunks);
+      setEmbodiments(newEmbodiments);
+      setShowResearchSections(true);
+      setCurrentStep("review");
+    } catch (err) {
+      setEmbodiments({ summary: [], description: [], claims: [] });
+      setShowResearchSections(false);
+      setCurrentStep("upload");
     }
   };
 
@@ -1012,7 +1041,11 @@ export default function Embodiments() {
             size="lg"
             className="py-6 text-lg gap-2 w-64"
             onClick={handleExtractEmbodiments}
-            disabled={isExtracting || selectedPatents.length === 0}
+            disabled={
+              isExtracting ||
+              selectedPatents.length === 0 ||
+              extractButtonDisabled
+            }
           >
             <Sparkles className="h-5 w-5" />
             Extract Embodiments
