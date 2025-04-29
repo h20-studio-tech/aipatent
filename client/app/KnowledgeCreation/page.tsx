@@ -8,6 +8,7 @@ import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import { backendUrl } from "@/config/config";
 import axios from "axios";
+import PatentComponentGenerator from "@/components/section-generator";
 
 export default function Home() {
   const [stage, setStage] = useState(1);
@@ -104,7 +105,13 @@ export default function Home() {
   return (
     <main className="container mx-auto px-4 py-8 relative">
       <StoredKnowledge stage={stage} setStage={setStage} />
-      {stage === 1 ? <KnowledgeCreation /> : <Embodiments />}
+      {stage === 1 ? (
+        <KnowledgeCreation />
+      ) : stage === 2 ? (
+        <Embodiments />
+      ) : (
+        <PatentComponentGenerator />
+      )}
     </main>
   );
 }
