@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -9,10 +9,21 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Database, FileText } from "lucide-react";
+import { Database, FileDown, FileText, Save } from "lucide-react";
 import axios from "axios";
 import { backendUrl } from "@/config/config";
+import { toast } from "./ui/use-toast";
+import { SectionMetadata } from "./resizeable-section";
 
+interface SavedPatentData {
+  editedComponents: Record<string, string>;
+  sectionMetadata: Record<string, SectionMetadata>;
+  currentSectionIndex: number;
+  currentSubsectionIndex: number;
+  lastGeneratedSection: string | null;
+  lastGeneratedSubsection: string | null;
+  timestamp: number;
+}
 interface DBData {
   patentId: number;
   question: string;
@@ -30,11 +41,67 @@ export default function StoredKnowledge({
   stage,
   setStage,
 }: StoredKnowledgeProps) {
+  const STORAGE_KEY = "patent_generator_progress";
   const [open, setOpen] = useState(false);
   const [localChats, setLocalChats] = useState<any[]>([]);
   const [hasNewItems, setHasNewItems] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
+  const [currentSubsectionIndex, setCurrentSubsectionIndex] = useState(0);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [editedComponents, setEditedComponents] = useState<
+    Record<string, string>
+  >({});
+  const [lastGeneratedSection, setLastGeneratedSection] = useState<
+    string | null
+  >(null);
+  const [lastGeneratedSubsection, setLastGeneratedSubsection] = useState<
+    string | null
+  >(null);
+  const [sectionMetadata, setSectionMetadata] = useState<
+    Record<string, SectionMetadata>
+  >({});
+  const [expandedSections, setExpandedSections] = useState<
+    Record<string, boolean>
+  >({});
+
+  const handleGeneratePDF = async () => {
+    if (Object.keys(editedComponents).length === 0) return;
+
+    setIsGeneratingPDF(true);
+    setError(null);
+
+    try {
+      // Simulate PDF generation with a delay
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      // In a real implementation, you would generate the PDF here
+      console.log("Generated PDF with sections:", editedComponents);
+
+      // Show success toast
+      toast({
+        title: "Success",
+        description: "PDF generated successfully!",
+        variant: "success",
+        duration: 3000,
+      });
+    } catch (err) {
+      console.error("Error generating PDF:", err);
+      toast({
+        title: "Error",
+        description: "Failed to generate PDF",
+        variant: "destructive",
+        duration: 5000,
+      });
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
 
   useEffect(() => {
+    window.__globalKnowledgeCache = [];
     window.addStoredData = async (type: string, data: DBData) => {
       if (type === "knowledge") {
         const newNote = {
@@ -52,6 +119,7 @@ export default function StoredKnowledge({
               new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
           )
         );
+        window.__globalKnowledgeCache.push(newNote);
       } else {
         const newNote = {
           id: `${Date.now()}-${Math.random()}`,
@@ -68,6 +136,7 @@ export default function StoredKnowledge({
               new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
           )
         );
+        window.__globalKnowledgeCache.push(newNote);
       }
     };
     // Set the global function to update local state
@@ -104,6 +173,7 @@ export default function StoredKnowledge({
 
       setLocalChats((prev) => [newNote, ...prev]);
       setHasNewItems(true);
+      window.__globalKnowledgeCache.push(newNote);
 
       if (typeof window !== "undefined") {
         const event = new CustomEvent("knowledgeEntryAdded", {
@@ -113,6 +183,12 @@ export default function StoredKnowledge({
       }
 
       return newNote;
+    };
+
+    window.getStoredKnowlegde = async () => {
+      console.log("Here", localChats);
+
+      return window.__globalKnowledgeCache || [];
     };
 
     window.addKnowledgeEntry = async (
@@ -163,6 +239,7 @@ export default function StoredKnowledge({
       // Always store locally
       setLocalChats((prev) => [newEntry, ...prev]);
       setHasNewItems(true);
+      window.__globalKnowledgeCache.push(newEntry);
 
       if (typeof window !== "undefined") {
         const event = new CustomEvent("knowledgeEntryAdded", {
@@ -172,6 +249,25 @@ export default function StoredKnowledge({
       }
 
       return newEntry;
+    };
+
+    window.setLastGeneratedSection = async (section) => {
+      setLastGeneratedSection(section);
+    };
+    window.setLastGeneratedSubSection = async (section) => {
+      setLastGeneratedSubsection(section);
+    };
+    window.setIsLoading = async (bool) => {
+      setIsLoading(bool);
+    };
+    window.setIsGeneratingPDF = async (bool) => {
+      setIsGeneratingPDF(bool);
+    };
+    window.setEditComponents = async (key, content) => {
+      setEditedComponents((prev) => ({
+        ...prev,
+        [key]: content,
+      }));
     };
   }, []);
 
@@ -188,6 +284,50 @@ export default function StoredKnowledge({
       window.removeEventListener("knowledgeEntryAdded", handleNewItem);
     };
   }, []);
+
+  const saveProgress = useCallback(() => {
+    setIsSaving(true);
+
+    try {
+      const dataToSave: SavedPatentData = {
+        editedComponents,
+        sectionMetadata,
+        currentSectionIndex,
+        currentSubsectionIndex,
+        lastGeneratedSection,
+        lastGeneratedSubsection,
+        timestamp: Date.now(),
+      };
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+
+      // Show success toast
+      toast({
+        title: "Success",
+        description: "Progress saved successfully!",
+        variant: "success",
+        duration: 3000,
+      });
+    } catch (err) {
+      console.error("Error saving progress:", err);
+      toast({
+        title: "Error",
+        description: "Failed to save progress",
+        variant: "destructive",
+        duration: 5000,
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  }, [
+    editedComponents,
+    sectionMetadata,
+    currentSectionIndex,
+    currentSubsectionIndex,
+    lastGeneratedSection,
+    lastGeneratedSubsection,
+    toast,
+  ]);
 
   return (
     <>
@@ -213,7 +353,7 @@ export default function StoredKnowledge({
         )}
       </Button>
 
-      {stage === 1 ? (
+      {stage === 1 && (
         <Button
           variant="default"
           size="lg"
@@ -222,15 +362,71 @@ export default function StoredKnowledge({
         >
           Next
         </Button>
-      ) : (
-        <Button
-          variant="default"
-          size="lg"
-          className="absolute top-4 right-4 z-10"
-          onClick={() => setStage(1)}
-        >
-          Prev
-        </Button>
+      )}
+
+      {stage === 2 && (
+        <div className="absolute top-4 right-4 z-10 flex gap-4">
+          <Button variant="default" size="lg" onClick={() => setStage(1)}>
+            Prev
+          </Button>
+          <Button variant="default" size="lg" onClick={() => setStage(3)}>
+            Next
+          </Button>
+        </div>
+      )}
+
+      {stage === 3 && (
+        <div className="absolute top-4 right-4 z-10 flex flex-wrap items-center justify-end gap-4">
+          <Button variant="default" size="lg" onClick={() => setStage(2)}>
+            Prev
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={saveProgress}
+            className="flex items-center gap-2"
+            disabled={
+              isLoading ||
+              isSaving ||
+              Object.keys(editedComponents).length === 0
+            }
+          >
+            {isSaving ? (
+              <span className="flex items-center">
+                <span className="animate-spin mr-2">⏳</span>
+                Saving...
+              </span>
+            ) : (
+              <>
+                <Save className="h-4 w-4" />
+                Save Progress
+              </>
+            )}
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={handleGeneratePDF}
+            className="flex items-center gap-2"
+            disabled={
+              isLoading ||
+              isGeneratingPDF ||
+              Object.keys(editedComponents).length === 0
+            }
+          >
+            {isGeneratingPDF ? (
+              <span className="flex items-center">
+                <span className="animate-spin mr-2">⏳</span>
+                Generating...
+              </span>
+            ) : (
+              <>
+                <FileDown className="h-4 w-4" />
+                Generate PDF
+              </>
+            )}
+          </Button>
+        </div>
       )}
 
       <Dialog open={open} onOpenChange={setOpen}>
@@ -317,8 +513,15 @@ declare global {
       patentId?: string,
       remixed?: boolean
     ) => any;
+    getStoredKnowlegde: () => any;
+    setLastGeneratedSection: (section: any) => any;
+    setIsLoading: (bool: boolean) => void;
+    setIsGeneratingPDF: (bool: boolean) => void;
+    setLastGeneratedSubSection: (section: any) => any;
+    setEditComponents: (key: any, content: any) => any;
     generateApproachInsights?: () => void;
     generateTechnologyInsights?: () => void;
     generateInnovationInsights?: () => void;
+    __globalKnowledgeCache: any[];
   }
 }

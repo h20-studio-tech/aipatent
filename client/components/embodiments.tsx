@@ -591,7 +591,7 @@ export default function Embodiments() {
   };
 
   // Function to create a remixed version of an embodiment based on similarity percentage
-  const createRemixedEmbodiment = (
+  const createRemixedEmbodiment = async (
     originalId: number,
     similarityPercentage: number
   ) => {
@@ -604,6 +604,13 @@ export default function Embodiments() {
       return;
     }
 
+    let knowledge;
+    if (typeof window !== "undefined" && window.getStoredKnowlegde) {
+      knowledge = await window.getStoredKnowlegde();
+    }
+
+    console.log("Knwoldeg", knowledge);
+
     const source_embodiment = originalEmbodiment.title;
     const inspiration = similarityPercentage;
 
@@ -613,13 +620,14 @@ export default function Embodiments() {
     const disease = params.get("disease") || "unspecified";
     const antigen = params.get("antigen") || "unspecified";
 
-    axios
+    await axios
       .post(`${backendUrl}/v1/embodiment`, {
         inspiration,
         source_embodiment,
         patent_title,
         disease,
         antigen,
+        knowledge: knowledge,
       })
       .then((res) => {
         const result = res.data;
