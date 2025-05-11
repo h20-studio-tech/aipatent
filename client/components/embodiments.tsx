@@ -45,6 +45,7 @@ interface Embodiment {
   source?: string;
   pageNumber?: number; // ✅ Add this
   section?: string; // ✅ And this
+  summary?: string;
 }
 
 // Interface for remixed embodiment objects
@@ -81,6 +82,7 @@ type RawChunk = {
   page_number: number;
   section: string;
   text: string;
+  summary?: string;
 };
 
 type EmbodimentMap = {
@@ -118,6 +120,7 @@ export function transformApiEmbodiments(data: RawChunk[]): EmbodimentMap {
       source: chunk.filename,
       pageNumber: chunk.page_number, // ✅
       section: chunk.section, // ✅
+      summary: chunk.summary || "Lorem Ipsum dolor sit amet.",
     });
   }
 
@@ -132,6 +135,9 @@ export default function Embodiments() {
   const [selectedPdfIds, setSelectedPdfIds] = useState<string[]>([]);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [selectedPatents, setSelectedPatents] = useState<string[]>([]);
+  const [visibleSummaries, setVisibleSummaries] = useState<
+    Record<number, boolean>
+  >({});
   const [activeTab, setActiveTab] = useState("summary");
   const [isProcessingPdf, setIsProcessingPdf] = useState(false);
   const [processingComplete, setProcessingComplete] = useState(false);
@@ -143,6 +149,13 @@ export default function Embodiments() {
     claims: [],
   });
   const [patentId, setPatentId] = useState<string>("");
+
+  const toggleSummary = (embodimentId: number) => {
+    setVisibleSummaries((prev) => ({
+      ...prev,
+      [embodimentId]: !prev[embodimentId],
+    }));
+  };
 
   const fetchEmbodiments = async () => {
     try {
@@ -1165,6 +1178,25 @@ export default function Embodiments() {
                           </button>
                         </div>
                       </div>
+                      <div className="flex items-center gap-1 mb-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleSummary(embodiment.id);
+                          }}
+                          className="text-xs bg-muted px-2 py-1 rounded hover:bg-muted/80 flex items-center gap-1"
+                        >
+                          {visibleSummaries[embodiment.id]
+                            ? "Hide summary"
+                            : "Show summary"}
+                        </button>
+                      </div>
+                      {visibleSummaries[embodiment.id] &&
+                        embodiment.summary && (
+                          <div className="mb-2 text-sm font-medium bg-muted/30 p-2 rounded-md">
+                            {embodiment.summary}
+                          </div>
+                        )}
                       <p className="text-sm">{embodiment.description}</p>
                       <div className="mt-3 flex justify-between items-center">
                         <Badge variant="outline" className="text-xs">
@@ -1215,6 +1247,26 @@ export default function Embodiments() {
                           </button>
                         </div>
                       </div>
+                      <div className="flex items-center gap-1 mb-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleSummary(embodiment.id);
+                          }}
+                          className="text-xs bg-muted px-2 py-1 rounded hover:bg-muted/80 flex items-center gap-1"
+                        >
+                          {visibleSummaries[embodiment.id]
+                            ? "Hide summary"
+                            : "Show summary"}
+                        </button>
+                      </div>
+                      {visibleSummaries[embodiment.id] &&
+                        embodiment.summary && (
+                          <div className="mb-2 text-sm font-medium bg-muted/30 p-2 rounded-md">
+                            {embodiment.summary}
+                          </div>
+                        )}
+
                       <p className="text-sm">{embodiment.description}</p>
                       <div className="mt-3 flex justify-between items-center">
                         <Badge variant="outline" className="text-xs">
@@ -1265,6 +1317,25 @@ export default function Embodiments() {
                           </button>
                         </div>
                       </div>
+                      <div className="flex items-center gap-1 mb-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleSummary(embodiment.id);
+                          }}
+                          className="text-xs bg-muted px-2 py-1 rounded hover:bg-muted/80 flex items-center gap-1"
+                        >
+                          {visibleSummaries[embodiment.id]
+                            ? "Hide summary"
+                            : "Show summary"}
+                        </button>
+                      </div>
+                      {visibleSummaries[embodiment.id] &&
+                        embodiment.summary && (
+                          <div className="mb-2 text-sm font-medium bg-muted/30 p-2 rounded-md">
+                            {embodiment.summary}
+                          </div>
+                        )}
                       <p className="text-sm">{embodiment.description}</p>
                       <div className="mt-3 flex justify-between items-center">
                         <Badge variant="outline" className="text-xs">
