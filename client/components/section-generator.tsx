@@ -37,27 +37,26 @@ interface SavedPatentData {
 }
 
 // Define the main sections (hardcoded headers)
+// Removed "Figures/Diagrams" as requested
 const MAIN_SECTIONS = [
-  "Definitions and methodology",
-  "Disease Background & Relevance",
-  "Technology or Product Overview",
+  "Background",
+  "Summary of Invention",
+  "Field of Invention",
+  "Detailed Description",
+  "Claims",
+  "Abstract",
 ];
 
 // Define the subsections for each main section (these will be generated)
+// Now each section just has itself as a subsection
+// Removed "Figures/Diagrams" as requested
 const SUBSECTIONS: Record<string, string[]> = {
-  "Definitions and methodology": ["Key terms"],
-  "Disease Background & Relevance": ["Disease Overview", "Target overview"],
-  "Technology or Product Overview": [
-    "High-Level Concept",
-    "Underlying Mechanism",
-  ],
-  "Embodiments (Core of the Detailed Description)": [
-    "Composition",
-    "Manufacturing Processes",
-    "Administration Methods",
-    "Indications & Patient Populations",
-    "Additional Modalities",
-  ],
+  Background: ["Background"],
+  "Summary of Invention": ["Summary of Invention"],
+  "Field of Invention": ["Field of Invention"],
+  "Detailed Description": ["Detailed Description"],
+  Claims: ["Claims"],
+  Abstract: ["Abstract"],
 };
 
 const STORAGE_KEY = "patent_generator_progress";
@@ -147,29 +146,16 @@ const PatentComponentGenerator: React.FC<PatentComponentGeneratorProps> = ({
 
   // Auto-scroll to the latest generated content
   useEffect(() => {
-    // For the first section (Key Terms), don't try to scroll to the duplicate content
-    // since it won't be rendered
-    const isFirstSection =
-      lastGeneratedSection === "Definitions and methodology" &&
-      lastGeneratedSubsection === "Key terms";
-
-    if (generatedContent && latestGeneratedRef.current && !isFirstSection) {
+    if (generatedContent && latestGeneratedRef.current) {
+      // Place the reference at the end of the content
       setTimeout(() => {
         latestGeneratedRef.current?.scrollIntoView({
           behavior: "smooth",
           block: "start",
         });
       }, 100);
-    } else if (generatedContent && isFirstSection) {
-      // For the first section, scroll to the bottom to see the Generate button
-      setTimeout(() => {
-        window.scrollTo({
-          top: document.body.scrollHeight,
-          behavior: "smooth",
-        });
-      }, 100);
     }
-  }, [generatedContent, lastGeneratedSection, lastGeneratedSubsection]);
+  }, [generatedContent]);
 
   // Save current progress
   const saveProgress = useCallback(() => {
@@ -236,24 +222,24 @@ const PatentComponentGenerator: React.FC<PatentComponentGeneratorProps> = ({
     }
 
     try {
-      // Create a prompt that includes the context of the section and subsection
+      // Create a prompt that includes the context of the section
       const enhancedContext = `${patentContext}
 
-Please generate the "${subsectionToGenerate}" subsection for the "${sectionToGenerate}" section of the patent.
-This subsection should be detailed, technically accurate, and formatted appropriately for a patent document.`;
+Please generate the "${sectionToGenerate}" section of the patent.
+This section should be detailed, technically accurate, and formatted appropriately for a patent document.`;
 
       const content = await generatePatentContent(
-        subsectionToGenerate,
+        sectionToGenerate,
         enhancedContext
       );
       setGeneratedContent(content);
 
-      // Create a unique key for this section/subsection
+      // Create a unique key for this section
       const componentKey = `${sectionToGenerate}:${subsectionToGenerate}`;
 
       // Create metadata for the new section
       const newMetadata: SectionMetadata = {
-        type: `${sectionToGenerate} - ${subsectionToGenerate}`,
+        type: sectionToGenerate,
         timestamp: Date.now(),
         regenerationCount: 0,
       };
@@ -274,13 +260,13 @@ This subsection should be detailed, technically accurate, and formatted appropri
         [componentKey]: newMetadata,
       }));
 
-      // Move to next subsection or section
+      // Move to next section
       moveToNextSubsection();
 
       // Show success toast
       toast({
         title: "Success",
-        description: `${subsectionToGenerate} subsection generated successfully!`,
+        description: `${sectionToGenerate} section generated successfully!`,
         duration: 3000,
       });
     } catch (err: any) {
@@ -301,19 +287,15 @@ This subsection should be detailed, technically accurate, and formatted appropri
   }, [currentSection, currentSubsection, patentContext, toast]);
 
   const moveToNextSubsection = () => {
-    const currentSubsections = SUBSECTIONS[currentSection];
-
-    if (currentSubsectionIndex < currentSubsections.length - 1) {
-      // Move to the next subsection in the current section
-      setCurrentSubsectionIndex(currentSubsectionIndex + 1);
-    } else if (currentSectionIndex < MAIN_SECTIONS.length - 1) {
-      // Move to the first subsection of the next section
+    // Since each section only has one subsection (itself), we always move to the next section
+    if (currentSectionIndex < MAIN_SECTIONS.length - 1) {
+      // Move to the next section
       setCurrentSectionIndex(currentSectionIndex + 1);
       setCurrentSubsectionIndex(0);
     } else {
-      // We've reached the end of all sections and subsections
+      // We've reached the end of all sections
       // Set the index beyond the last subsection to trigger the "Generate PDF" button
-      setCurrentSubsectionIndex(currentSubsections.length);
+      setCurrentSubsectionIndex(1); // Since each section has only one subsection
     }
   };
 
@@ -333,6 +315,7 @@ This subsection should be detailed, technically accurate, and formatted appropri
     }
 
     setRegenerateModalOpen(false);
+
     if (typeof window !== "undefined" && window.setIsLoading) {
       window.setIsLoading(true);
     }
@@ -340,12 +323,11 @@ This subsection should be detailed, technically accurate, and formatted appropri
     setError(null);
 
     try {
-      // Use the last generated section and subsection for regeneration
+      // Use the last generated section for regeneration
       const sectionToRegenerate = lastGeneratedSection || MAIN_SECTIONS[0];
-      const subsectionToRegenerate =
-        lastGeneratedSubsection || SUBSECTIONS[MAIN_SECTIONS[0]][0];
+      const subsectionToRegenerate = sectionToRegenerate; // Since subsection is the same as section
 
-      // Create a unique key for this section/subsection
+      // Create a unique key for this section
       const componentKey = `${sectionToRegenerate}:${subsectionToRegenerate}`;
 
       // Get the current content of the section we're regenerating
@@ -358,11 +340,11 @@ Previous content: ${currentSectionContent}
 
 User guidance: ${correctionText}
 
-Please regenerate the "${subsectionToRegenerate}" subsection for the "${sectionToRegenerate}" section based on this guidance.
-This subsection should be detailed, technically accurate, and formatted appropriately for a patent document.`;
+Please regenerate the "${sectionToRegenerate}" section based on this guidance.
+This section should be detailed, technically accurate, and formatted appropriately for a patent document.`;
 
       const regeneratedText = await generatePatentContent(
-        subsectionToRegenerate,
+        sectionToRegenerate,
         correctedPrompt
       );
 
@@ -378,7 +360,7 @@ This subsection should be detailed, technically accurate, and formatted appropri
       // Update the metadata for this section
       setSectionMetadata((prev) => {
         const existingMetadata = prev[componentKey] || {
-          type: `${sectionToRegenerate} - ${subsectionToRegenerate}`,
+          type: sectionToRegenerate,
           timestamp: Date.now(),
           regenerationCount: 0,
         };
@@ -399,7 +381,7 @@ This subsection should be detailed, technically accurate, and formatted appropri
       // Show success toast
       toast({
         title: "Success",
-        description: `${subsectionToRegenerate} subsection successfully regenerated!`,
+        description: `${sectionToRegenerate} section successfully regenerated!`,
         duration: 3000,
       });
     } catch (err: any) {
@@ -437,7 +419,7 @@ This subsection should be detailed, technically accurate, and formatted appropri
     // Update metadata to reflect the edit
     setSectionMetadata((prev) => {
       const existingMetadata = prev[componentKey] || {
-        type: `${sectionType} - ${subsectionType}`,
+        type: sectionType,
         timestamp: Date.now(),
         regenerationCount: 0,
       };
@@ -527,7 +509,6 @@ This subsection should be detailed, technically accurate, and formatted appropri
       toast({
         title: "Error",
         description: "Failed to generate PDF",
-        variant: "destructive",
         duration: 5000,
       });
     } finally {
@@ -537,16 +518,16 @@ This subsection should be detailed, technically accurate, and formatted appropri
 
   // Calculate progress for the progress bar
   const calculateProgress = useCallback(() => {
-    // Count total subsections across all sections
-    const totalSubsections = MAIN_SECTIONS.reduce((total, section) => {
-      return total + SUBSECTIONS[section].length;
-    }, 0);
+    // Count total sections
+    const totalSections = MAIN_SECTIONS.length;
 
-    // Count completed subsections
-    const completedSubsections = Object.keys(editedComponents).length;
+    // Count completed sections
+    const completedSections = new Set(
+      Object.keys(editedComponents).map((key) => key.split(":")[0])
+    ).size;
 
     // Calculate percentage
-    return Math.round((completedSubsections / totalSubsections) * 100);
+    return Math.round((completedSections / totalSections) * 100);
   }, [editedComponents]);
 
   // Render the sections and their generated subsections
@@ -566,20 +547,14 @@ This subsection should be detailed, technically accurate, and formatted appropri
     });
 
     return MAIN_SECTIONS.filter((section) => sectionsToRender.has(section))
-      .map((section, index) => {
-        const subsections = SUBSECTIONS[section];
-        const sectionNumber = MAIN_SECTIONS.indexOf(section) + 1;
-
-        // Track which subsections have content or are next to be generated
-        const hasAnyContent = subsections.some((subsection) => {
-          const componentKey = `${section}:${subsection}`;
-          return componentKey in editedComponents;
-        });
+      .map((section) => {
+        const componentKey = `${section}:${section}`;
+        const hasContent = componentKey in editedComponents;
 
         // Only show sections that have content or are the current section being worked on
         const isCurrentSection = section === currentSection;
 
-        if (!hasAnyContent && !isCurrentSection) {
+        if (!hasContent && !isCurrentSection) {
           return null;
         }
 
@@ -594,73 +569,57 @@ This subsection should be detailed, technically accurate, and formatted appropri
               ) : (
                 <ChevronRight className="h-5 w-5 mr-2" />
               )}
-              <h3 className="text-xl font-semibold">
-                {sectionNumber}. {section}
-              </h3>
+              {/* Removed section number, showing just the section name */}
+              <h3 className="text-xl font-semibold">{section}</h3>
             </div>
 
             {expandedSections[section] && (
               <div className="pl-8 space-y-6">
-                {subsections.map((subsection) => {
-                  const componentKey = `${section}:${subsection}`;
-                  const hasContent = componentKey in editedComponents;
-
-                  // Only show subsections that have been generated
-                  // or the next one to be generated if this is the current section
-                  const isNextSubsection =
-                    isCurrentSection && subsection === currentSubsection;
-
-                  if (!hasContent && !isNextSubsection) {
-                    return null;
-                  }
-
-                  if (hasContent) {
-                    return (
-                      <ResizableSection
-                        key={componentKey}
-                        title={subsection}
-                        content={editedComponents[componentKey]}
-                        metadata={
-                          sectionMetadata[componentKey] || {
-                            type: `${section} - ${subsection}`,
-                            timestamp: Date.now(),
-                          }
+                {hasContent ? (
+                  <div
+                    ref={
+                      section === lastGeneratedSection
+                        ? latestGeneratedRef
+                        : null
+                    }
+                  >
+                    <ResizableSection
+                      key={componentKey}
+                      title={section}
+                      content={editedComponents[componentKey]}
+                      metadata={
+                        sectionMetadata[componentKey] || {
+                          type: section,
+                          timestamp: Date.now(),
                         }
-                        onContentChange={(newContent) =>
-                          handleContentChange(section, subsection, newContent)
-                        }
-                        onEdit={() => {
-                          setGeneratedContent(editedComponents[componentKey]);
-                          setLastGeneratedSection(section);
-                          setLastGeneratedSubsection(subsection);
-                          setCorrectionModalOpen(true);
-                        }}
-                        onRegenerate={() => {
-                          setGeneratedContent(editedComponents[componentKey]);
-                          setLastGeneratedSection(section);
-                          setLastGeneratedSubsection(subsection);
-                          setRegenerateModalOpen(true);
-                        }}
-                      />
-                    );
-                  } else if (isNextSubsection) {
-                    // Show a placeholder for the next subsection to be generated
-                    return (
-                      <div
-                        key={componentKey}
-                        className="flex items-center text-gray-500 py-2"
-                      >
-                        <span className="mr-2">•</span>
-                        <span>{subsection}</span>
-                        <span className="ml-2 text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">
-                          Next to Generate
-                        </span>
-                      </div>
-                    );
-                  }
-
-                  return null;
-                })}
+                      }
+                      onContentChange={(newContent) =>
+                        handleContentChange(section, section, newContent)
+                      }
+                      onEdit={() => {
+                        setGeneratedContent(editedComponents[componentKey]);
+                        setLastGeneratedSection(section);
+                        setLastGeneratedSubsection(section);
+                        setCorrectionModalOpen(true);
+                      }}
+                      onRegenerate={() => {
+                        setGeneratedContent(editedComponents[componentKey]);
+                        setLastGeneratedSection(section);
+                        setLastGeneratedSubsection(section);
+                        setRegenerateModalOpen(true);
+                      }}
+                    />
+                  </div>
+                ) : isCurrentSection ? (
+                  // Show a placeholder for the next section to be generated
+                  <div className="flex items-center text-gray-500 py-2">
+                    <span className="mr-2">•</span>
+                    <span>{section}</span>
+                    <span className="ml-2 text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">
+                      Next to Generate
+                    </span>
+                  </div>
+                ) : null}
               </div>
             )}
           </div>
@@ -673,60 +632,9 @@ This subsection should be detailed, technically accurate, and formatted appropri
     <>
       <div className="mb-6">
         {/* Navigation bar */}
-        {/* <div className="flex justify-between items-center mb-4"> */}
-        {/* <div>
-            <StoredKnowledge />
-          </div> */}
-        {/* <div className="flex space-x-2">
-            <Button
-              variant="outline"
-              onClick={saveProgress}
-              className="flex items-center gap-1"
-              disabled={
-                isLoading ||
-                isSaving ||
-                Object.keys(editedComponents).length === 0
-              }
-            >
-              {isSaving ? (
-                <span className="flex items-center">
-                  <span className="animate-spin mr-2">⏳</span>
-                  Saving...
-                </span>
-              ) : (
-                <>
-                  <Save className="h-4 w-4 mr-1" />
-                  Save Progress
-                </>
-              )}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => handleGeneratePDF()}
-              className="flex items-center gap-1"
-              disabled={
-                isLoading ||
-                isGeneratingPDF ||
-                Object.keys(editedComponents).length === 0
-              }
-            >
-              {isGeneratingPDF ? (
-                <span className="flex items-center">
-                  <span className="animate-spin mr-2">⏳</span>
-                  Generating...
-                </span>
-              ) : (
-                <>
-                  <FileDown className="h-4 w-4 mr-1" />
-                  Generate PDF
-                </>
-              )}
-            </Button>
-          </div> */}
-        {/* </div> */}
 
         {/* Header text */}
-        <div className="mt-6">
+        <div className="mt-10">
           <h2 className="text-2xl font-bold">Patent Section Generator</h2>
           <p className="text-gray-500">
             Generate patent sections sequentially with AI assistance
@@ -757,13 +665,10 @@ This subsection should be detailed, technically accurate, and formatted appropri
             >
               <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
-                  <DialogTitle>
-                    Regenerate {lastGeneratedSubsection}
-                    {lastGeneratedSection && ` (${lastGeneratedSection})`}
-                  </DialogTitle>
+                  <DialogTitle>Regenerate {lastGeneratedSection}</DialogTitle>
                   <DialogDescription>
                     Provide specific guidance to steer the AI in generating a
-                    new version of this subsection.
+                    new version of this section.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="py-4">
@@ -793,39 +698,11 @@ This subsection should be detailed, technically accurate, and formatted appropri
               </DialogContent>
             </Dialog>
 
-            {/* Render all sections with their subsections */}
+            {/* Render all sections */}
             {renderSections()}
 
-            {/* Latest Generated Content - Using ResizableSection */}
-            {generatedContent &&
-              lastGeneratedSection &&
-              lastGeneratedSubsection &&
-              // Only show the duplicate content box if it's NOT the first section (Key Terms)
-              !(
-                lastGeneratedSection === "Definitions and methodology" &&
-                lastGeneratedSubsection === "Key terms"
-              ) && (
-                <div ref={latestGeneratedRef} className="mt-4">
-                  <ResizableSection
-                    title={`${lastGeneratedSubsection} (${lastGeneratedSection})`}
-                    content={generatedContent}
-                    metadata={{
-                      type: `${lastGeneratedSection} - ${lastGeneratedSubsection}`,
-                      timestamp: Date.now(),
-                      regenerationCount: 0,
-                    }}
-                    onContentChange={handleLatestContentChange}
-                    onEdit={() => {
-                      // Open the correction modal
-                      setCorrectionModalOpen(true);
-                    }}
-                    onRegenerate={() => {
-                      // Open the regenerate modal
-                      setRegenerateModalOpen(true);
-                    }}
-                  />
-                </div>
-              )}
+            {/* Hidden reference for scrolling to the latest generated content */}
+            <div ref={latestGeneratedRef} className="h-0 w-0" />
 
             {/* Feedback Dialog */}
             <Dialog
@@ -835,8 +712,7 @@ This subsection should be detailed, technically accurate, and formatted appropri
               <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
                   <DialogTitle>
-                    Provide Feedback for {lastGeneratedSubsection}
-                    {lastGeneratedSection && ` (${lastGeneratedSection})`}
+                    Provide Feedback for {lastGeneratedSection}
                   </DialogTitle>
                   <DialogDescription>
                     Please provide specific feedback or corrections to improve
@@ -946,7 +822,7 @@ This subsection should be detailed, technically accurate, and formatted appropri
                     </div>
                   ) : (
                     <>
-                      Generate {currentSubsection}
+                      Generate {currentSection}
                       <span className="ml-2 opacity-70 text-sm">
                         (Ctrl+Enter)
                       </span>
