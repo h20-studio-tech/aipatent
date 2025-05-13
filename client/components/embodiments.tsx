@@ -1178,25 +1178,11 @@ export default function Embodiments() {
                           </button>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1 mb-2">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleSummary(embodiment.id);
-                          }}
-                          className="text-xs bg-muted px-2 py-1 rounded hover:bg-muted/80 flex items-center gap-1"
-                        >
-                          {visibleSummaries[embodiment.id]
-                            ? "Hide summary"
-                            : "Show summary"}
-                        </button>
+
+                      <div className="mb-2 text-sm font-medium bg-muted/30 p-2 rounded-md">
+                        {embodiment.summary}
                       </div>
-                      {visibleSummaries[embodiment.id] &&
-                        embodiment.summary && (
-                          <div className="mb-2 text-sm font-medium bg-muted/30 p-2 rounded-md">
-                            {embodiment.summary}
-                          </div>
-                        )}
+
                       <p className="text-sm">{embodiment.description}</p>
                       <div className="mt-3 flex justify-between items-center">
                         <Badge variant="outline" className="text-xs">
@@ -1247,26 +1233,9 @@ export default function Embodiments() {
                           </button>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1 mb-2">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleSummary(embodiment.id);
-                          }}
-                          className="text-xs bg-muted px-2 py-1 rounded hover:bg-muted/80 flex items-center gap-1"
-                        >
-                          {visibleSummaries[embodiment.id]
-                            ? "Hide summary"
-                            : "Show summary"}
-                        </button>
+                      <div className="mb-2 text-sm font-medium bg-muted/30 p-2 rounded-md">
+                        {embodiment.summary}
                       </div>
-                      {visibleSummaries[embodiment.id] &&
-                        embodiment.summary && (
-                          <div className="mb-2 text-sm font-medium bg-muted/30 p-2 rounded-md">
-                            {embodiment.summary}
-                          </div>
-                        )}
-
                       <p className="text-sm">{embodiment.description}</p>
                       <div className="mt-3 flex justify-between items-center">
                         <Badge variant="outline" className="text-xs">
@@ -1317,25 +1286,10 @@ export default function Embodiments() {
                           </button>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1 mb-2">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleSummary(embodiment.id);
-                          }}
-                          className="text-xs bg-muted px-2 py-1 rounded hover:bg-muted/80 flex items-center gap-1"
-                        >
-                          {visibleSummaries[embodiment.id]
-                            ? "Hide summary"
-                            : "Show summary"}
-                        </button>
+
+                      <div className="mb-2 text-sm font-medium bg-muted/30 p-2 rounded-md">
+                        {embodiment.summary}
                       </div>
-                      {visibleSummaries[embodiment.id] &&
-                        embodiment.summary && (
-                          <div className="mb-2 text-sm font-medium bg-muted/30 p-2 rounded-md">
-                            {embodiment.summary}
-                          </div>
-                        )}
                       <p className="text-sm">{embodiment.description}</p>
                       <div className="mt-3 flex justify-between items-center">
                         <Badge variant="outline" className="text-xs">
