@@ -1153,7 +1153,6 @@ export default function Embodiments() {
                       className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
                     >
                       <div className="flex justify-between items-center mb-2">
-                        <h3 className="font-medium">{embodiment.title}</h3>
                         <div className="flex items-center gap-2">
                           <button
                             className={`w-6 h-6 rounded-full flex items-center justify-center ${
@@ -1179,11 +1178,12 @@ export default function Embodiments() {
                         </div>
                       </div>
 
-                      <div className="mb-2 text-sm font-medium bg-muted/30 p-2 rounded-md">
+                      <div className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md">
                         {embodiment.summary}
                       </div>
 
                       <p className="text-sm">{embodiment.description}</p>
+
                       <div className="mt-3 flex justify-between items-center">
                         <Badge variant="outline" className="text-xs">
                           Source: {embodiment.source}
@@ -1195,6 +1195,11 @@ export default function Embodiments() {
                           Create
                         </button>
                       </div>
+
+                      {/* Embodiment number shown at the bottom */}
+                      <p className="mt-3 text-xs text-muted-foreground italic">
+                        {embodiment.title}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -1208,7 +1213,6 @@ export default function Embodiments() {
                       className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
                     >
                       <div className="flex justify-between items-center mb-2">
-                        <h3 className="font-medium">{embodiment.title}</h3>
                         <div className="flex items-center gap-2">
                           <button
                             className={`w-6 h-6 rounded-full flex items-center justify-center ${
@@ -1233,10 +1237,13 @@ export default function Embodiments() {
                           </button>
                         </div>
                       </div>
-                      <div className="mb-2 text-sm font-medium bg-muted/30 p-2 rounded-md">
+
+                      <div className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md">
                         {embodiment.summary}
                       </div>
+
                       <p className="text-sm">{embodiment.description}</p>
+
                       <div className="mt-3 flex justify-between items-center">
                         <Badge variant="outline" className="text-xs">
                           Source: {embodiment.source}
@@ -1248,6 +1255,11 @@ export default function Embodiments() {
                           Create
                         </button>
                       </div>
+
+                      {/* Embodiment number shown at the bottom */}
+                      <p className="mt-3 text-xs text-muted-foreground italic">
+                        {embodiment.title}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -1261,7 +1273,6 @@ export default function Embodiments() {
                       className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
                     >
                       <div className="flex justify-between items-center mb-2">
-                        <h3 className="font-medium">{embodiment.title}</h3>
                         <div className="flex items-center gap-2">
                           <button
                             className={`w-6 h-6 rounded-full flex items-center justify-center ${
@@ -1287,10 +1298,12 @@ export default function Embodiments() {
                         </div>
                       </div>
 
-                      <div className="mb-2 text-sm font-medium bg-muted/30 p-2 rounded-md">
+                      <div className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md">
                         {embodiment.summary}
                       </div>
+
                       <p className="text-sm">{embodiment.description}</p>
+
                       <div className="mt-3 flex justify-between items-center">
                         <Badge variant="outline" className="text-xs">
                           Source: {embodiment.source}
@@ -1302,6 +1315,11 @@ export default function Embodiments() {
                           Create
                         </button>
                       </div>
+
+                      {/* Embodiment number shown at the bottom */}
+                      <p className="mt-3 text-xs text-muted-foreground italic">
+                        {embodiment.title}
+                      </p>
                     </div>
                   ))}
                 </div>
