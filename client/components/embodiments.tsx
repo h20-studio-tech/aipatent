@@ -1162,7 +1162,7 @@ export default function Embodiments() {
                             }`}
                             onClick={(e) => {
                               toggleEmbodimentSelection(
-                                "description",
+                                "summary",
                                 embodiment.id
                               );
                             }}
@@ -1282,7 +1282,7 @@ export default function Embodiments() {
                             }`}
                             onClick={(e) => {
                               toggleEmbodimentSelection(
-                                "description",
+                                "claims",
                                 embodiment.id
                               );
                             }}
