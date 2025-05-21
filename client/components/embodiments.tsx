@@ -34,6 +34,12 @@ import axios from "axios";
 import { PDF } from "@/lib/types";
 import ProcessingLoader from "./processingLoader";
 import ProcessCompleteLoader from "./processCompleteLoader";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 // Interface for embodiment objects
 interface Embodiment {
@@ -46,6 +52,7 @@ interface Embodiment {
   pageNumber?: number; // ✅ Add this
   section?: string; // ✅ And this
   summary?: string;
+  header?: string;
 }
 
 // Interface for remixed embodiment objects
@@ -83,6 +90,7 @@ type RawChunk = {
   section: string;
   text: string;
   summary?: string;
+  header?: string;
 };
 
 type EmbodimentMap = {
@@ -121,6 +129,7 @@ export function transformApiEmbodiments(data: RawChunk[]): EmbodimentMap {
       pageNumber: chunk.page_number, // ✅
       section: chunk.section, // ✅
       summary: chunk.summary || "Lorem Ipsum dolor sit amet.",
+      header: chunk.header,
     });
   }
 
@@ -878,6 +887,58 @@ export default function Embodiments() {
     );
   };
 
+  const keyTerms = [
+    {
+      id: "term-1",
+      term: "Document Processing System",
+      definition:
+        "A comprehensive software solution designed to manage the entire lifecycle of digital documents, including creation, storage, retrieval, modification, and distribution.",
+    },
+    {
+      id: "term-2",
+      term: "Cloud-based Storage",
+      definition:
+        "A model of data storage where digital information is stored in logical pools across multiple servers, typically hosted by a third-party service provider and accessed via the internet.",
+    },
+    {
+      id: "term-3",
+      term: "Version Control",
+      definition:
+        "A system that records changes to files over time so that specific versions can be recalled later, enabling tracking of modifications and collaborative editing.",
+    },
+    {
+      id: "term-4",
+      term: "Multi-factor Authentication",
+      definition:
+        "A security process that requires users to provide two or more verification factors to gain access to a resource, typically combining something they know (password) with something they have (security token) or something they are (biometric).",
+    },
+    {
+      id: "term-5",
+      term: "Collaborative Editing",
+      definition:
+        "A feature that allows multiple users to edit a document simultaneously, with changes synchronized in real-time across all participants' views.",
+    },
+    {
+      id: "term-6",
+      term: "Conflict Resolution Algorithm",
+      definition:
+        "A computational method used to automatically resolve contradictory changes made by different users to the same document, ensuring data consistency.",
+    },
+    {
+      id: "term-7",
+      term: "API (Application Programming Interface)",
+      definition:
+        "A set of rules and protocols that allows different software applications to communicate with each other, enabling integration between systems.",
+    },
+    {
+      id: "term-8",
+      term: "Webhook",
+      definition:
+        "A mechanism that allows one application to provide other applications with real-time information by sending HTTP POST requests to a specified URL when certain events occur.",
+    },
+  ];
+  const [showKeyTerms, setShowKeyTerms] = useState(true);
+
   // Handle file upload
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -908,6 +969,22 @@ export default function Embodiments() {
 
   // Filter and sort PDFs
   const filteredPdfs = availablePdfs;
+
+  const grouped = embodiments.description.reduce(
+    (acc: Record<string, Embodiment[]>, curr) => {
+      const key = curr.header || "Ungrouped";
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(curr);
+      return acc;
+    },
+    {}
+  );
+
+  const sortedGroupedEntries = Object.entries(grouped).sort(([a], [b]) => {
+    if (a === "Ungrouped") return 1;
+    if (b === "Ungrouped") return -1;
+    return a.localeCompare(b);
+  });
 
   return (
     <main className="container mx-auto px-4 py-8 relative">
@@ -1205,64 +1282,100 @@ export default function Embodiments() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="description" className="mt-4">
-                <div className="grid grid-cols-2 gap-4">
-                  {embodiments.description.map((embodiment) => (
-                    <div
-                      key={embodiment.id}
-                      className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
+              <TabsContent value="description" className="mt-4 space-y-6">
+                {/* Key Terms Accordion */}
+                <div className="mb-6">
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className="text-lg font-semibold">Key Terms</h3>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowKeyTerms(!showKeyTerms)}
+                      className="text-xs"
                     >
-                      <div className="flex justify-between items-center mb-2">
-                        <div className="flex items-center gap-2">
-                          <button
-                            className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                              embodiment.selected
-                                ? "text-green-500"
-                                : "text-gray-300"
-                            }`}
-                            onClick={(e) => {
-                              toggleEmbodimentSelection(
-                                "description",
-                                embodiment.id
-                              );
-                            }}
-                          >
-                            <CheckCircle className="h-5 w-5" />
-                          </button>
-                          <button
-                            className="text-xs bg-white border border-gray-200 px-2 py-1 rounded hover:bg-gray-50"
-                            onClick={() => showExtractedMetadata(embodiment)}
-                          >
-                            Meta-data
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md">
-                        {embodiment.summary}
-                      </div>
-
-                      <p className="text-sm">{embodiment.description}</p>
-
-                      <div className="mt-3 flex justify-between items-center">
-                        <Badge variant="outline" className="text-xs">
-                          Source: {embodiment.source}
-                        </Badge>
-                        <button
-                          className="text-xs bg-primary text-white px-3 py-1.5 rounded hover:bg-primary/90"
-                          onClick={() => setOpenPopupId(embodiment.id)}
-                        >
-                          Create
-                        </button>
-                      </div>
-
-                      {/* Embodiment number shown at the bottom */}
-                      <p className="mt-3 text-xs text-muted-foreground italic">
-                        {embodiment.title}
-                      </p>
-                    </div>
-                  ))}
+                      {showKeyTerms ? "Hide Terms" : "Show Terms"}
+                    </Button>
+                  </div>
+                  {showKeyTerms && (
+                    <Accordion
+                      type="single"
+                      collapsible
+                      className="border rounded-md"
+                    >
+                      {keyTerms.map((term) => (
+                        <AccordionItem key={term.id} value={term.id}>
+                          <AccordionTrigger className="px-4 hover:no-underline hover:bg-muted/50">
+                            <span className="font-medium">{term.term}</span>
+                          </AccordionTrigger>
+                          <AccordionContent className="px-4 pb-4 pt-2 text-sm">
+                            {term.definition}
+                          </AccordionContent>
+                        </AccordionItem>
+                      ))}
+                    </Accordion>
+                  )}
                 </div>
+
+                {/* Embodiments by Header */}
+                {sortedGroupedEntries.map(([header, items]) => (
+                  <div key={header} className="mb-10">
+                    <h2 className="text-xl font-bold mb-4 border-b pb-2">
+                      {header}
+                    </h2>
+                    <div className="grid grid-cols-2 gap-4">
+                      {items.map((embodiment) => (
+                        <div
+                          key={embodiment.id}
+                          className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
+                        >
+                          <div className="flex justify-between items-center mb-2">
+                            <div className="flex items-center gap-2">
+                              <button
+                                className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                                  embodiment.selected
+                                    ? "text-green-500"
+                                    : "text-gray-300"
+                                }`}
+                                onClick={() =>
+                                  toggleEmbodimentSelection(
+                                    "description",
+                                    embodiment.id
+                                  )
+                                }
+                              >
+                                <CheckCircle className="h-5 w-5" />
+                              </button>
+                              <button
+                                className="text-xs bg-white border border-gray-200 px-2 py-1 rounded hover:bg-gray-50"
+                                onClick={() =>
+                                  showExtractedMetadata(embodiment)
+                                }
+                              >
+                                Meta-data
+                              </button>
+                            </div>
+                          </div>
+                          <div className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md">
+                            {embodiment.summary}
+                          </div>
+
+                          <p className="text-sm">{embodiment.description}</p>
+                          <div className="mt-3 flex justify-between items-center">
+                            <Badge variant="outline" className="text-xs">
+                              Source: {embodiment.source}
+                            </Badge>
+                            <button
+                              className="text-xs bg-primary text-white px-3 py-1.5 rounded hover:bg-primary/90"
+                              onClick={() => setOpenPopupId(embodiment.id)}
+                            >
+                              Create
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </TabsContent>
 
               <TabsContent value="claims" className="mt-4">
