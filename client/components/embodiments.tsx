@@ -1318,61 +1318,67 @@ export default function Embodiments() {
 
                 {/* Embodiments by Header */}
                 {sortedGroupedEntries.map(([header, items]) => (
-                  <div key={header} className="mb-10">
-                    <h2 className="text-xl font-bold mb-4 border-b pb-2">
-                      {header}
-                    </h2>
-                    <div className="grid grid-cols-2 gap-4">
-                      {items.map((embodiment) => (
-                        <div
-                          key={embodiment.id}
-                          className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
-                        >
-                          <div className="flex justify-between items-center mb-2">
-                            <div className="flex items-center gap-2">
+                  <div key={header}>
+                    {header === "Ungrouped" && (
+                      <hr className="my-6 border-gray-300" />
+                    )}
+                    <div className="mb-10">
+                      {header !== "Ungrouped" && (
+                        <h2 className="text-xl font-bold mb-4 border-b pb-2">
+                          {header}
+                        </h2>
+                      )}
+                      <div className="grid grid-cols-2 gap-4">
+                        {items.map((embodiment) => (
+                          <div
+                            key={embodiment.id}
+                            className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
+                          >
+                            <div className="flex justify-between items-center mb-2">
+                              <div className="flex items-center gap-2">
+                                <button
+                                  className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                                    embodiment.selected
+                                      ? "text-green-500"
+                                      : "text-gray-300"
+                                  }`}
+                                  onClick={() =>
+                                    toggleEmbodimentSelection(
+                                      "description",
+                                      embodiment.id
+                                    )
+                                  }
+                                >
+                                  <CheckCircle className="h-5 w-5" />
+                                </button>
+                                <button
+                                  className="text-xs bg-white border border-gray-200 px-2 py-1 rounded hover:bg-gray-50"
+                                  onClick={() =>
+                                    showExtractedMetadata(embodiment)
+                                  }
+                                >
+                                  Meta-data
+                                </button>
+                              </div>
+                            </div>
+                            <div className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md">
+                              {embodiment.summary}
+                            </div>
+                            <p className="text-sm">{embodiment.description}</p>
+                            <div className="mt-3 flex justify-between items-center">
+                              <Badge variant="outline" className="text-xs">
+                                Source: {embodiment.source}
+                              </Badge>
                               <button
-                                className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                                  embodiment.selected
-                                    ? "text-green-500"
-                                    : "text-gray-300"
-                                }`}
-                                onClick={() =>
-                                  toggleEmbodimentSelection(
-                                    "description",
-                                    embodiment.id
-                                  )
-                                }
+                                className="text-xs bg-primary text-white px-3 py-1.5 rounded hover:bg-primary/90"
+                                onClick={() => setOpenPopupId(embodiment.id)}
                               >
-                                <CheckCircle className="h-5 w-5" />
-                              </button>
-                              <button
-                                className="text-xs bg-white border border-gray-200 px-2 py-1 rounded hover:bg-gray-50"
-                                onClick={() =>
-                                  showExtractedMetadata(embodiment)
-                                }
-                              >
-                                Meta-data
+                                Create
                               </button>
                             </div>
                           </div>
-                          <div className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md">
-                            {embodiment.summary}
-                          </div>
-
-                          <p className="text-sm">{embodiment.description}</p>
-                          <div className="mt-3 flex justify-between items-center">
-                            <Badge variant="outline" className="text-xs">
-                              Source: {embodiment.source}
-                            </Badge>
-                            <button
-                              className="text-xs bg-primary text-white px-3 py-1.5 rounded hover:bg-primary/90"
-                              onClick={() => setOpenPopupId(embodiment.id)}
-                            >
-                              Create
-                            </button>
-                          </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
                   </div>
                 ))}
