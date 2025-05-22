@@ -138,6 +138,9 @@ export function transformApiEmbodiments(data: RawChunk[]): EmbodimentMap {
 
 export default function Embodiments() {
   const [isExtracting, setIsExtracting] = useState(false);
+  const [keyTermsFromApi, setKeyTermsFromApi] = useState<
+    { term: string; definition?: string; page_number?: number }[]
+  >([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [showResearchSections, setShowResearchSections] = useState(false);
@@ -505,6 +508,9 @@ export default function Embodiments() {
 
       const data = response.data.data;
       const mapped = transformApiEmbodiments(data || []);
+      const keyTerms = response.data.terms?.definitions || null;
+
+      setKeyTermsFromApi(keyTerms);
       setEmbodiments(mapped);
 
       clearInterval(progressInterval);
@@ -887,56 +893,6 @@ export default function Embodiments() {
     );
   };
 
-  const keyTerms = [
-    {
-      id: "term-1",
-      term: "Document Processing System",
-      definition:
-        "A comprehensive software solution designed to manage the entire lifecycle of digital documents, including creation, storage, retrieval, modification, and distribution.",
-    },
-    {
-      id: "term-2",
-      term: "Cloud-based Storage",
-      definition:
-        "A model of data storage where digital information is stored in logical pools across multiple servers, typically hosted by a third-party service provider and accessed via the internet.",
-    },
-    {
-      id: "term-3",
-      term: "Version Control",
-      definition:
-        "A system that records changes to files over time so that specific versions can be recalled later, enabling tracking of modifications and collaborative editing.",
-    },
-    {
-      id: "term-4",
-      term: "Multi-factor Authentication",
-      definition:
-        "A security process that requires users to provide two or more verification factors to gain access to a resource, typically combining something they know (password) with something they have (security token) or something they are (biometric).",
-    },
-    {
-      id: "term-5",
-      term: "Collaborative Editing",
-      definition:
-        "A feature that allows multiple users to edit a document simultaneously, with changes synchronized in real-time across all participants' views.",
-    },
-    {
-      id: "term-6",
-      term: "Conflict Resolution Algorithm",
-      definition:
-        "A computational method used to automatically resolve contradictory changes made by different users to the same document, ensuring data consistency.",
-    },
-    {
-      id: "term-7",
-      term: "API (Application Programming Interface)",
-      definition:
-        "A set of rules and protocols that allows different software applications to communicate with each other, enabling integration between systems.",
-    },
-    {
-      id: "term-8",
-      term: "Webhook",
-      definition:
-        "A mechanism that allows one application to provide other applications with real-time information by sending HTTP POST requests to a specified URL when certain events occur.",
-    },
-  ];
   const [showKeyTerms, setShowKeyTerms] = useState(true);
 
   // Handle file upload
@@ -1302,16 +1258,20 @@ export default function Embodiments() {
                       collapsible
                       className="border rounded-md"
                     >
-                      {keyTerms.map((term) => (
-                        <AccordionItem key={term.id} value={term.id}>
-                          <AccordionTrigger className="px-4 hover:no-underline hover:bg-muted/50">
-                            <span className="font-medium">{term.term}</span>
-                          </AccordionTrigger>
-                          <AccordionContent className="px-4 pb-4 pt-2 text-sm">
-                            {term.definition}
-                          </AccordionContent>
-                        </AccordionItem>
-                      ))}
+                      {keyTermsFromApi.length > 0 &&
+                        keyTermsFromApi.map((term, index) => (
+                          <AccordionItem key={index} value={`term-${index}`}>
+                            <AccordionTrigger className="px-4 hover:no-underline hover:bg-muted/50">
+                              <span className="font-medium">
+                                {term.term.charAt(0).toUpperCase() +
+                                  term.term.slice(1) || "Untitled Term"}
+                              </span>
+                            </AccordionTrigger>
+                            <AccordionContent className="px-4 pb-4 pt-2 text-sm">
+                              {term.definition || "No definition available."}
+                            </AccordionContent>
+                          </AccordionItem>
+                        ))}
                     </Accordion>
                   )}
                 </div>
