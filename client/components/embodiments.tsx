@@ -513,6 +513,7 @@ export default function Embodiments() {
       const data = response.data.data;
       const mapped = transformApiEmbodiments(data || []);
       const keyTerms = response.data.terms?.definitions || null;
+      setSelectedPdfIds([response.data.file_id]);
 
       setKeyTermsFromApi(keyTerms);
       setEmbodiments(mapped);
@@ -871,13 +872,20 @@ export default function Embodiments() {
 
     try {
       const res = await axios.get(`${backendUrl}/v1/source-embodiments/${id}`);
-      const data: RawChunk[] = res.data || [];
+      console.log("Res", res);
+      const data: RawChunk[] = res.data.data || [];
 
       // ✅ Correctly assign filename to each chunk
       const updatedChunks = data.map((chunk) => ({
         ...chunk,
         filename: selectedDoc?.name || chunk.filename,
       }));
+
+      const keyTerms = res.data?.terms || null;
+
+      console.log("Key Terms", keyTerms);
+
+      setKeyTermsFromApi(keyTerms);
 
       const newEmbodiments = transformApiEmbodiments(updatedChunks);
       setEmbodiments(newEmbodiments);
@@ -1342,6 +1350,9 @@ export default function Embodiments() {
                                 Create
                               </button>
                             </div>
+                            <p className="mt-3 text-xs text-muted-foreground italic">
+                              {embodiment.title}
+                            </p>
                           </div>
                         ))}
                       </div>
