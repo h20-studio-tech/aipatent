@@ -147,6 +147,7 @@ export default function Embodiments() {
   const [selectedPdfIds, setSelectedPdfIds] = useState<string[]>([]);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [selectedPatents, setSelectedPatents] = useState<string[]>([]);
+  const [selectedFileId, setSelectedFileId] = useState<string | "">("");
   const [visibleSummaries, setVisibleSummaries] = useState<
     Record<number, boolean>
   >({});
@@ -350,13 +351,16 @@ export default function Embodiments() {
       try {
         const formData = new FormData();
         formData.append("file", file);
-        await axios.post(`${backendUrl}/v1/documents/`, formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        const response = await axios.post(
+          `${backendUrl}/v1/documents/`,
+          formData,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
 
-        const generatedId = `pdf-${Date.now()}-${Math.random()
-          .toString(36)
-          .substr(2, 9)}`;
+        console.log("YY", response);
+        const generatedId = response.data.id;
         const uploadedPDF: PDF = {
           id: generatedId,
           name: file.name,
@@ -647,11 +651,13 @@ export default function Embodiments() {
     const patent_title = params.get("patentName") || "Untitled Patent";
     const disease = params.get("disease") || "unspecified";
     const antigen = params.get("antigen") || "unspecified";
+    const file_id = selectedPdfIds[0];
 
+    console.log("UUUU", selectedPdfIds);
     await axios
       .post(`${backendUrl}/v1/embodiment`, {
+        file_id,
         inspiration,
-        source_embodiment,
         patent_title,
         disease,
         antigen,
