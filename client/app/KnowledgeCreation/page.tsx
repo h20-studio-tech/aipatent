@@ -13,11 +13,15 @@ import PatentComponentGenerator from "@/components/section-generator";
 export default function Home() {
   const [stage, setStage] = useState(1);
   const [patentId, setPatentId] = useState<string | "">("");
+  const [antigen, setAntigen] = useState<string | "">("");
+  const [disease, setDisease] = useState<string | "">("");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       setPatentId(params.get("patentId") || "");
+      setAntigen(params.get("antigen") || "");
+      setDisease(params.get("disease") || "");
     }
   }, []);
 
@@ -110,7 +114,7 @@ export default function Home() {
       ) : stage === 2 ? (
         <Embodiments />
       ) : (
-        <PatentComponentGenerator />
+        <PatentComponentGenerator antigen={antigen} disease={disease} />
       )}
     </main>
   );

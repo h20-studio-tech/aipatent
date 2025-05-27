@@ -24,6 +24,8 @@ interface PatentComponentGeneratorProps {
   patentContext: string;
   onComponentGenerated: (component: string) => void;
   generatedComponents: string[];
+  antigen?: string;
+  disease?: string;
 }
 
 interface SavedPatentData {
@@ -42,7 +44,10 @@ const MAIN_SECTIONS = [
   "Background",
   "Summary of Invention",
   "Field of Invention",
-  "Detailed Description",
+  "Target Overview",
+  "Disease Overview",
+  "Underlying Mechanism",
+  "High Level Concept",
   "Claims",
   "Abstract",
 ];
@@ -54,7 +59,10 @@ const SUBSECTIONS: Record<string, string[]> = {
   Background: ["Background"],
   "Summary of Invention": ["Summary of Invention"],
   "Field of Invention": ["Field of Invention"],
-  "Detailed Description": ["Detailed Description"],
+  "Target Overview": ["Target Overview"],
+  "Disease Overview": ["Disease Overview"],
+  "Underlying Mechanism": ["Underlying Mechanism"],
+  "High Level Concept": ["High Level Concept"],
   Claims: ["Claims"],
   Abstract: ["Abstract"],
 };
@@ -65,6 +73,8 @@ const PatentComponentGenerator: React.FC<PatentComponentGeneratorProps> = ({
   patentContext,
   onComponentGenerated,
   generatedComponents,
+  antigen,
+  disease,
 }) => {
   const { toast } = useToast();
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
@@ -80,6 +90,8 @@ const PatentComponentGenerator: React.FC<PatentComponentGeneratorProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [correctionModalOpen, setCorrectionModalOpen] = useState(false);
   const [regenerateModalOpen, setRegenerateModalOpen] = useState(false);
+  const [patentName, setPatentName] = useState<string | null>(null);
+  const [patentId, setPatentId] = useState<string>("");
   const [userCorrection, setUserCorrection] = useState("");
   const [regenerateInput, setRegenerateInput] = useState("");
   const contentRef = useRef<HTMLDivElement>(null);
@@ -157,6 +169,36 @@ const PatentComponentGenerator: React.FC<PatentComponentGeneratorProps> = ({
     }
   }, [generatedContent]);
 
+  const fetchStoredKnowledge = async () => {
+    if (typeof window !== "undefined" && window.getStoredKnowlegde) {
+      const storedKnowledge = await window.getStoredKnowlegde();
+      console.log("DFvdf", storedKnowledge);
+
+      let approachKnowledge;
+      let innovationKnowledge;
+      let technologyKnowledge;
+
+      for (const knowledge of storedKnowledge) {
+        if (knowledge.section === "Approach") {
+          approachKnowledge = knowledge;
+        }
+
+        if (knowledge.section === "Innovation") {
+          innovationKnowledge = knowledge;
+        }
+
+        if (knowledge.section === "Technology") {
+          technologyKnowledge = knowledge;
+        }
+      }
+      return {
+        approachKnowledge,
+        innovationKnowledge,
+        technologyKnowledge,
+      };
+    }
+  };
+
   // Save current progress
   const saveProgress = useCallback(() => {
     setIsSaving(true);
@@ -211,6 +253,7 @@ const PatentComponentGenerator: React.FC<PatentComponentGeneratorProps> = ({
     // Store the current section and subsection before generating
     const sectionToGenerate = currentSection;
     const subsectionToGenerate = currentSubsection;
+    console.log("Section", sectionToGenerate);
     setLastGeneratedSection(sectionToGenerate);
     setLastGeneratedSubsection(subsectionToGenerate);
 
@@ -227,12 +270,29 @@ const PatentComponentGenerator: React.FC<PatentComponentGeneratorProps> = ({
 
 Please generate the "${sectionToGenerate}" section of the patent.
 This section should be detailed, technically accurate, and formatted appropriately for a patent document.`;
+      const storedKnowledge = await fetchStoredKnowledge();
 
+      console.log("Stored", storedKnowledge);
+      console.log("Antigen", antigen);
+      console.log("Disease", disease);
+
+      if (!antigen || !disease) {
+        console.warn("Missing critical data:", { antigen, disease });
+      }
       const content = await generatePatentContent(
         sectionToGenerate,
-        enhancedContext
+        enhancedContext,
+        antigen,
+        disease,
+        storedKnowledge?.innovationKnowledge?.answer || "",
+        storedKnowledge?.approachKnowledge?.answer || "",
+        storedKnowledge?.technologyKnowledge?.answer || "",
+        "test",
+        "test"
       );
       setGeneratedContent(content);
+
+      console.log("first", content);
 
       // Create a unique key for this section
       const componentKey = `${sectionToGenerate}:${subsectionToGenerate}`;
@@ -343,9 +403,25 @@ User guidance: ${correctionText}
 Please regenerate the "${sectionToRegenerate}" section based on this guidance.
 This section should be detailed, technically accurate, and formatted appropriately for a patent document.`;
 
+      const storedKnowledge = await fetchStoredKnowledge();
+
+      console.log("Stored", storedKnowledge);
+      console.log("Antigen", antigen);
+      console.log("Disease", disease);
+
+      if (!antigen || !disease) {
+        console.warn("Missing critical data:", { antigen, disease });
+      }
       const regeneratedText = await generatePatentContent(
         sectionToRegenerate,
-        correctedPrompt
+        correctedPrompt,
+        antigen,
+        disease,
+        storedKnowledge?.innovationKnowledge?.answer || "",
+        storedKnowledge?.approachKnowledge?.answer || "",
+        storedKnowledge?.technologyKnowledge?.answer || "",
+        "test",
+        "test"
       );
 
       // Update the current content with the regenerated text
