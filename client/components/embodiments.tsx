@@ -99,7 +99,7 @@ type EmbodimentMap = {
   claims: Embodiment[];
 };
 
-export function transformApiEmbodiments(data: RawChunk[]): EmbodimentMap {
+export function transformGroupedEmbodiments(response: any): EmbodimentMap {
   let idCounter = 1;
 
   const map: EmbodimentMap = {
@@ -108,28 +108,48 @@ export function transformApiEmbodiments(data: RawChunk[]): EmbodimentMap {
     claims: [],
   };
 
-  for (const chunk of data) {
-    const key = chunk.section.toLowerCase().includes("summary")
-      ? "summary"
-      : chunk.section.toLowerCase().includes("description")
-      ? "description"
-      : chunk.section.toLowerCase().includes("claims")
-      ? "claims"
-      : null;
+  const getSectionKey = (section: string) => {
+    if (section.toLowerCase().includes("summary")) return "summary";
+    if (section.toLowerCase().includes("description")) return "description";
+    return null;
+  };
 
+  for (const sec of response.sections || []) {
+    const key = getSectionKey(sec.section);
     if (!key) continue;
 
-    map[key].push({
+    for (const sub of sec.subsections || []) {
+      for (const emb of sub.embodiments || []) {
+        map[key].push({
+          id: idCounter++,
+          title: `Embodiment #${idCounter - 1}`,
+          description: emb.description || "",
+          selected: true,
+          confidence: parseFloat((0.87 + Math.random() * 0.1).toFixed(2)),
+          source: response.filename || "Uploaded PDF",
+          section: sec.section,
+          summary: sub.summary,
+          header: sub.header,
+        });
+      }
+    }
+  }
+
+  for (const chunk of response.data || []) {
+    const section = chunk.section?.toLowerCase();
+    if (!section?.includes("claim")) continue;
+
+    map.claims.push({
       id: idCounter++,
       title: `Embodiment #${idCounter - 1}`,
-      description: chunk.text.trim(),
+      description: chunk.text?.trim() || "",
       selected: true,
       confidence: parseFloat((0.87 + Math.random() * 0.1).toFixed(2)),
       source: chunk.filename,
-      pageNumber: chunk.page_number, // ✅
-      section: chunk.section, // ✅
-      summary: chunk.summary || "Lorem Ipsum dolor sit amet.",
-      header: chunk.header,
+      pageNumber: chunk.page_number,
+      section: chunk.section,
+      summary: chunk.summary || "",
+      header: chunk.header || "Claims",
     });
   }
 
@@ -148,6 +168,7 @@ export default function Embodiments() {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [selectedPatents, setSelectedPatents] = useState<string[]>([]);
   const [selectedFileId, setSelectedFileId] = useState<string | "">("");
+  const [abstract, setAbstract] = useState<string | "">("");
   const [visibleSummaries, setVisibleSummaries] = useState<
     Record<number, boolean>
   >({});
@@ -511,8 +532,10 @@ export default function Embodiments() {
       );
 
       const data = response.data.data;
-      const mapped = transformApiEmbodiments(data || []);
+      const mapped = transformGroupedEmbodiments(response.data || {});
       const keyTerms = response.data.terms?.definitions || null;
+      const abst = response.data.abstract;
+      setAbstract(abst);
       setSelectedPdfIds([response.data.file_id]);
 
       setKeyTermsFromApi(keyTerms);
@@ -1191,65 +1214,131 @@ export default function Embodiments() {
                 </TabsTrigger>
                 <TabsTrigger value="claims">Claims</TabsTrigger>
               </TabsList>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginTop: "20px",
+                }}
+              >
+                <h1>
+                  <strong>Abstract</strong>
+                </h1>
+                <p
+                  style={{ textAlign: "center" }}
+                  className="text-md italic text-muted-foreground"
+                >
+                  {abstract}
+                </p>
+              </div>
 
-              <TabsContent value="summary" className="mt-4">
-                <div className="grid grid-cols-2 gap-4">
-                  {embodiments.summary.map((embodiment) => (
-                    <div
-                      key={embodiment.id}
-                      className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
-                    >
-                      <div className="flex justify-between items-center mb-2">
-                        <div className="flex items-center gap-2">
-                          <button
-                            className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                              embodiment.selected
-                                ? "text-green-500"
-                                : "text-gray-300"
-                            }`}
-                            onClick={(e) => {
-                              toggleEmbodimentSelection(
-                                "summary",
-                                embodiment.id
-                              );
-                            }}
-                          >
-                            <CheckCircle className="h-5 w-5" />
-                          </button>
-                          <button
-                            className="text-xs bg-white border border-gray-200 px-2 py-1 rounded hover:bg-gray-50"
-                            onClick={() => showExtractedMetadata(embodiment)}
-                          >
-                            Meta-data
-                          </button>
+              <TabsContent value="summary">
+                {embodiments.summary.length > 0 ? (
+                  <>
+                    {Object.entries(
+                      embodiments.summary.reduce((acc, curr) => {
+                        const key = curr.header || "Ungrouped";
+                        if (!acc[key]) acc[key] = [];
+                        acc[key].push(curr);
+                        return acc;
+                      }, {} as Record<string, Embodiment[]>)
+                    ).map(([header, items]) => {
+                      const summary = items[0]?.summary;
+
+                      return (
+                        <div key={header}>
+                          {header === "Ungrouped" && (
+                            <hr className="my-6 border-gray-300" />
+                          )}
+                          <div className="mb-10">
+                            {header !== "Ungrouped" && (
+                              <>
+                                <h2 className="text-xl font-bold mb-2 border-b pb-1">
+                                  {header}
+                                </h2>
+                                {summary && (
+                                  <p className="text-sm italic text-muted-foreground mb-4">
+                                    {summary}
+                                  </p>
+                                )}
+                              </>
+                            )}
+                            <div className="grid grid-cols-2 gap-4">
+                              {items.map((embodiment) => (
+                                <div
+                                  key={embodiment.id}
+                                  className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
+                                >
+                                  <div className="flex justify-between items-center mb-2">
+                                    <div className="flex items-center gap-2">
+                                      <button
+                                        className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                                          embodiment.selected
+                                            ? "text-green-500"
+                                            : "text-gray-300"
+                                        }`}
+                                        onClick={(e) => {
+                                          toggleEmbodimentSelection(
+                                            "summary",
+                                            embodiment.id
+                                          );
+                                        }}
+                                      >
+                                        <CheckCircle className="h-5 w-5" />
+                                      </button>
+                                      <button
+                                        className="text-xs bg-white border border-gray-200 px-2 py-1 rounded hover:bg-gray-50"
+                                        onClick={() =>
+                                          showExtractedMetadata(embodiment)
+                                        }
+                                      >
+                                        Meta-data
+                                      </button>
+                                    </div>
+                                  </div>
+
+                                  <div className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md">
+                                    {embodiment.summary}
+                                  </div>
+
+                                  <p className="text-sm">
+                                    {embodiment.description}
+                                  </p>
+
+                                  <div className="mt-3 flex justify-between items-center">
+                                    <Badge
+                                      variant="outline"
+                                      className="text-xs"
+                                    >
+                                      Source: {embodiment.source}
+                                    </Badge>
+                                    <button
+                                      className="text-xs bg-primary text-white px-3 py-1.5 rounded hover:bg-primary/90"
+                                      onClick={() =>
+                                        setOpenPopupId(embodiment.id)
+                                      }
+                                    >
+                                      Create
+                                    </button>
+                                  </div>
+
+                                  {/* Embodiment number shown at the bottom */}
+                                  <p className="mt-3 text-xs text-muted-foreground italic">
+                                    {embodiment.title}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-
-                      <div className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md">
-                        {embodiment.summary}
-                      </div>
-
-                      <p className="text-sm">{embodiment.description}</p>
-
-                      <div className="mt-3 flex justify-between items-center">
-                        <Badge variant="outline" className="text-xs">
-                          Source: {embodiment.source}
-                        </Badge>
-                        <button
-                          className="text-xs bg-primary text-white px-3 py-1.5 rounded hover:bg-primary/90"
-                          onClick={() => setOpenPopupId(embodiment.id)}
-                        >
-                          Create
-                        </button>
-                      </div>
-
-                      {/* Embodiment number shown at the bottom */}
-                      <p className="mt-3 text-xs text-muted-foreground italic">
-                        {embodiment.title}
-                      </p>
-                    </div>
-                  ))}
-                </div>
+                      );
+                    })}
+                  </>
+                ) : (
+                  <p>empty</p>
+                )}
               </TabsContent>
 
               <TabsContent value="description" className="mt-4 space-y-6">
@@ -1291,74 +1380,88 @@ export default function Embodiments() {
                 </div>
 
                 {/* Embodiments by Header */}
-                {sortedGroupedEntries.map(([header, items]) => (
-                  <div key={header}>
-                    {header === "Ungrouped" && (
-                      <hr className="my-6 border-gray-300" />
-                    )}
-                    <div className="mb-10">
-                      {header !== "Ungrouped" && (
-                        <h2 className="text-xl font-bold mb-4 border-b pb-2">
-                          {header}
-                        </h2>
+                {sortedGroupedEntries.map(([header, items]) => {
+                  const summary = items[0]?.summary;
+
+                  return (
+                    <div key={header}>
+                      {header === "Ungrouped" && (
+                        <hr className="my-6 border-gray-300" />
                       )}
-                      <div className="grid grid-cols-2 gap-4">
-                        {items.map((embodiment) => (
-                          <div
-                            key={embodiment.id}
-                            className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
-                          >
-                            <div className="flex justify-between items-center mb-2">
-                              <div className="flex items-center gap-2">
+                      <div className="mb-10">
+                        {header !== "Ungrouped" && (
+                          <>
+                            <h2 className="text-xl font-bold mb-2 border-b pb-1">
+                              {header}
+                            </h2>
+                            {summary && (
+                              <p className="text-sm italic text-muted-foreground mb-4">
+                                {summary}
+                              </p>
+                            )}
+                          </>
+                        )}
+
+                        <div className="grid grid-cols-2 gap-4">
+                          {items.map((embodiment) => (
+                            <div
+                              key={embodiment.id}
+                              className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
+                            >
+                              <div className="flex justify-between items-center mb-2">
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                                      embodiment.selected
+                                        ? "text-green-500"
+                                        : "text-gray-300"
+                                    }`}
+                                    onClick={() =>
+                                      toggleEmbodimentSelection(
+                                        "description",
+                                        embodiment.id
+                                      )
+                                    }
+                                  >
+                                    <CheckCircle className="h-5 w-5" />
+                                  </button>
+                                  <button
+                                    className="text-xs bg-white border border-gray-200 px-2 py-1 rounded hover:bg-gray-50"
+                                    onClick={() =>
+                                      showExtractedMetadata(embodiment)
+                                    }
+                                  >
+                                    Meta-data
+                                  </button>
+                                </div>
+                              </div>
+                              <div className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md">
+                                {embodiment.summary}
+                              </div>
+                              <p className="text-sm">
+                                {embodiment.description}
+                              </p>
+                              <div className="mt-3 flex justify-between items-center">
+                                <Badge variant="outline" className="text-xs">
+                                  Source: {embodiment.source}
+                                </Badge>
                                 <button
-                                  className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                                    embodiment.selected
-                                      ? "text-green-500"
-                                      : "text-gray-300"
-                                  }`}
-                                  onClick={() =>
-                                    toggleEmbodimentSelection(
-                                      "description",
-                                      embodiment.id
-                                    )
-                                  }
+                                  className="text-xs bg-primary text-white px-3 py-1.5 rounded hover:bg-primary/90"
+                                  onClick={() => setOpenPopupId(embodiment.id)}
                                 >
-                                  <CheckCircle className="h-5 w-5" />
-                                </button>
-                                <button
-                                  className="text-xs bg-white border border-gray-200 px-2 py-1 rounded hover:bg-gray-50"
-                                  onClick={() =>
-                                    showExtractedMetadata(embodiment)
-                                  }
-                                >
-                                  Meta-data
+                                  Create
                                 </button>
                               </div>
+                              <p className="mt-3 text-xs text-muted-foreground italic">
+                                {embodiment.title}
+                              </p>
                             </div>
-                            <div className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md">
-                              {embodiment.summary}
-                            </div>
-                            <p className="text-sm">{embodiment.description}</p>
-                            <div className="mt-3 flex justify-between items-center">
-                              <Badge variant="outline" className="text-xs">
-                                Source: {embodiment.source}
-                              </Badge>
-                              <button
-                                className="text-xs bg-primary text-white px-3 py-1.5 rounded hover:bg-primary/90"
-                                onClick={() => setOpenPopupId(embodiment.id)}
-                              >
-                                Create
-                              </button>
-                            </div>
-                            <p className="mt-3 text-xs text-muted-foreground italic">
-                              {embodiment.title}
-                            </p>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </TabsContent>
 
               <TabsContent value="claims" className="mt-4">
