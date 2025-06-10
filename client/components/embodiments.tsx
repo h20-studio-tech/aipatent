@@ -119,13 +119,32 @@ export function transformGroupedEmbodiments(response: any): EmbodimentMap {
     if (!key) continue;
 
     for (const sub of sec.subsections || []) {
-      for (const emb of sub.embodiments || []) {
+      const hasEmbodiments =
+        Array.isArray(sub.embodiments) && sub.embodiments.length > 0;
+
+      // If there are actual embodiments, process them
+      if (hasEmbodiments) {
+        for (const emb of sub.embodiments) {
+          map[key].push({
+            id: idCounter++,
+            title: `Embodiment #${idCounter - 1}`,
+            description: emb.summary || "",
+            selected: true,
+            confidence: parseFloat((0.87 + Math.random() * 0.1).toFixed(2)),
+            source: response.filename || "Uploaded PDF",
+            section: sec.section,
+            summary: sub.summary,
+            header: sub.header,
+          });
+        }
+      } else {
+        // Push a placeholder to preserve header/summary with no embodiments
         map[key].push({
           id: idCounter++,
           title: `Embodiment #${idCounter - 1}`,
-          description: emb.description || "",
-          selected: true,
-          confidence: parseFloat((0.87 + Math.random() * 0.1).toFixed(2)),
+          description: "", // Empty content
+          selected: false,
+          confidence: undefined,
           source: response.filename || "Uploaded PDF",
           section: sec.section,
           summary: sub.summary,
@@ -572,6 +591,7 @@ export default function Embodiments() {
       const mapped = transformGroupedEmbodiments(response.data || {});
       const keyTerms = response.data.terms?.definitions || null;
       const abst = response.data.abstract;
+      console.log("Mapped", mapped);
       setAbstract(abst);
       setSelectedPdfIds([response.data.file_id]);
 
@@ -1000,15 +1020,21 @@ export default function Embodiments() {
   // Filter and sort PDFs
   const filteredPdfs = availablePdfs;
 
-  const grouped = embodiments.description.reduce(
-    (acc: Record<string, Embodiment[]>, curr) => {
-      const key = curr.header || "Ungrouped";
-      if (!acc[key]) acc[key] = [];
-      acc[key].push(curr);
-      return acc;
-    },
-    {}
+  const allHeaders = Array.from(
+    new Set(embodiments.description.map((e) => e.header || "Ungrouped"))
   );
+
+  // Create map with empty arrays for all found headers
+  const grouped: Record<string, Embodiment[]> = {};
+  for (const header of allHeaders) {
+    grouped[header] = [];
+  }
+
+  // Populate with actual embodiments
+  for (const emb of embodiments.description) {
+    const key = emb.header || "Ungrouped";
+    grouped[key].push(emb);
+  }
 
   const sortedGroupedEntries = Object.entries(grouped).sort(([a], [b]) => {
     if (a === "Ungrouped") return 1;
@@ -1439,62 +1465,76 @@ export default function Embodiments() {
                           </>
                         )}
 
-                        <div className="grid grid-cols-2 gap-4">
-                          {items.map((embodiment) => (
-                            <div
-                              key={embodiment.id}
-                              className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
-                            >
-                              <div className="flex justify-between items-center mb-2">
-                                <div className="flex items-center gap-2">
-                                  <button
-                                    className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                                      embodiment.selected
-                                        ? "text-green-500"
-                                        : "text-gray-300"
-                                    }`}
-                                    onClick={() =>
-                                      toggleEmbodimentSelection(
-                                        "description",
-                                        embodiment.id
-                                      )
-                                    }
-                                  >
-                                    <CheckCircle className="h-5 w-5" />
-                                  </button>
-                                  <button
-                                    className="text-xs bg-white border border-gray-200 px-2 py-1 rounded hover:bg-gray-50"
-                                    onClick={() =>
-                                      showExtractedMetadata(embodiment)
-                                    }
-                                  >
-                                    Meta-data
-                                  </button>
-                                </div>
-                              </div>
-                              <div className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md">
-                                {embodiment.summary}
-                              </div>
-                              <p className="text-sm">
-                                {embodiment.description}
-                              </p>
-                              <div className="mt-3 flex justify-between items-center">
-                                <Badge variant="outline" className="text-xs">
-                                  Source: {embodiment.source}
-                                </Badge>
-                                <button
-                                  className="text-xs bg-primary text-white px-3 py-1.5 rounded hover:bg-primary/90"
-                                  onClick={() => setOpenPopupId(embodiment.id)}
+                        {items.filter((e) => e.description.trim() !== "")
+                          .length === 0 ? (
+                          <p className="text-muted-foreground italic text-sm">
+                            No embodiments available for this section.
+                          </p>
+                        ) : (
+                          <div className="grid grid-cols-2 gap-4">
+                            {items
+                              .filter((e) => e.description.trim() !== "")
+                              .map((embodiment) => (
+                                <div
+                                  key={embodiment.id}
+                                  className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
                                 >
-                                  Create
-                                </button>
-                              </div>
-                              <p className="mt-3 text-xs text-muted-foreground italic">
-                                {embodiment.title}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
+                                  <div className="flex justify-between items-center mb-2">
+                                    <div className="flex items-center gap-2">
+                                      <button
+                                        className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                                          embodiment.selected
+                                            ? "text-green-500"
+                                            : "text-gray-300"
+                                        }`}
+                                        onClick={() =>
+                                          toggleEmbodimentSelection(
+                                            "description",
+                                            embodiment.id
+                                          )
+                                        }
+                                      >
+                                        <CheckCircle className="h-5 w-5" />
+                                      </button>
+                                      <button
+                                        className="text-xs bg-white border border-gray-200 px-2 py-1 rounded hover:bg-gray-50"
+                                        onClick={() =>
+                                          showExtractedMetadata(embodiment)
+                                        }
+                                      >
+                                        Meta-data
+                                      </button>
+                                    </div>
+                                  </div>
+
+                                  <div className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md">
+                                    {embodiment.description}
+                                  </div>
+
+                                  <div className="mt-3 flex justify-between items-center">
+                                    <Badge
+                                      variant="outline"
+                                      className="text-xs"
+                                    >
+                                      Source: {embodiment.source}
+                                    </Badge>
+                                    <button
+                                      className="text-xs bg-primary text-white px-3 py-1.5 rounded hover:bg-primary/90"
+                                      onClick={() =>
+                                        setOpenPopupId(embodiment.id)
+                                      }
+                                    >
+                                      Create
+                                    </button>
+                                  </div>
+
+                                  <p className="mt-3 text-xs text-muted-foreground italic">
+                                    {embodiment.title}
+                                  </p>
+                                </div>
+                              ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
