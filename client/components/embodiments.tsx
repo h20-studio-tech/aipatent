@@ -1286,15 +1286,19 @@ export default function Embodiments() {
                   marginTop: "20px",
                 }}
               >
-                <h1>
-                  <strong>Abstract</strong>
-                </h1>
-                <p
-                  style={{ textAlign: "center" }}
-                  className="text-md italic text-muted-foreground"
-                >
-                  {abstract}
-                </p>
+                {abstract && (
+                  <>
+                    <h1>
+                      <strong>Abstract</strong>
+                    </h1>
+                    <p
+                      style={{ textAlign: "center" }}
+                      className="text-md italic text-muted-foreground"
+                    >
+                      {abstract}
+                    </p>
+                  </>
+                )}
               </div>
 
               <TabsContent value="summary">
