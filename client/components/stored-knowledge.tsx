@@ -63,9 +63,6 @@ export default function StoredKnowledge({
   const [sectionMetadata, setSectionMetadata] = useState<
     Record<string, SectionMetadata>
   >({});
-  const [expandedSections, setExpandedSections] = useState<
-    Record<string, boolean>
-  >({});
 
   const handleGeneratePDF = async () => {
     if (Object.keys(editedComponents).length === 0) return;
@@ -186,8 +183,6 @@ export default function StoredKnowledge({
     };
 
     window.getStoredKnowlegde = async () => {
-      console.log("Here", localChats);
-
       return window.__globalKnowledgeCache || [];
     };
 
@@ -198,8 +193,6 @@ export default function StoredKnowledge({
       patentId?: string,
       remixed?: boolean
     ) => {
-      console.log("PatentId -----------", patentId);
-
       const payload = {
         patent_id: patentId,
         question,

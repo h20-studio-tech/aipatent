@@ -229,16 +229,13 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
   const [selectedPdfIds, setSelectedPdfIds] = useState<string[]>([]);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [selectedPatents, setSelectedPatents] = useState<string[]>([]);
-  const [selectedFileId, setSelectedFileId] = useState<string | "">("");
   const [activeSection, setActiveSection] = useState("abstract");
   const [abstract, setAbstract] = useState<string | "">("");
   const [visibleSummaries, setVisibleSummaries] = useState<
     Record<number, boolean>
   >({});
-  const [activeTab, setActiveTab] = useState("summary");
   const [isProcessingPdf, setIsProcessingPdf] = useState(false);
   const [processingComplete, setProcessingComplete] = useState(false);
-  const [pdfList, setPdfList] = useState<PDF[]>([]);
   const [processingFileName, setProcessingFileName] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [embodiments, setEmbodiments] = useState<EmbodimentMap>({
@@ -254,30 +251,86 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
       [embodimentId]: !prev[embodimentId],
     }));
   };
-
-  const fetchEmbodiments = async () => {
+  const fetchStoredKnowledge = async () => {
     try {
-      const response = await axios.get(
-        `${backendUrl}/v1/source-embodiments/${patentId}`
+      const approachResponse = await axios.get(
+        `${backendUrl}/v1/knowledge/approach/${patentId}`
+      );
+      const innovationResponse = await axios.get(
+        `${backendUrl}/v1/knowledge/innovation/${patentId}`
+      );
+      const technologyResponse = await axios.get(
+        `${backendUrl}/v1/knowledge/technology/${patentId}`
+      );
+      const notesResponse = await axios.get(
+        `${backendUrl}/v1/knowledge/research-note/${patentId}`
       );
 
-      console.log("Here", response);
-      const data: RawChunk[] = response.data || [];
+      if (typeof window !== "undefined" && window.addStoredData) {
+        if (approachResponse.data.data.length > 0) {
+          for (const approachKnowledge of approachResponse.data.data) {
+            const newNote = {
+              patentId: patentId,
+              question: approachKnowledge.question,
+              answer: approachKnowledge.answer,
+              section: "Approach",
+              timestamp: approachKnowledge.created_at,
+            };
+            window.addStoredData("knowledge", newNote);
+          }
+        }
 
-      const mappedEmbodiments = transformApiEmbodiments(data);
-      if (
-        mappedEmbodiments.summary.length > 0 ||
-        mappedEmbodiments.description.length > 0 ||
-        mappedEmbodiments.claims.length > 0
-      ) {
-        setShowResearchSections(true);
-        setCurrentStep("review");
+        if (innovationResponse.data.data.length > 0) {
+          for (const innovationKnowledge of innovationResponse.data.data) {
+            const newNote = {
+              patentId: patentId,
+              question: innovationKnowledge.question,
+              answer: innovationKnowledge.answer,
+              section: "Innovation",
+              timestamp: innovationKnowledge.created_at,
+            };
+            window.addStoredData("knowledge", newNote);
+          }
+        }
+
+        if (technologyResponse.data.data.length > 0) {
+          for (const technologyKnowledge of technologyResponse.data.data) {
+            const newNote = {
+              patentId: patentId,
+              question: technologyKnowledge.question,
+              answer: technologyKnowledge.answer,
+              section: "Technology",
+              timestamp: technologyKnowledge.created_at,
+            };
+            window.addStoredData("knowledge", newNote);
+          }
+        }
+
+        if (notesResponse.data.data.length > 0) {
+          console.log("A");
+          for (const notes of notesResponse.data.data) {
+            const newNote = {
+              patentId: patentId,
+              question: "Research Note",
+              answer: notes.content,
+              section: "Note",
+              timestamp: notes.created_at,
+            };
+            console.log("B", newNote);
+            window.addStoredData("note", newNote);
+          }
+        }
       }
-      setEmbodiments(mappedEmbodiments);
     } catch (err) {
-      console.log("Error fetching embodiments:", err);
+      console.log(err);
     }
   };
+
+  useEffect(() => {
+    if (patentId) {
+      fetchStoredKnowledge();
+    }
+  }, [patentId]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
