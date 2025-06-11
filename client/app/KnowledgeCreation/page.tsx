@@ -108,13 +108,18 @@ export default function Home() {
 
   return (
     <main className="container mx-auto px-4 py-8 relative">
-      <StoredKnowledge stage={stage} setStage={setStage} />
       {stage === 1 ? (
-        <KnowledgeCreation />
+        <>
+          <StoredKnowledge stage={stage} setStage={setStage} />
+          <KnowledgeCreation />
+        </>
       ) : stage === 2 ? (
-        <Embodiments />
+        <Embodiments stage={stage} setStage={setStage} />
       ) : (
-        <PatentComponentGenerator antigen={antigen} disease={disease} />
+        <>
+          <StoredKnowledge stage={stage} setStage={setStage} />
+          <PatentComponentGenerator antigen={antigen} disease={disease} />
+        </>
       )}
     </main>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState, useRef, useEffect, Dispatch, SetStateAction } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Loader2,
@@ -10,7 +10,6 @@ import {
   Library,
   CheckCircle,
   Lightbulb,
-  Database,
   Save,
   Edit2,
   RefreshCw,
@@ -27,19 +26,20 @@ import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { mockPdfs } from "@/lib/mock-data";
 import { backendUrl } from "@/config/config";
 import axios from "axios";
 import { PDF } from "@/lib/types";
-import ProcessingLoader from "./processingLoader";
-import ProcessCompleteLoader from "./processCompleteLoader";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Textarea } from "./ui/textarea";
+import StoredKnowledge from "./stored-knowledge";
+import ProcessingLoader from "./processingLoader";
+import ProcessCompleteLoader from "./processCompleteLoader";
 
 // Interface for embodiment objects
 interface Embodiment {
@@ -53,6 +53,8 @@ interface Embodiment {
   section?: string; // ✅ And this
   summary?: string;
   header?: string;
+  headingSummary?: string;
+  category?: string;
 }
 
 // Interface for remixed embodiment objects
@@ -128,13 +130,14 @@ export function transformGroupedEmbodiments(response: any): EmbodimentMap {
           map[key].push({
             id: idCounter++,
             title: `Embodiment #${idCounter - 1}`,
-            description: emb.summary || "",
+            description: emb.text || "",
+            summary: emb.summary,
             selected: true,
             confidence: parseFloat((0.87 + Math.random() * 0.1).toFixed(2)),
-            source: response.filename || "Uploaded PDF",
-            section: sec.section,
-            summary: sub.summary,
-            header: sub.header,
+            source: emb.filename || "Uploaded PDF",
+            headingSummary: sub.summary,
+            header: sub.header ? sub.header : "",
+            category: emb.sub_category ? emb.sub_category : "",
           });
         }
       } else {
@@ -145,10 +148,11 @@ export function transformGroupedEmbodiments(response: any): EmbodimentMap {
           description: "", // Empty content
           selected: false,
           confidence: undefined,
-          source: response.filename || "Uploaded PDF",
+          source: "Uploaded PDF",
           section: sec.section,
-          summary: sub.summary,
+          headingSummary: sub.summary,
           header: sub.header,
+          category: "product composition",
         });
       }
     }
@@ -168,7 +172,6 @@ export function transformGroupedEmbodiments(response: any): EmbodimentMap {
       pageNumber: chunk.page_number,
       section: chunk.section,
       summary: chunk.summary || "",
-      header: chunk.header || "Claims",
     });
   }
 
@@ -211,19 +214,23 @@ export function transformApiEmbodiments(data: RawChunk[]): EmbodimentMap {
 
   return map;
 }
+interface EmbodimentsProps {
+  stage: number;
+  setStage: (stage: number) => void;
+}
 
-export default function Embodiments() {
+export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
   const [isExtracting, setIsExtracting] = useState(false);
   const [keyTermsFromApi, setKeyTermsFromApi] = useState<
     { term: string; definition?: string; page_number?: number }[]
   >([]);
-  const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [showResearchSections, setShowResearchSections] = useState(false);
   const [selectedPdfIds, setSelectedPdfIds] = useState<string[]>([]);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [selectedPatents, setSelectedPatents] = useState<string[]>([]);
   const [selectedFileId, setSelectedFileId] = useState<string | "">("");
+  const [activeSection, setActiveSection] = useState("abstract");
   const [abstract, setAbstract] = useState<string | "">("");
   const [visibleSummaries, setVisibleSummaries] = useState<
     Record<number, boolean>
@@ -233,6 +240,7 @@ export default function Embodiments() {
   const [processingComplete, setProcessingComplete] = useState(false);
   const [pdfList, setPdfList] = useState<PDF[]>([]);
   const [processingFileName, setProcessingFileName] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
   const [embodiments, setEmbodiments] = useState<EmbodimentMap>({
     summary: [],
     description: [],
@@ -265,7 +273,6 @@ export default function Embodiments() {
         setShowResearchSections(true);
         setCurrentStep("review");
       }
-      console.log("Mapped", mappedEmbodiments);
       setEmbodiments(mappedEmbodiments);
     } catch (err) {
       console.log("Error fetching embodiments:", err);
@@ -279,11 +286,6 @@ export default function Embodiments() {
     }
   }, []);
 
-  // useEffect(() => {
-  //   if (patentId) {
-  //     fetchEmbodiments();
-  //   }
-  // }, [patentId]);
   const [openPopupId, setOpenPopupId] = useState<number | null>(null);
   const [remixedEmbodiments, setRemixedEmbodiments] = useState<
     RemixedEmbodiment[]
@@ -348,76 +350,27 @@ export default function Embodiments() {
     });
   };
 
-  // const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   console.log("A");
-  //   if (e.target.files && e.target.files[0]) {
-  //     console.log("B");
-  //     const file = e.target.files[0];
-  //     setProcessingFileName(file.name);
-  //     setIsProcessingPdf(true);
+  useEffect(() => {
+    if (!showResearchSections) return;
 
-  //     try {
-  //       const formData = new FormData();
-  //       formData.append("file", file);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        });
+      },
+      { rootMargin: "-20% 0px -70% 0px" }
+    );
 
-  //       await axios.post(`${backendUrl}/v1/documents/`, formData, {
-  //         headers: { "Content-Type": "multipart/form-data" },
-  //       });
+    const sections = document.querySelectorAll("[data-section-id]");
+    sections.forEach((section) => observer.observe(section));
 
-  //       // Fetch updated documents list
-  //       const { data } = await axios.get(`${backendUrl}/v1/documents/`);
-
-  //       if (data.response) {
-  //         const sortedDocuments = data.response.sort(
-  //           (a: any, b: any) =>
-  //             new Date(b.created_at).getTime() -
-  //             new Date(a.created_at).getTime()
-  //         );
-
-  //         setPdfList(sortedDocuments);
-
-  //         // Find the uploaded PDF
-  //         let uploadedPDF: any;
-
-  //         uploadedPDF = sortedDocuments.find(
-  //           (item: PDF) =>
-  //             item.name.replace(/[_\s]/g, "").toLowerCase() ===
-  //             file.name.replace(/[_\s]/g, "").toLowerCase()
-  //         );
-
-  //         console.log("UUG", uploadedPDF);
-  //         console.log("UygygyUG", sortedDocuments);
-  //         console.log("UgygUG", file.name);
-
-  //         if (uploadedPDF) {
-  //           const updatedPDF = {
-  //             ...uploadedPDF,
-  //             selected: true,
-  //           };
-
-  //           setAvailablePdfs([{ ...uploadedPDF, selected: true }]);
-  //           setSelectedPdfIds([uploadedPDF.id]);
-  //           setSelectedPatents([uploadedPDF.name]);
-  //         }
-  //       }
-
-  //       // ✅ Reset file input
-  //       if (fileInputRef.current) {
-  //         fileInputRef.current.value = "";
-  //       }
-
-  //       setUploadedFile(file);
-  //       setIsProcessingPdf(false);
-  //       setProcessingComplete(true);
-  //       setTimeout(() => {
-  //         setProcessingComplete(false);
-  //       }, 3000);
-  //     } catch (error) {
-  //       console.error("Error uploading file:", error);
-  //       setIsProcessingPdf(false);
-  //     }
-  //   }
-  // };
+    return () => {
+      sections.forEach((section) => observer.unobserve(section));
+    };
+  }, [showResearchSections]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -436,7 +389,6 @@ export default function Embodiments() {
           }
         );
 
-        console.log("YY", response);
         const generatedId = response.data.id;
         const uploadedPDF: PDF = {
           id: generatedId,
@@ -591,7 +543,6 @@ export default function Embodiments() {
       const mapped = transformGroupedEmbodiments(response.data || {});
       const keyTerms = response.data.terms?.definitions || null;
       const abst = response.data.abstract;
-      console.log("Mapped", mapped);
       setAbstract(abst);
       setSelectedPdfIds([response.data.file_id]);
 
@@ -644,9 +595,6 @@ export default function Embodiments() {
     if (uploadedFile?.name === patent) {
       setUploadedFile(null);
     }
-
-    console.log("Uploaded file", uploadedFile);
-    console.log("Updated PDFs", availablePdfs);
   };
 
   const handleTabClick = (tab: string) => {
@@ -722,8 +670,6 @@ export default function Embodiments() {
       knowledge = await window.getStoredKnowlegde();
     }
 
-    console.log("Knwoldeg", knowledge);
-
     const source_embodiment = originalEmbodiment.title;
     const inspiration = similarityPercentage;
 
@@ -734,7 +680,6 @@ export default function Embodiments() {
     const antigen = params.get("antigen") || "unspecified";
     const file_id = selectedPdfIds[0];
 
-    console.log("UUUU", selectedPdfIds);
     await axios
       .post(`${backendUrl}/v1/embodiment`, {
         file_id,
@@ -944,7 +889,6 @@ export default function Embodiments() {
       selected: pdf.id === id,
     }));
     const selectedDoc = updatedList.find((pdf) => pdf.id === id);
-
     setAvailablePdfs(updatedList);
     setSelectedPdfIds([id]);
     setSelectedPatents(selectedDoc ? [selectedDoc.name] : []);
@@ -952,14 +896,12 @@ export default function Embodiments() {
 
     try {
       const res = await axios.get(`${backendUrl}/v1/source-embodiments/${id}`);
-      console.log("Res", res);
 
       const data = res.data.data;
       const mapped = transformGroupedEmbodiments(res.data || {});
       const abst = res.data.abstract;
-      console.log("Mapped", mapped);
       setAbstract(abst);
-      setSelectedPdfIds([res.data.file_id]);
+      setSelectedPdfIds([res.data.data[0].file_id]);
 
       setEmbodiments(mapped);
 
@@ -970,8 +912,6 @@ export default function Embodiments() {
       }));
 
       const keyTerms = res.data?.terms || null;
-
-      console.log("Key Terms", keyTerms);
 
       setKeyTermsFromApi(keyTerms);
       setEmbodiments(mapped);
@@ -1023,6 +963,51 @@ export default function Embodiments() {
     }
   };
 
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+      setActiveSection(sectionId);
+    }
+  };
+
+  const slugify = (text: string) =>
+    text
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^\w-]+/g, "");
+
+  const tableOfContents = [
+    { id: "abstract", title: "Abstract", level: 1 },
+    { id: "key-terms", title: "Key Terms", level: 1 },
+    { id: "summary-of-invention", title: "Summary of Invention", level: 1 },
+    { id: "detailed-description", title: "Detailed Description", level: 1 },
+    ...Array.from(new Set(embodiments.description.map((e) => e.header)))
+      .filter(Boolean)
+      .flatMap((header) => {
+        const headerId = slugify(header!);
+        const headerItem = { id: headerId, title: header!, level: 2 };
+        const categoryItems = Array.from(
+          new Set(
+            embodiments.description
+              .filter((e) => e.header === header)
+              .map((e) => e.category)
+          )
+        )
+          .filter(Boolean)
+          .map((category) => ({
+            id: `${headerId}-${slugify(category!)}`,
+            title: category!,
+            level: 3,
+          }));
+        return [headerItem, ...categoryItems];
+      }),
+    { id: "claims", title: "Claims", level: 1 },
+    ...(remixedEmbodiments.length > 0
+      ? [{ id: "new-embodiments", title: "New Embodiments", level: 1 }]
+      : []),
+  ];
+
   // Filter and sort PDFs
   const filteredPdfs = availablePdfs;
 
@@ -1049,7 +1034,7 @@ export default function Embodiments() {
   });
 
   return (
-    <main className="container mx-auto px-4 py-8 relative">
+    <div className="flex">
       {isProcessingPdf && (
         <ProcessingLoader processingFileName={processingFileName} />
       )}
@@ -1062,363 +1047,299 @@ export default function Embodiments() {
           successIcon={successIconRef}
         />
       )}
-      {/* Patent Documents Section - Adjust top margin since we removed the header */}
-      <div className="border rounded-lg p-6 shadow-sm mb-8 mt-16">
-        <div className="mb-4">
-          <h2 className="text-xl font-bold">Patent Documents</h2>
-          <p className="text-sm text-muted-foreground">
-            Upload new patents or select from your previously uploaded documents
-          </p>
-        </div>
+      {showResearchSections && (
+        <aside className="fixed top-0 left-0 h-screen w-64 bg-background border-r z-30 hidden lg:block">
+          <ScrollArea className="h-full py-6 pr-6">
+            <div className="pl-6">
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4">
+                TABLE OF CONTENTS
+              </h3>
+              <nav className="space-y-1">
+                {tableOfContents.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => scrollToSection(item.id)}
+                    className={`w-full text-left rounded-md transition-colors 
+  ${
+    item.level === 1
+      ? "py-2 px-3 font-semibold text-base"
+      : item.level === 2
+      ? "py-1.5 pl-6 pr-3 text-sm"
+      : "py-1.5 pl-9 pr-3 text-sm"
+  }
+  ${
+    activeSection === item.id
+      ? item.level === 1
+        ? "bg-primary/10 text-primary"
+        : "bg-primary/10 text-primary"
+      : item.level === 1
+      ? "text-foreground hover:text-primary"
+      : "text-muted-foreground hover:text-foreground"
+  }
+`}
+                  >
+                    {item.title}
+                  </button>
+                ))}
+              </nav>
+            </div>
+          </ScrollArea>
+        </aside>
+      )}
 
-        {/* PDF Selection */}
-        <div className="flex items-center gap-2 mb-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Library className="h-5 w-5 text-primary" />
-            <h3 className="font-medium">Select or Upload Patents</h3>
-          </div>
-        </div>
-
-        {/* PDF Selection - Updated UI */}
-        <div className="mb-6">
-          <div className="flex flex-wrap gap-2 mb-4">
-            {/* Simplified PDF Dropdown */}
-            <div className="relative w-[300px] pdf-dropdown">
-              <button
-                className="w-full flex items-center justify-between border border-input bg-background px-3 py-2 text-sm rounded-md"
-                onClick={() => setPdfDropdownOpen(!pdfDropdownOpen)}
-              >
-                <span>Select PDFs</span>
-                <ChevronDown className="h-4 w-4 opacity-50" />
-              </button>
-
-              {pdfDropdownOpen && (
-                <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg pdf-dropdown">
-                  <div className="max-h-60 overflow-auto p-1">
-                    {availablePdfs?.length === 0 ? (
-                      <div className="text-center py-4 text-sm text-muted-foreground">
-                        No PDFs available
-                      </div>
-                    ) : (
-                      availablePdfs?.map((pdf: any) => (
-                        <div
-                          key={pdf.id}
-                          className="flex items-center px-2 py-2 hover:bg-gray-100 rounded"
-                        >
-                          <input
-                            type="checkbox"
-                            id={pdf.id}
-                            checked={pdf.selected}
-                            onChange={() => togglePdfSelection(pdf.id)}
-                            className="h-4 w-4 mr-2"
-                          />
-                          <label
-                            htmlFor={pdf.id}
-                            className="text-sm cursor-pointer flex-1"
-                          >
-                            {pdf.name}
-                          </label>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              )}
+      <div className={`flex-1 ${showResearchSections ? "lg:ml-64" : ""}`}>
+        <main className="container mx-auto px-4 py-8 relative">
+          <StoredKnowledge stage={stage} setStage={setStage} />
+          {/* Patent Documents Section - Adjust top margin since we removed the header */}
+          <div className="border rounded-lg p-6 shadow-sm mb-8 mt-16">
+            <div className="mb-4">
+              <h2 className="text-xl font-bold">Patent Documents</h2>
+              <p className="text-sm text-muted-foreground">
+                Upload new patents or select from your previously uploaded
+                documents
+              </p>
             </div>
 
-            {/* Upload PDF Button */}
-            <div className="relative">
-              <input
-                type="file"
-                accept="application/pdf"
-                id={`pdf-upload-test`}
-                className="absolute inset-0 opacity-0 cursor-pointer"
-                onChange={handleFileChange} // Call the updated function
-              />
-              <Button variant="outline" size="sm" asChild>
-                <label
-                  htmlFor={`pdf-upload-test`}
-                  className="cursor-pointer flex items-center"
-                >
-                  {isUploading ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-2 text-primary" />
-                  ) : uploadSuccess ? (
-                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 transition-all duration-300" />
-                  ) : (
-                    <FileUp className="h-4 w-4 mr-2 transition-all duration-300" />
+            {/* PDF Selection */}
+            <div className="flex items-center gap-2 mb-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Library className="h-5 w-5 text-primary" />
+                <h3 className="font-medium">Select or Upload Patents</h3>
+              </div>
+            </div>
+
+            {/* PDF Selection - Updated UI */}
+            <div className="mb-6">
+              <div className="flex flex-wrap gap-2 mb-4">
+                {/* Simplified PDF Dropdown */}
+                <div className="relative w-[300px] pdf-dropdown">
+                  <button
+                    className="w-full flex items-center justify-between border border-input bg-background px-3 py-2 text-sm rounded-md"
+                    onClick={() => setPdfDropdownOpen(!pdfDropdownOpen)}
+                  >
+                    <span>Select PDFs</span>
+                    <ChevronDown className="h-4 w-4 opacity-50" />
+                  </button>
+
+                  {pdfDropdownOpen && (
+                    <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg pdf-dropdown">
+                      <div className="max-h-60 overflow-auto p-1">
+                        {availablePdfs.length === 0 ? (
+                          <div className="text-center py-4 text-sm text-muted-foreground">
+                            No PDFs available
+                          </div>
+                        ) : (
+                          availablePdfs.map((pdf) => (
+                            <div
+                              key={pdf.id}
+                              className="flex items-center px-2 py-2 hover:bg-gray-100 rounded"
+                            >
+                              <input
+                                type="checkbox"
+                                id={pdf.id}
+                                checked={pdf.selected}
+                                onChange={() => togglePdfSelection(pdf.id)}
+                                className="h-4 w-4 mr-2"
+                              />
+                              <label
+                                htmlFor={pdf.id}
+                                className="text-sm cursor-pointer flex-1"
+                              >
+                                {pdf.name}
+                              </label>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
                   )}
-                  Upload PDF
-                </label>
+                </div>
+
+                {/* Upload PDF Button */}
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    id={`pdf-upload-test`}
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                    onChange={handleFileChange}
+                  />
+                  <Button variant="outline" size="sm" asChild>
+                    <label
+                      htmlFor={`pdf-upload-test`}
+                      className="cursor-pointer flex items-center"
+                    >
+                      {isUploading ? (
+                        <Loader2 className="h-4 w-4 animate-spin mr-2 text-primary" />
+                      ) : uploadSuccess ? (
+                        <CheckCircle className="h-4 w-4 text-green-500 mr-2 transition-all duration-300" />
+                      ) : (
+                        <FileUp className="h-4 w-4 mr-2 transition-all duration-300" />
+                      )}
+                      Upload PDF
+                    </label>
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Selected Documents - Only shown when patents are selected */}
+            {selectedPatents.length > 0 && (
+              <div className="mb-6">
+                <h3 className="font-medium mb-2">
+                  Selected Documents ({selectedPatents.length})
+                </h3>
+                <div className="space-y-2">
+                  {selectedPatents.map((patent, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between bg-muted px-4 py-3 rounded-md"
+                    >
+                      <div className="flex items-center">
+                        <File className="h-5 w-5 mr-3 text-primary" />
+                        <span className="font-medium">{patent}</span>
+                      </div>
+                      <button
+                        className="h-8 w-8 rounded-full hover:bg-background/50 flex items-center justify-center"
+                        onClick={() => handleRemovePatent(patent)}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="h-4 w-4"
+                        >
+                          <path d="M18 6 6 18" />
+                          <path d="m6 6 12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div>
+              <Button
+                size="lg"
+                className="py-6 text-lg gap-2 w-64"
+                onClick={handleExtractEmbodiments}
+                disabled={
+                  isExtracting ||
+                  selectedPatents.length === 0 ||
+                  extractButtonDisabled
+                }
+              >
+                <Sparkles className="h-5 w-5" />
+                Extract Embodiments
               </Button>
             </div>
           </div>
-        </div>
 
-        {/* Selected Documents - Only shown when patents are selected */}
-        {selectedPatents.length > 0 && (
-          <div className="mb-6">
-            <h3 className="font-medium mb-2">
-              Selected Documents ({selectedPatents.length})
-            </h3>
-            <div className="space-y-2">
-              {selectedPatents.map((patent, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between bg-muted px-4 py-3 rounded-md"
-                >
-                  <div className="flex items-center">
-                    <File className="h-5 w-5 mr-3 text-primary" />
-                    <span className="font-medium">{patent}</span>
-                  </div>
-                  <button
-                    className="h-8 w-8 rounded-full hover:bg-background/50 flex items-center justify-center"
-                    onClick={() => handleRemovePatent(patent)}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-4 w-4"
-                    >
-                      <path d="M18 6 6 18" />
-                      <path d="m6 6 12 12" />
-                    </svg>
-                  </button>
+          {/* Extracting Embodiments Overlay */}
+          {isExtracting && (
+            <div className="fixed inset-0 bg-background z-50 flex items-center justify-center">
+              <div className="text-center max-w-md mx-auto p-8">
+                <Loader2 className="h-16 w-16 animate-spin mx-auto mb-6 text-primary" />
+                <h3 className="text-xl font-medium mb-2">
+                  Extracting Embodiments
+                </h3>
+                <p className="text-muted-foreground mb-4">
+                  AI is analyzing patent documents to extract key embodiments
+                </p>
+                <div className="w-full bg-muted rounded-full h-2 mb-6">
+                  <div
+                    className="bg-primary h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${processingProgress}%` }}
+                  ></div>
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div>
-          <Button
-            size="lg"
-            className="py-6 text-lg gap-2 w-64"
-            onClick={handleExtractEmbodiments}
-            disabled={
-              isExtracting ||
-              selectedPatents.length === 0 ||
-              extractButtonDisabled
-            }
-          >
-            <Sparkles className="h-5 w-5" />
-            Extract Embodiments
-          </Button>
-        </div>
-      </div>
-
-      {/* Extracting Embodiments Overlay */}
-      {isExtracting && (
-        <div className="fixed inset-0 bg-background z-50 flex items-center justify-center">
-          <div className="text-center max-w-md mx-auto p-8">
-            <Loader2 className="h-16 w-16 animate-spin mx-auto mb-6 text-primary" />
-            <h3 className="text-xl font-medium mb-2">Extracting Embodiments</h3>
-            <p className="text-muted-foreground mb-4">
-              AI is analyzing patent documents to extract key embodiments
-            </p>
-            <div className="w-full bg-muted rounded-full h-2 mb-6">
-              <div
-                className="bg-primary h-2 rounded-full transition-all duration-300"
-                style={{ width: `${processingProgress}%` }}
-              ></div>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              This process may take a few minutes as we identify and categorize
-              all embodiments in your patents.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Creating Remix Overlay */}
-      {isCreatingRemix && (
-        <div className="fixed inset-0 bg-background z-50 flex items-center justify-center">
-          <div className="text-center max-w-md mx-auto p-8">
-            <Loader2 className="h-16 w-16 animate-spin mx-auto mb-6 text-primary" />
-            <h3 className="text-xl font-medium mb-2">
-              Creating New Embodiment
-            </h3>
-            <p className="text-muted-foreground mb-4">
-              AI is generating a remixed version of the embodiment
-            </p>
-            <div className="w-full bg-muted rounded-full h-2 mb-6">
-              <div className="bg-primary h-2 rounded-full animate-pulse"></div>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              This process may take a few moments as we create a new embodiment
-              based on your selected similarity percentage.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Research Sections - Only shown after embodiments are extracted */}
-      {showResearchSections && (
-        <div className="border rounded-lg p-6 shadow-sm mb-8">
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-bold">Extracted Embodiments</h2>
-              <span className="text-sm text-muted-foreground">
-                {getSelectedEmbodimentsCount()} of {getTotalEmbodimentsCount()}{" "}
-                embodiments selected
-              </span>
-            </div>
-
-            {/* Tabs - Updated with new section names */}
-            <Tabs
-              defaultValue="summary"
-              value={activeTab}
-              onValueChange={setActiveTab}
-            >
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="summary">Summary of Invention</TabsTrigger>
-                <TabsTrigger value="description">
-                  Detailed Description
-                </TabsTrigger>
-                <TabsTrigger value="claims">Claims</TabsTrigger>
-              </TabsList>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  marginTop: "20px",
-                }}
-              >
-                {abstract && (
-                  <>
-                    <h1>
-                      <strong>Abstract</strong>
-                    </h1>
-                    <p
-                      style={{ textAlign: "center" }}
-                      className="text-md italic text-muted-foreground"
-                    >
-                      {abstract}
-                    </p>
-                  </>
-                )}
+                <p className="text-sm text-muted-foreground">
+                  This process may take a few minutes as we identify and
+                  categorize all embodiments in your patents.
+                </p>
               </div>
+            </div>
+          )}
 
-              <TabsContent value="summary">
-                {embodiments.summary.length > 0 ? (
-                  <>
-                    {Object.entries(
-                      embodiments.summary.reduce((acc, curr) => {
-                        const key = curr.header || "Ungrouped";
-                        if (!acc[key]) acc[key] = [];
-                        acc[key].push(curr);
-                        return acc;
-                      }, {} as Record<string, Embodiment[]>)
-                    ).map(([header, items]) => {
-                      const summary = items[0]?.summary;
+          {/* Creating Remix Overlay */}
+          {isCreatingRemix && (
+            <div className="fixed inset-0 bg-background z-50 flex items-center justify-center">
+              <div className="text-center max-w-md mx-auto p-8">
+                <Loader2 className="h-16 w-16 animate-spin mx-auto mb-6 text-primary" />
+                <h3 className="text-xl font-medium mb-2">
+                  Creating New Embodiment
+                </h3>
+                <p className="text-muted-foreground mb-4">
+                  AI is generating a remixed version of the embodiment
+                </p>
+                <div className="w-full bg-muted rounded-full h-2 mb-6">
+                  <div className="bg-primary h-2 rounded-full animate-pulse"></div>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  This process may take a few moments as we create a new
+                  embodiment based on your selected similarity percentage.
+                </p>
+              </div>
+            </div>
+          )}
 
-                      return (
-                        <div key={header}>
-                          {header === "Ungrouped" && (
-                            <hr className="my-6 border-gray-300" />
-                          )}
-                          <div className="mb-10">
-                            {header !== "Ungrouped" && (
-                              <>
-                                <h2 className="text-xl font-bold mb-2 border-b pb-1">
-                                  {header}
-                                </h2>
-                                {summary && (
-                                  <p className="text-sm italic text-muted-foreground mb-4">
-                                    {summary}
-                                  </p>
-                                )}
-                              </>
-                            )}
-                            <div className="grid grid-cols-2 gap-4">
-                              {items.map((embodiment) => (
-                                <div
-                                  key={embodiment.id}
-                                  className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
-                                >
-                                  <div className="flex justify-between items-center mb-2">
-                                    <div className="flex items-center gap-2">
-                                      <button
-                                        className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                                          embodiment.selected
-                                            ? "text-green-500"
-                                            : "text-gray-300"
-                                        }`}
-                                        onClick={(e) => {
-                                          toggleEmbodimentSelection(
-                                            "summary",
-                                            embodiment.id
-                                          );
-                                        }}
-                                      >
-                                        <CheckCircle className="h-5 w-5" />
-                                      </button>
-                                      <button
-                                        className="text-xs bg-white border border-gray-200 px-2 py-1 rounded hover:bg-gray-50"
-                                        onClick={() =>
-                                          showExtractedMetadata(embodiment)
-                                        }
-                                      >
-                                        Meta-data
-                                      </button>
-                                    </div>
-                                  </div>
+          {/* Research Sections - Only shown after embodiments are extracted */}
+          {showResearchSections && (
+            <div className="border rounded-lg p-6 shadow-sm mb-8">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-xl font-bold">Extracted Embodiments</h2>
+                  <span className="text-sm text-muted-foreground">
+                    {getSelectedEmbodimentsCount()} of{" "}
+                    {getTotalEmbodimentsCount()} embodiments selected
+                  </span>
+                </div>
 
-                                  <div className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md">
-                                    {embodiment.summary}
-                                  </div>
+                {/* Abstract Section - Before Key Terms */}
+                <div
+                  id="abstract"
+                  data-section-id="abstract"
+                  className="mb-12 pt-4"
+                >
+                  <div className="border-l-4 border-primary pl-4 mb-6">
+                    <h3 className="text-2xl font-bold text-primary">
+                      Abstract
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Patent abstract and overview
+                    </p>
+                  </div>
 
-                                  <p className="text-sm">
-                                    {embodiment.description}
-                                  </p>
+                  <div className="border rounded-lg p-6 bg-gray-50 shadow-sm">
+                    <div className="space-y-4 text-sm text-gray-700">
+                      <p>{abstract}</p>
+                    </div>
+                  </div>
+                </div>
 
-                                  <div className="mt-3 flex justify-between items-center">
-                                    <Badge
-                                      variant="outline"
-                                      className="text-xs"
-                                    >
-                                      Source: {embodiment.source}
-                                    </Badge>
-                                    <button
-                                      className="text-xs bg-primary text-white px-3 py-1.5 rounded hover:bg-primary/90"
-                                      onClick={() =>
-                                        setOpenPopupId(embodiment.id)
-                                      }
-                                    >
-                                      Create
-                                    </button>
-                                  </div>
+                {/* Key Terms Section - Before all embodiment sections */}
+                <div
+                  id="key-terms"
+                  data-section-id="key-terms"
+                  className="mb-12 pt-4"
+                >
+                  <div className="border-l-4 border-primary pl-4 mb-6">
+                    <h3 className="text-2xl font-bold text-primary">
+                      Key Terms
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Important terminology and definitions
+                    </p>
+                  </div>
 
-                                  {/* Embodiment number shown at the bottom */}
-                                  <p className="mt-3 text-xs text-muted-foreground italic">
-                                    {embodiment.title}
-                                  </p>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </>
-                ) : (
-                  <p>empty</p>
-                )}
-              </TabsContent>
-
-              <TabsContent value="description" className="mt-4 space-y-6">
-                {/* Key Terms Accordion */}
-                <div className="mb-6">
-                  <div className="flex justify-between items-center mb-2">
-                    <h3 className="text-lg font-semibold">Key Terms</h3>
+                  <div className="flex justify-between items-center mb-4">
+                    <h4 className="text-lg font-semibold">{""}</h4>
                     <Button
                       variant="outline"
                       size="sm"
@@ -1428,467 +1349,685 @@ export default function Embodiments() {
                       {showKeyTerms ? "Hide Terms" : "Show Terms"}
                     </Button>
                   </div>
+
                   {showKeyTerms && (
                     <Accordion
                       type="single"
                       collapsible
                       className="border rounded-md"
                     >
-                      {keyTermsFromApi.length > 0 &&
-                        keyTermsFromApi.map((term, index) => (
-                          <AccordionItem key={index} value={`term-${index}`}>
-                            <AccordionTrigger className="px-4 hover:no-underline hover:bg-muted/50">
-                              <span className="font-medium">
-                                {term.term.charAt(0).toUpperCase() +
-                                  term.term.slice(1) || "Untitled Term"}
-                              </span>
-                            </AccordionTrigger>
-                            <AccordionContent className="px-4 pb-4 pt-2 text-sm">
-                              {term.definition || "No definition available."}
-                            </AccordionContent>
-                          </AccordionItem>
-                        ))}
+                      {keyTermsFromApi.map((item) => (
+                        <AccordionItem key={item.id} value={item.id}>
+                          <AccordionTrigger className="px-4 hover:no-underline hover:bg-muted/50">
+                            <span className="font-medium">{item.term}</span>
+                          </AccordionTrigger>
+                          <AccordionContent className="px-4 pb-4 pt-2 text-sm">
+                            {item.definition}
+                          </AccordionContent>
+                        </AccordionItem>
+                      ))}
                     </Accordion>
                   )}
                 </div>
 
-                {/* Embodiments by Header */}
-                {sortedGroupedEntries.map(([header, items]) => {
-                  const summary = items[0]?.summary;
+                {/* Summary of Invention Section */}
+                <div
+                  id="summary-of-invention"
+                  data-section-id="summary-of-invention"
+                  className="mb-12 pt-4"
+                >
+                  <div className="border-l-4 border-primary pl-4 mb-6">
+                    <h3 className="text-2xl font-bold text-primary">
+                      Summary of Invention
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {embodiments.summary.length} embodiments extracted
+                    </p>
+                  </div>
 
-                  return (
-                    <div key={header}>
-                      {header === "Ungrouped" && (
-                        <hr className="my-6 border-gray-300" />
-                      )}
-                      <div className="mb-10">
-                        {header !== "Ungrouped" && (
-                          <>
-                            <h2 className="text-xl font-bold mb-2 border-b pb-1">
-                              {header}
-                            </h2>
-                            {summary && (
-                              <p className="text-sm italic text-muted-foreground mb-4">
-                                {summary}
-                              </p>
-                            )}
-                          </>
-                        )}
-
-                        {items.filter((e) => e.description.trim() !== "")
-                          .length === 0 ? (
-                          <p className="text-muted-foreground italic text-sm">
-                            No embodiments available for this section.
-                          </p>
-                        ) : (
-                          <div className="grid grid-cols-2 gap-4">
-                            {items
-                              .filter((e) => e.description.trim() !== "")
-                              .map((embodiment) => (
-                                <div
-                                  key={embodiment.id}
-                                  className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
-                                >
-                                  <div className="flex justify-between items-center mb-2">
-                                    <div className="flex items-center gap-2">
-                                      <button
-                                        className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                                          embodiment.selected
-                                            ? "text-green-500"
-                                            : "text-gray-300"
-                                        }`}
-                                        onClick={() =>
-                                          toggleEmbodimentSelection(
-                                            "description",
-                                            embodiment.id
-                                          )
-                                        }
-                                      >
-                                        <CheckCircle className="h-5 w-5" />
-                                      </button>
-                                      <button
-                                        className="text-xs bg-white border border-gray-200 px-2 py-1 rounded hover:bg-gray-50"
-                                        onClick={() =>
-                                          showExtractedMetadata(embodiment)
-                                        }
-                                      >
-                                        Meta-data
-                                      </button>
-                                    </div>
-                                  </div>
-
-                                  <div className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md">
-                                    {embodiment.description}
-                                  </div>
-
-                                  <div className="mt-3 flex justify-between items-center">
-                                    <Badge
-                                      variant="outline"
-                                      className="text-xs"
-                                    >
-                                      Source: {embodiment.source}
-                                    </Badge>
-                                    <button
-                                      className="text-xs bg-primary text-white px-3 py-1.5 rounded hover:bg-primary/90"
-                                      onClick={() =>
-                                        setOpenPopupId(embodiment.id)
-                                      }
-                                    >
-                                      Create
-                                    </button>
-                                  </div>
-
-                                  <p className="mt-3 text-xs text-muted-foreground italic">
-                                    {embodiment.title}
-                                  </p>
-                                </div>
-                              ))}
-                          </div>
-                        )}
-                      </div>
+                  {/* Section Summary Box */}
+                  <div className="mb-6 p-4 border rounded-lg bg-gray-50 shadow-sm">
+                    <h4 className="font-semibold text-md mb-2 text-gray-700">
+                      Section Summary
+                    </h4>
+                    <div className="space-y-2 text-sm text-gray-600">
+                      <p>
+                        This section outlines the core innovations of the
+                        invention, providing a high-level overview of the
+                        system, method, and apparatus. It details the primary
+                        components and their interactions, establishing the
+                        foundational concepts that are further elaborated in the
+                        detailed description.
+                      </p>
+                      <p>
+                        Key advantages highlighted include significant
+                        reductions in material waste, lower energy consumption,
+                        and enhanced device durability, addressing major
+                        challenges in modern electronics manufacturing.
+                      </p>
                     </div>
-                  );
-                })}
-              </TabsContent>
+                  </div>
 
-              <TabsContent value="claims" className="mt-4">
-                <div className="grid grid-cols-2 gap-4">
-                  {embodiments.claims.map((embodiment) => (
-                    <div
-                      key={embodiment.id}
-                      className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
-                    >
-                      <div className="flex justify-between items-center mb-2">
-                        <div className="flex items-center gap-2">
+                  <div className="grid grid-cols-2 gap-4">
+                    {embodiments.summary.map((embodiment) => (
+                      <div
+                        key={embodiment.id}
+                        className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
+                      >
+                        <div className="flex justify-between items-center mb-2">
+                          <h3 className="font-medium">{embodiment.title}</h3>
+                          <div className="flex items-center gap-2">
+                            <button
+                              className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                                embodiment.selected
+                                  ? "text-green-500"
+                                  : "text-gray-300"
+                              }`}
+                              onClick={(e) => {
+                                toggleEmbodimentSelection(
+                                  "summary",
+                                  embodiment.id
+                                );
+                              }}
+                            >
+                              <CheckCircle className="h-5 w-5" />
+                            </button>
+                            <button
+                              className="text-xs bg-white border border-gray-200 px-2 py-1 rounded hover:bg-gray-50"
+                              onClick={() => showExtractedMetadata(embodiment)}
+                            >
+                              Meta-data
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 mb-2">
                           <button
-                            className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                              embodiment.selected
-                                ? "text-green-500"
-                                : "text-gray-300"
-                            }`}
                             onClick={(e) => {
-                              toggleEmbodimentSelection(
-                                "claims",
-                                embodiment.id
-                              );
+                              e.stopPropagation();
+                              toggleSummary(embodiment.id);
                             }}
+                            className="text-xs bg-muted px-2 py-1 rounded hover:bg-muted/80 flex items-center gap-1"
                           >
-                            <CheckCircle className="h-5 w-5" />
+                            {visibleSummaries[embodiment.id]
+                              ? "Hide summary"
+                              : "Show summary"}
                           </button>
+                        </div>
+                        {visibleSummaries[embodiment.id] &&
+                          embodiment.summary && (
+                            <div className="mb-2 text-sm font-medium bg-muted/30 p-2 rounded-md">
+                              {embodiment.summary}
+                            </div>
+                          )}
+                        <p className="text-sm">{embodiment.description}</p>
+                        <div className="mt-3 flex justify-between items-center">
+                          <Badge variant="outline" className="text-xs">
+                            Source: {embodiment.source}
+                          </Badge>
                           <button
-                            className="text-xs bg-white border border-gray-200 px-2 py-1 rounded hover:bg-gray-50"
-                            onClick={() => showExtractedMetadata(embodiment)}
+                            className="text-xs bg-primary text-white px-3 py-1.5 rounded hover:bg-primary/90"
+                            onClick={() => setOpenPopupId(embodiment.id)}
                           >
-                            Meta-data
+                            Create
                           </button>
                         </div>
                       </div>
+                    ))}
+                  </div>
+                </div>
 
-                      <div className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md">
-                        {embodiment.summary}
+                {/* Detailed Description Section */}
+                <div
+                  id="detailed-description"
+                  data-section-id="detailed-description"
+                  className="mb-12 pt-4"
+                >
+                  <div className="border-l-4 border-primary pl-4 mb-6">
+                    <h3 className="text-2xl font-bold text-primary">
+                      Detailed Description
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {embodiments.description.length} embodiments extracted
+                    </p>
+                  </div>
+
+                  <div className="space-y-6">
+                    {/* Group embodiments by header first, then by category */}
+                    {Array.from(
+                      new Set(embodiments.description.map((e) => e.header))
+                    )
+                      .filter(Boolean)
+                      .map((header) => {
+                        const headerId = slugify(header!);
+                        // Get all embodiments with this header
+                        const headerEmbodiments =
+                          embodiments.description.filter(
+                            (e) => e.header === header
+                          );
+
+                        const headingSummary =
+                          headerEmbodiments[0].headingSummary;
+
+                        console.log("Header", header);
+                        console.log("Hello", headerEmbodiments);
+                        console.log("Summary", headingSummary);
+
+                        // Get unique categories within this header
+                        const categories = Array.from(
+                          new Set(headerEmbodiments.map((e) => e.category))
+                        ).filter(Boolean);
+
+                        return (
+                          <div
+                            key={`header-${header}`}
+                            id={headerId}
+                            data-section-id={headerId}
+                            className="mb-10 pt-4"
+                          >
+                            <h2 className="text-xl font-bold mb-6 pb-2 border-b">
+                              {header}
+                            </h2>
+
+                            {categories.map((category) => {
+                              const categoryId = `${headerId}-${slugify(
+                                category!
+                              )}`;
+                              // Get embodiments for this header and category
+                              const categoryEmbodiments =
+                                headerEmbodiments.filter(
+                                  (e) => e.category === category
+                                );
+
+                              return (
+                                <div
+                                  key={`${header}-${category}`}
+                                  id={categoryId}
+                                  data-section-id={categoryId}
+                                  className="mb-8 pt-4"
+                                >
+                                  <h3 className="text-lg font-semibold capitalize border-b pb-2 mb-4">
+                                    {category}
+                                    <span className="ml-2 text-sm text-muted-foreground font-normal">
+                                      (
+                                      {categoryEmbodiments[0].description !== ""
+                                        ? categoryEmbodiments.length
+                                        : 0}{" "}
+                                      embodiments)
+                                    </span>
+                                  </h3>
+
+                                  {/* Sub-section summary box */}
+                                  <div className="mb-6 p-4 border rounded-lg bg-gray-50 shadow-sm">
+                                    <h4 className="font-semibold text-md mb-2 text-gray-700">
+                                      Summary for {category}
+                                    </h4>
+                                    <div className="text-sm text-gray-600">
+                                      {headerEmbodiments[0]?.headingSummary ||
+                                        "No summary available."}
+                                    </div>
+                                  </div>
+
+                                  <div className="grid grid-cols-2 gap-4">
+                                    {categoryEmbodiments.map(
+                                      (embodiment) =>
+                                        embodiment.description !== "" && (
+                                          <div
+                                            key={embodiment.id}
+                                            className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
+                                          >
+                                            <div className="flex justify-between items-center mb-2">
+                                              <h3 className="font-medium">
+                                                {embodiment.title}
+                                              </h3>
+                                              <div className="flex items-center gap-2">
+                                                <button
+                                                  className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                                                    embodiment.selected
+                                                      ? "text-green-500"
+                                                      : "text-gray-300"
+                                                  }`}
+                                                  onClick={(e) => {
+                                                    toggleEmbodimentSelection(
+                                                      "description",
+                                                      embodiment.id
+                                                    );
+                                                  }}
+                                                >
+                                                  <CheckCircle className="h-5 w-5" />
+                                                </button>
+                                                <button
+                                                  className="text-xs bg-white border border-gray-200 px-2 py-1 rounded hover:bg-gray-50"
+                                                  onClick={() =>
+                                                    showExtractedMetadata(
+                                                      embodiment
+                                                    )
+                                                  }
+                                                >
+                                                  Meta-data
+                                                </button>
+                                              </div>
+                                            </div>
+                                            <div className="flex items-center gap-1 mb-2">
+                                              <button
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  toggleSummary(embodiment.id);
+                                                }}
+                                                className="text-xs bg-muted px-2 py-1 rounded hover:bg-muted/80 flex items-center gap-1"
+                                              >
+                                                {visibleSummaries[embodiment.id]
+                                                  ? "Hide summary"
+                                                  : "Show summary"}
+                                              </button>
+                                            </div>
+                                            {visibleSummaries[embodiment.id] &&
+                                              embodiment.summary && (
+                                                <div className="mb-2 text-sm font-medium bg-muted/30 p-2 rounded-md">
+                                                  {embodiment.summary}
+                                                </div>
+                                              )}
+                                            <p className="text-sm">
+                                              {embodiment.description}
+                                            </p>
+                                            <div className="mt-3 flex justify-between items-center">
+                                              <Badge
+                                                variant="outline"
+                                                className="text-xs"
+                                              >
+                                                Source: {embodiment.source}
+                                              </Badge>
+                                              <button
+                                                className="text-xs bg-primary text-white px-3 py-1.5 rounded hover:bg-primary/90"
+                                                onClick={() =>
+                                                  setOpenPopupId(embodiment.id)
+                                                }
+                                              >
+                                                Create
+                                              </button>
+                                            </div>
+                                          </div>
+                                        )
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+
+                {/* Claims Section */}
+                <div
+                  id="claims"
+                  data-section-id="claims"
+                  className="mb-12 pt-4"
+                >
+                  <div className="border-l-4 border-primary pl-4 mb-6">
+                    <h3 className="text-2xl font-bold text-primary">Claims</h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {embodiments.claims.length} embodiments extracted
+                    </p>
+                  </div>
+
+                  {/* Section Summary Box */}
+                  <div className="mb-6 p-4 border rounded-lg bg-gray-50 shadow-sm">
+                    <h4 className="font-semibold text-md mb-2 text-gray-700">
+                      Section Summary
+                    </h4>
+                    <div className="space-y-2 text-sm text-gray-600">
+                      <p>
+                        This section defines the legal scope of the invention.
+                        It includes independent claims covering the overall
+                        system and method, as well as dependent claims that
+                        specify particular features and refinements. The claims
+                        are drafted to protect the novel aspects of the
+                        manufacturing process and the resulting electronic
+                        device.
+                      </p>
+                      <p>
+                        The claims cover the unique combination of material
+                        processing, component assembly, and quality control
+                        subsystems, which collectively achieve unprecedented
+                        efficiency and product quality.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    {embodiments.claims.map((embodiment) => (
+                      <div
+                        key={embodiment.id}
+                        className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
+                      >
+                        <div className="flex justify-between items-center mb-2">
+                          <h3 className="font-medium">{embodiment.title}</h3>
+                          <div className="flex items-center gap-2">
+                            <button
+                              className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                                embodiment.selected
+                                  ? "text-green-500"
+                                  : "text-gray-300"
+                              }`}
+                              onClick={(e) => {
+                                toggleEmbodimentSelection(
+                                  "claims",
+                                  embodiment.id
+                                );
+                              }}
+                            >
+                              <CheckCircle className="h-5 w-5" />
+                            </button>
+                            <button
+                              className="text-xs bg-white border border-gray-200 px-2 py-1 rounded hover:bg-gray-50"
+                              onClick={() => showExtractedMetadata(embodiment)}
+                            >
+                              Meta-data
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 mb-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleSummary(embodiment.id);
+                            }}
+                            className="text-xs bg-muted px-2 py-1 rounded hover:bg-muted/80 flex items-center gap-1"
+                          >
+                            {visibleSummaries[embodiment.id]
+                              ? "Hide summary"
+                              : "Show summary"}
+                          </button>
+                        </div>
+                        {visibleSummaries[embodiment.id] &&
+                          embodiment.summary && (
+                            <div className="mb-2 text-sm font-medium bg-muted/30 p-2 rounded-md">
+                              {embodiment.summary}
+                            </div>
+                          )}
+                        <p className="text-sm">{embodiment.description}</p>
+                        <div className="mt-3 flex justify-between items-center">
+                          <Badge variant="outline" className="text-xs">
+                            Source: {embodiment.source}
+                          </Badge>
+                          <button
+                            className="text-xs bg-primary text-white px-3 py-1.5 rounded hover:bg-primary/90"
+                            onClick={() => setOpenPopupId(embodiment.id)}
+                          >
+                            Create
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* New Embodiments Section - Only shown when there are remixed embodiments */}
+          {remixedEmbodiments.length > 0 && (
+            <div
+              id="new-embodiments"
+              data-section-id="new-embodiments"
+              className="border rounded-lg p-6 shadow-sm pt-4"
+            >
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Lightbulb className="h-5 w-5 text-yellow-500" />
+                  <h2 className="text-xl font-bold">New Embodiments</h2>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  AI-generated variations of your selected embodiments
+                </p>
+
+                {/* Remixed Embodiment Cards */}
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                  {remixedEmbodiments.map((embodiment) => (
+                    <div
+                      key={embodiment.id}
+                      className="border border-yellow-400 rounded-lg p-4 bg-yellow-50 hover:shadow-sm transition-shadow"
+                    >
+                      <div className="flex justify-between items-center mb-2">
+                        <h3 className="font-medium">{embodiment.title}</h3>
+                        <button
+                          className="text-xs bg-white border border-gray-200 px-2 py-1 rounded hover:bg-gray-50"
+                          onClick={() => showRemixedMetadata(embodiment)}
+                        >
+                          Meta-data
+                        </button>
                       </div>
 
                       <p className="text-sm">{embodiment.description}</p>
 
                       <div className="mt-3 flex justify-between items-center">
                         <Badge variant="outline" className="text-xs">
-                          Source: {embodiment.source}
+                          Similarity: {embodiment.similarityPercentage}%
                         </Badge>
-                        <button
-                          className="text-xs bg-primary text-white px-3 py-1.5 rounded hover:bg-primary/90"
-                          onClick={() => setOpenPopupId(embodiment.id)}
-                        >
-                          Create
-                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            className="text-xs bg-green-500 text-white px-3 py-1.5 rounded hover:bg-green-600"
+                            onClick={() =>
+                              saveEmbodiment(embodiment, "remixed")
+                            }
+                          >
+                            <span className="flex items-center gap-1">
+                              <Save className="h-3 w-3" />
+                              Save
+                            </span>
+                          </button>
+                          <button
+                            className="text-xs bg-blue-500 text-white px-3 py-1.5 rounded hover:bg-blue-600"
+                            onClick={() => startEditing(embodiment)}
+                          >
+                            <span className="flex items-center gap-1">
+                              <Edit2 className="h-3 w-3" />
+                              Edit
+                            </span>
+                          </button>
+                          <button
+                            className="text-xs bg-yellow-500 text-white px-3 py-1.5 rounded hover:bg-yellow-600"
+                            onClick={() => regenerateEmbodiment(embodiment)}
+                          >
+                            <span className="flex items-center gap-1">
+                              <RefreshCw className="h-3 w-3" />
+                              Redo
+                            </span>
+                          </button>
+                        </div>
                       </div>
-
-                      {/* Embodiment number shown at the bottom */}
-                      <p className="mt-3 text-xs text-muted-foreground italic">
-                        {embodiment.title}
-                      </p>
                     </div>
                   ))}
                 </div>
-              </TabsContent>
-            </Tabs>
-          </div>
-        </div>
-      )}
-
-      {/* New Embodiments Section - Only shown when there are remixed embodiments */}
-      {remixedEmbodiments.length > 0 && (
-        <div className="border rounded-lg p-6 shadow-sm">
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Lightbulb className="h-5 w-5 text-yellow-500" />
-              <h2 className="text-xl font-bold">New Embodiments</h2>
+              </div>
             </div>
-            <p className="text-sm text-muted-foreground">
-              AI-generated variations of your selected embodiments
-            </p>
+          )}
 
-            {/* Remixed Embodiment Cards */}
-            <div className="grid grid-cols-2 gap-4 mt-4">
-              {remixedEmbodiments.map((embodiment) => (
-                <div
-                  key={embodiment.id}
-                  className="border border-yellow-400 rounded-lg p-4 bg-yellow-50 hover:shadow-sm transition-shadow"
+          {/* Percentage Selection Dialog */}
+          <Dialog
+            open={openPopupId !== null}
+            onOpenChange={(open) => !open && setOpenPopupId(null)}
+          >
+            <DialogContent className="sm:max-w-[400px]">
+              <DialogHeader>
+                <DialogTitle>Select Percentage Similarity</DialogTitle>
+              </DialogHeader>
+              <div className="grid grid-cols-2 gap-4 py-4">
+                {[25, 50, 75, 100].map((percentage) => (
+                  <Button
+                    key={percentage}
+                    variant="outline"
+                    className="h-20 text-lg font-medium hover:bg-primary hover:text-white"
+                    onClick={() => {
+                      if (openPopupId) {
+                        createRemixedEmbodiment(openPopupId, percentage);
+                      }
+                      setOpenPopupId(null);
+                    }}
+                  >
+                    {percentage}%
+                  </Button>
+                ))}
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Edit Embodiment Dialog */}
+          <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+            <DialogContent className="sm:max-w-[600px]">
+              <DialogHeader>
+                <DialogTitle>Edit Embodiment</DialogTitle>
+              </DialogHeader>
+              <div className="py-4">
+                <Textarea
+                  ref={textareaRef}
+                  className="w-full min-h-[200px] p-3 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                  value={editingText}
+                  onChange={(e) => setEditingText(e.target.value)}
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setEditDialogOpen(false)}
                 >
-                  <div className="flex justify-between items-center mb-2">
-                    <h3 className="font-medium">{embodiment.title}</h3>
-                    <button
-                      className="text-xs bg-white border border-gray-200 px-2 py-1 rounded hover:bg-gray-50"
-                      onClick={() => showRemixedMetadata(embodiment)}
-                    >
-                      Meta-data
-                    </button>
-                  </div>
+                  Cancel
+                </Button>
+                <Button onClick={saveEditedText}>Save Changes</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
 
-                  <p className="text-sm">{embodiment.description}</p>
+          {/* Metadata Dialog */}
+          <Dialog
+            open={showMetadataDialog}
+            onOpenChange={setShowMetadataDialog}
+          >
+            <DialogContent className="sm:max-w-[900px] max-h-[80vh]">
+              <DialogHeader>
+                <DialogTitle className="text-xl">
+                  {metadataType === "extracted"
+                    ? "Extracted Embodiment Metadata"
+                    : "Remixed Embodiment Comparison"}
+                </DialogTitle>
+              </DialogHeader>
 
-                  <div className="mt-3 flex justify-between items-center">
-                    <Badge variant="outline" className="text-xs">
-                      Similarity: {embodiment.similarityPercentage}%
-                    </Badge>
-                    <div className="flex gap-2">
-                      <button
-                        className="text-xs bg-green-500 text-white px-3 py-1.5 rounded hover:bg-green-600"
-                        onClick={() => saveEmbodiment(embodiment, "remixed")}
-                        disabled={isEmbodimentAlreadySaved(embodiment)}
-                      >
-                        <span className="flex items-center gap-1">
-                          <Save className="h-3 w-3" />
-                          {isEmbodimentAlreadySaved(embodiment)
-                            ? "Saved"
-                            : "Save"}
-                        </span>
-                      </button>
-                      <button
-                        className="text-xs bg-blue-500 text-white px-3 py-1.5 rounded hover:bg-blue-600"
-                        onClick={() => startEditing(embodiment)}
-                      >
-                        <span className="flex items-center gap-1">
-                          <Edit2 className="h-3 w-3" />
-                          Edit
-                        </span>
-                      </button>
-                      <button
-                        className="text-xs bg-yellow-500 text-white px-3 py-1.5 rounded hover:bg-yellow-600"
-                        onClick={() => regenerateEmbodiment(embodiment)}
-                      >
-                        <span className="flex items-center gap-1">
-                          <RefreshCw className="h-3 w-3" />
-                          Redo
-                        </span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Percentage Selection Dialog */}
-      <Dialog
-        open={openPopupId !== null}
-        onOpenChange={(open) => !open && setOpenPopupId(null)}
-      >
-        <DialogContent className="sm:max-w-[400px]">
-          <DialogHeader>
-            <DialogTitle>Select Percentage Similarity</DialogTitle>
-          </DialogHeader>
-          <div className="grid grid-cols-2 gap-4 py-4">
-            {[25, 50, 75, 100].map((percentage) => (
-              <Button
-                key={percentage}
-                variant="outline"
-                className="h-20 text-lg font-medium hover:bg-primary hover:text-white"
-                onClick={() => {
-                  if (openPopupId) {
-                    createRemixedEmbodiment(openPopupId, percentage);
-                  }
-                  setOpenPopupId(null);
-                }}
-              >
-                {percentage}%
-              </Button>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Embodiment Dialog */}
-      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Edit Embodiment</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <textarea
-              ref={textareaRef}
-              className="w-full min-h-[200px] p-3 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-              value={editingText}
-              onChange={(e) => setEditingText(e.target.value)}
-            />
-          </div>
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={saveEditedText}>Save Changes</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Metadata Dialog */}
-      <Dialog open={showMetadataDialog} onOpenChange={setShowMetadataDialog}>
-        <DialogContent className="sm:max-w-[900px] max-h-[80vh]">
-          <DialogHeader>
-            <DialogTitle className="text-xl">
-              {metadataType === "extracted"
-                ? "Extracted Embodiment Metadata"
-                : "Remixed Embodiment Comparison"}
-            </DialogTitle>
-          </DialogHeader>
-
-          <ScrollArea className="h-[60vh] pr-4">
-            {selectedMetadataEmbodiment && (
-              <>
-                {metadataType === "extracted" ? (
-                  <div className="space-y-4">
-                    <div className="border rounded-lg p-4">
-                      <h3 className="font-medium mb-2">
-                        {selectedMetadataEmbodiment.title}
-                      </h3>
-                      <p className="text-sm">
-                        {selectedMetadataEmbodiment.description}
-                      </p>
-                    </div>
-
-                    <div>
-                      <h3 className="font-medium mb-2">Source Text Chunk</h3>
-                      <div className="space-y-3">
-                        {/* Mock source chunks - in a real app, these would come from the extraction process */}
-                        <div>
-                          <h3 className="font-medium mb-2">Source Info</h3>
-                          <div className="border-l-4 border-primary pl-4 py-2 bg-primary/5">
-                            <p className="text-sm text-muted-foreground">
-                              <strong>Section:</strong>{" "}
-                              {
-                                (selectedMetadataEmbodiment as Embodiment)
-                                  .section
-                              }
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              <strong>Filename:</strong>{" "}
-                              {
-                                (selectedMetadataEmbodiment as Embodiment)
-                                  .source
-                              }
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              <strong>Page Number:</strong>{" "}
-                              {
-                                (selectedMetadataEmbodiment as Embodiment)
-                                  .pageNumber
-                              }
-                            </p>
-                          </div>
-                        </div>
-                        {/* {[1, 2, 3].map((i) => (
-                          <div
-                            key={i}
-                            className="border-l-4 border-primary pl-4 py-2 bg-primary/5"
-                          >
-                            <p className="text-sm">
-                              {`Source text chunk ${i} that was used to extract this embodiment. This would contain the original patent text that was processed to identify this specific embodiment. The AI system analyzed patterns, terminology, and structural elements to identify this as a distinct embodiment within the patent document.`}
-                            </p>
-                            <div className="mt-1 text-xs text-muted-foreground">
-                              Source:{" "}
-                              {(selectedMetadataEmbodiment as Embodiment)
-                                .source || "US Patent Document"}
-                              , Section {i}, Page {i + 2}
-                            </div>
-                          </div>
-                        ))} */}
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-medium">
-                        Similarity:{" "}
-                        {
-                          (selectedMetadataEmbodiment as RemixedEmbodiment)
-                            .similarityPercentage
-                        }
-                        %
-                      </h3>
-                      <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">
-                        Remixed on{" "}
-                        {new Date(
-                          (
-                            selectedMetadataEmbodiment as RemixedEmbodiment
-                          ).createdAt
-                        ).toLocaleDateString()}
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-6">
-                      {/* Original Embodiment */}
-                      <div>
-                        <h3 className="font-medium mb-2 pb-2 border-b">
-                          Original Embodiment
-                        </h3>
-                        {(() => {
-                          const originalEmbodiment = findEmbodimentById(
-                            (selectedMetadataEmbodiment as RemixedEmbodiment)
-                              .originalId
-                          );
-                          return originalEmbodiment ? (
-                            <div className="border rounded-lg p-4 bg-muted/20">
-                              <h4 className="font-medium text-sm mb-1">
-                                {originalEmbodiment.title}
-                              </h4>
-                              <p className="text-sm">
-                                {originalEmbodiment.description}
-                              </p>
-                            </div>
-                          ) : (
-                            <p className="text-sm text-muted-foreground">
-                              Original embodiment not found
-                            </p>
-                          );
-                        })()}
-                      </div>
-
-                      {/* Remixed Embodiment */}
-                      <div>
-                        <h3 className="font-medium mb-2 pb-2 border-b">
-                          Remixed Version
-                        </h3>
-                        <div className="border rounded-lg p-4 bg-yellow-50 border-yellow-200">
-                          <h4 className="font-medium text-sm mb-1">
+              <ScrollArea className="h-[60vh] pr-4">
+                {selectedMetadataEmbodiment && (
+                  <>
+                    {metadataType === "extracted" ? (
+                      <div className="space-y-4">
+                        <div className="border rounded-lg p-4">
+                          <h3 className="font-medium mb-2">
                             {selectedMetadataEmbodiment.title}
-                          </h4>
+                          </h3>
                           <p className="text-sm">
                             {selectedMetadataEmbodiment.description}
                           </p>
                         </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
-          </ScrollArea>
-        </DialogContent>
-      </Dialog>
 
-      <Toaster />
-    </main>
+                        <div>
+                          <h3 className="font-medium mb-2">
+                            Source Text Chunks
+                          </h3>
+                          <div className="space-y-3">
+                            {/* Mock source chunks - in a real app, these would come from the extraction process */}
+                            {[1, 2, 3].map((i) => (
+                              <div
+                                key={i}
+                                className="border-l-4 border-primary pl-4 py-2 bg-primary/5"
+                              >
+                                <p className="text-sm">
+                                  {`Source text chunk ${i} that was used to extract this embodiment. This would contain the original patent text that was processed to identify this specific embodiment. The AI system analyzed patterns, terminology, and structural elements to identify this as a distinct embodiment within the patent document.`}
+                                </p>
+                                <div className="mt-1 text-xs text-muted-foreground">
+                                  Source:{" "}
+                                  {(selectedMetadataEmbodiment as Embodiment)
+                                    .source || "US Patent Document"}
+                                  , Section {i}, Page {i + 2}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="font-medium">
+                            Similarity:{" "}
+                            {
+                              (selectedMetadataEmbodiment as RemixedEmbodiment)
+                                .similarityPercentage
+                            }
+                            %
+                          </h3>
+                          <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">
+                            Remixed on{" "}
+                            {new Date(
+                              (
+                                selectedMetadataEmbodiment as RemixedEmbodiment
+                              ).createdAt
+                            ).toLocaleDateString()}
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-6">
+                          {/* Original Embodiment */}
+                          <div>
+                            <h3 className="font-medium mb-2 pb-2 border-b">
+                              Original Embodiment
+                            </h3>
+                            {(() => {
+                              const originalEmbodiment = findEmbodimentById(
+                                (
+                                  selectedMetadataEmbodiment as RemixedEmbodiment
+                                ).originalId
+                              );
+                              return originalEmbodiment ? (
+                                <div className="border rounded-lg p-4 bg-muted/20">
+                                  <h4 className="font-medium text-sm mb-1">
+                                    {originalEmbodiment.title}
+                                  </h4>
+                                  <p className="text-sm">
+                                    {originalEmbodiment.description}
+                                  </p>
+                                </div>
+                              ) : (
+                                <p className="text-sm text-muted-foreground">
+                                  Original embodiment not found
+                                </p>
+                              );
+                            })()}
+                          </div>
+
+                          {/* Remixed Embodiment */}
+                          <div>
+                            <h3 className="font-medium mb-2 pb-2 border-b">
+                              Remixed Version
+                            </h3>
+                            <div className="border rounded-lg p-4 bg-yellow-50 border-yellow-200">
+                              <h4 className="font-medium text-sm mb-1">
+                                {selectedMetadataEmbodiment.title}
+                              </h4>
+                              <p className="text-sm">
+                                {selectedMetadataEmbodiment.description}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </ScrollArea>
+            </DialogContent>
+          </Dialog>
+
+          <Toaster />
+        </main>
+      </div>
+    </div>
   );
 }
