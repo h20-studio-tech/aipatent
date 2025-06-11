@@ -953,7 +953,15 @@ export default function Embodiments() {
     try {
       const res = await axios.get(`${backendUrl}/v1/source-embodiments/${id}`);
       console.log("Res", res);
-      const data: RawChunk[] = res.data.data || [];
+
+      const data = res.data.data;
+      const mapped = transformGroupedEmbodiments(res.data || {});
+      const abst = res.data.abstract;
+      console.log("Mapped", mapped);
+      setAbstract(abst);
+      setSelectedPdfIds([res.data.file_id]);
+
+      setEmbodiments(mapped);
 
       // ✅ Correctly assign filename to each chunk
       const updatedChunks = data.map((chunk) => ({
@@ -966,9 +974,7 @@ export default function Embodiments() {
       console.log("Key Terms", keyTerms);
 
       setKeyTermsFromApi(keyTerms);
-
-      const newEmbodiments = transformApiEmbodiments(updatedChunks);
-      setEmbodiments(newEmbodiments);
+      setEmbodiments(mapped);
       setShowResearchSections(true);
       setCurrentStep("review");
     } catch (err) {
