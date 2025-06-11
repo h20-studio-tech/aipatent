@@ -1462,55 +1462,62 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
-                    {embodiments.summary.map((embodiment) => (
-                      <div
-                        key={embodiment.id}
-                        className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
-                      >
-                        <div className="flex justify-between items-center mb-2">
-                          <h3 className="font-medium">{embodiment.title}</h3>
-                          <div className="flex items-center gap-2">
-                            <button
-                              className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                                embodiment.selected
-                                  ? "text-green-500"
-                                  : "text-gray-300"
-                              }`}
-                              onClick={(e) => {
-                                toggleEmbodimentSelection(
-                                  "summary",
-                                  embodiment.id
-                                );
-                              }}
-                            >
-                              <CheckCircle className="h-5 w-5" />
-                            </button>
-                            <button
-                              className="text-xs bg-white border border-gray-200 px-2 py-1 rounded hover:bg-gray-50"
-                              onClick={() => showExtractedMetadata(embodiment)}
-                            >
-                              Meta-data
-                            </button>
-                          </div>
-                        </div>
-                        <div className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md">
-                          {embodiment.summary}
-                        </div>
-
-                        <p className="text-sm">{embodiment.description}</p>
-                        <div className="mt-3 flex justify-between items-center">
-                          <Badge variant="outline" className="text-xs">
-                            Source: {embodiment.source}
-                          </Badge>
-                          <button
-                            className="text-xs bg-primary text-white px-3 py-1.5 rounded hover:bg-primary/90"
-                            onClick={() => setOpenPopupId(embodiment.id)}
+                    {embodiments.summary.map(
+                      (embodiment) =>
+                        embodiment.description !== "" && (
+                          <div
+                            key={embodiment.id}
+                            className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
                           >
-                            Create
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                            <div className="flex justify-between items-center mb-2">
+                              <h3 className="font-medium">
+                                {embodiment.title}
+                              </h3>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                                    embodiment.selected
+                                      ? "text-green-500"
+                                      : "text-gray-300"
+                                  }`}
+                                  onClick={(e) => {
+                                    toggleEmbodimentSelection(
+                                      "summary",
+                                      embodiment.id
+                                    );
+                                  }}
+                                >
+                                  <CheckCircle className="h-5 w-5" />
+                                </button>
+                                <button
+                                  className="text-xs bg-white border border-gray-200 px-2 py-1 rounded hover:bg-gray-50"
+                                  onClick={() =>
+                                    showExtractedMetadata(embodiment)
+                                  }
+                                >
+                                  Meta-data
+                                </button>
+                              </div>
+                            </div>
+                            <div className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md">
+                              {embodiment.summary}
+                            </div>
+
+                            <p className="text-sm">{embodiment.description}</p>
+                            <div className="mt-3 flex justify-between items-center">
+                              <Badge variant="outline" className="text-xs">
+                                Source: {embodiment.source}
+                              </Badge>
+                              <button
+                                className="text-xs bg-primary text-white px-3 py-1.5 rounded hover:bg-primary/90"
+                                onClick={() => setOpenPopupId(embodiment.id)}
+                              >
+                                Create
+                              </button>
+                            </div>
+                          </div>
+                        )
+                    )}
                   </div>
                 </div>
 
