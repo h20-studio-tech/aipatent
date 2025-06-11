@@ -117,6 +117,7 @@ export async function generatePatentContent(
       // return loremIpsum;
     }
     if (subsectionType === "Disease Overview") {
+      
        const response = await axios.post(
         `${backendUrl}/v1/sections/disease_overview`,
          {
