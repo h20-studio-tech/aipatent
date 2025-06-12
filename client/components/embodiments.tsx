@@ -168,7 +168,7 @@ export function transformGroupedEmbodiments(response: any): EmbodimentMap {
       description: chunk.text?.trim() || "",
       selected: true,
       confidence: parseFloat((0.87 + Math.random() * 0.1).toFixed(2)),
-      source: chunk.filename,
+      source: response.filename,
       pageNumber: chunk.page_number,
       section: chunk.section,
       summary: chunk.summary || "",
