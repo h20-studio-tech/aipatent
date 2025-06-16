@@ -14,6 +14,7 @@ import {
   Edit2,
   RefreshCw,
   ChevronDown,
+  ChevronRight,
   FileUp,
 } from "lucide-react";
 import {
@@ -230,6 +231,9 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [selectedPatents, setSelectedPatents] = useState<string[]>([]);
   const [activeSection, setActiveSection] = useState("abstract");
+  const [showSummaryOfInvention, setShowSummaryOfInvention] = useState(true);
+  const [showDetailedDescription, setShowDetailedDescription] = useState(true);
+  const [showClaims, setShowClaims] = useState(true);
   const [abstract, setAbstract] = useState<string | "">("");
   const [visibleSummaries, setVisibleSummaries] = useState<
     Record<number, boolean>
@@ -250,6 +254,20 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
       ...prev,
       [embodimentId]: !prev[embodimentId],
     }));
+  };
+
+  const handleSelectAll = (
+    sectionKey: keyof typeof embodiments,
+    selectStatus: boolean
+  ) => {
+    setEmbodiments((prev) => {
+      const newEmbodiments = { ...prev };
+      newEmbodiments[sectionKey] = newEmbodiments[sectionKey].map((emb) => ({
+        ...emb,
+        selected: selectStatus,
+      }));
+      return newEmbodiments;
+    });
   };
   const fetchStoredKnowledge = async () => {
     try {
@@ -1429,42 +1447,439 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                   data-section-id="summary-of-invention"
                   className="mb-12 pt-4"
                 >
-                  <div className="border-l-4 border-primary pl-4 mb-6">
-                    <h3 className="text-2xl font-bold text-primary">
-                      Summary of Invention
-                    </h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {embodiments.summary.length} embodiments extracted
-                    </p>
+                  <div className="border-l-4 border-primary pl-4 mb-6 flex justify-between items-center">
+                    <div>
+                      <h3 className="text-2xl font-bold text-primary">
+                        Summary of Invention
+                      </h3>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {embodiments.summary.length} embodiments extracted
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() =>
+                        setShowSummaryOfInvention(!showSummaryOfInvention)
+                      }
+                      aria-label={
+                        showSummaryOfInvention
+                          ? "Collapse Summary of Invention"
+                          : "Expand Summary of Invention"
+                      }
+                    >
+                      {showSummaryOfInvention ? (
+                        <ChevronDown className="h-5 w-5" />
+                      ) : (
+                        <ChevronRight className="h-5 w-5" />
+                      )}
+                    </Button>
                   </div>
 
                   {/* Section Summary Box */}
-                  <div className="mb-6 p-4 border rounded-lg bg-gray-50 shadow-sm">
-                    <h4 className="font-semibold text-md mb-2 text-gray-700">
-                      Section Summary
-                    </h4>
-                    <div className="space-y-2 text-sm text-gray-600">
-                      <p>
-                        This section outlines the core innovations of the
-                        invention, providing a high-level overview of the
-                        system, method, and apparatus. It details the primary
-                        components and their interactions, establishing the
-                        foundational concepts that are further elaborated in the
-                        detailed description.
+                  {showSummaryOfInvention && (
+                    <>
+                      <div className="mb-6 p-4 border rounded-lg bg-gray-50 shadow-sm">
+                        <h4 className="font-semibold text-md mb-2 text-gray-700">
+                          Section Summary
+                        </h4>
+                        <div className="space-y-2 text-sm text-gray-600">
+                          <p>
+                            This section outlines the core innovations of the
+                            invention, providing a high-level overview of the
+                            system, method, and apparatus. It details the
+                            primary components and their interactions,
+                            establishing the foundational concepts that are
+                            further elaborated in the detailed description.
+                          </p>
+                          <p>
+                            Key advantages highlighted include significant
+                            reductions in material waste, lower energy
+                            consumption, and enhanced device durability,
+                            addressing major challenges in modern electronics
+                            manufacturing.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end gap-2 mb-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleSelectAll("summary", true)}
+                        >
+                          Approve All
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleSelectAll("summary", false)}
+                        >
+                          Reject All
+                        </Button>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        {embodiments.summary.map(
+                          (embodiment) =>
+                            embodiment.description !== "" && (
+                              <div
+                                key={embodiment.id}
+                                className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
+                              >
+                                <div className="flex justify-between items-center mb-2">
+                                  <h3 className="font-medium">
+                                    {embodiment.title}
+                                  </h3>
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${
+                                        embodiment.selected
+                                          ? "bg-green-100 text-green-700 border border-green-300"
+                                          : "bg-red-100 text-red-600 border border-red-300 hover:bg-red-200"
+                                      }`}
+                                      onClick={(e) => {
+                                        toggleEmbodimentSelection(
+                                          "summary",
+                                          embodiment.id
+                                        );
+                                      }}
+                                    >
+                                      {embodiment.selected
+                                        ? "approved"
+                                        : "rejected"}
+                                    </button>
+                                    <button
+                                      className="text-xs bg-white border border-gray-200 px-2 py-1 rounded hover:bg-gray-50"
+                                      onClick={() =>
+                                        showExtractedMetadata(embodiment)
+                                      }
+                                    >
+                                      Meta-data
+                                    </button>
+                                  </div>
+                                </div>
+                                <div className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md">
+                                  {embodiment.summary}
+                                </div>
+
+                                <p className="text-sm">
+                                  {embodiment.description}
+                                </p>
+                                <div className="mt-3 flex justify-between items-center">
+                                  <Badge variant="outline" className="text-xs">
+                                    Source: {embodiment.source}
+                                  </Badge>
+                                  <button
+                                    className="text-xs bg-primary text-white px-3 py-1.5 rounded hover:bg-primary/90"
+                                    onClick={() =>
+                                      setOpenPopupId(embodiment.id)
+                                    }
+                                  >
+                                    Create
+                                  </button>
+                                </div>
+                              </div>
+                            )
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* Detailed Description Section */}
+                <div
+                  id="detailed-description"
+                  data-section-id="detailed-description"
+                  className="mb-12 pt-4"
+                >
+                  <div className="border-l-4 border-primary pl-4 mb-6 flex justify-between items-center">
+                    <div className="">
+                      <h3 className="text-2xl font-bold text-primary">
+                        Detailed Description
+                      </h3>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {embodiments.description.length} embodiments extracted
                       </p>
-                      <p>
-                        Key advantages highlighted include significant
-                        reductions in material waste, lower energy consumption,
-                        and enhanced device durability, addressing major
-                        challenges in modern electronics manufacturing.
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() =>
+                        setShowDetailedDescription(!showDetailedDescription)
+                      }
+                      aria-label={
+                        showDetailedDescription
+                          ? "Collapse Detailed Description"
+                          : "Expand Detailed Description"
+                      }
+                      className="mr-2" // Add some margin if needed
+                    >
+                      {showDetailedDescription ? (
+                        <ChevronDown className="h-5 w-5" />
+                      ) : (
+                        <ChevronRight className="h-5 w-5" />
+                      )}
+                    </Button>
+                  </div>
+
+                  {showDetailedDescription && (
+                    <>
+                      <div className="flex justify-end gap-2 mb-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleSelectAll("description", true)}
+                        >
+                          Approve All
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleSelectAll("description", false)}
+                        >
+                          Reject All
+                        </Button>
+                      </div>
+                      <div className="space-y-6">
+                        {/* Group embodiments by header first, then by category */}
+                        {Array.from(
+                          new Set(embodiments.description.map((e) => e.header))
+                        )
+                          .filter(Boolean)
+                          .map((header) => {
+                            const headerId = slugify(header!);
+                            // Get all embodiments with this header
+                            const headerEmbodiments =
+                              embodiments.description.filter(
+                                (e) => e.header === header
+                              );
+
+                            const headingSummary =
+                              headerEmbodiments[0].headingSummary;
+
+                            console.log("Header", header);
+                            console.log("Hello", headerEmbodiments);
+                            console.log("Summary", headingSummary);
+
+                            // Get unique categories within this header
+                            const categories = Array.from(
+                              new Set(headerEmbodiments.map((e) => e.category))
+                            ).filter(Boolean);
+
+                            return (
+                              <div
+                                key={`header-${header}`}
+                                id={headerId}
+                                data-section-id={headerId}
+                                className="mb-10 pt-4"
+                              >
+                                <h2 className="text-xl font-bold mb-6 pb-2 border-b">
+                                  {header}
+                                </h2>
+
+                                {categories.map((category) => {
+                                  const categoryId = `${headerId}-${slugify(
+                                    category!
+                                  )}`;
+                                  // Get embodiments for this header and category
+                                  const categoryEmbodiments =
+                                    headerEmbodiments.filter(
+                                      (e) => e.category === category
+                                    );
+
+                                  return (
+                                    <div
+                                      key={`${header}-${category}`}
+                                      id={categoryId}
+                                      data-section-id={categoryId}
+                                      className="mb-8 pt-4"
+                                    >
+                                      <h3 className="text-lg font-semibold capitalize border-b pb-2 mb-4">
+                                        {category}
+                                        <span className="ml-2 text-sm text-muted-foreground font-normal">
+                                          (
+                                          {categoryEmbodiments[0]
+                                            .description !== ""
+                                            ? categoryEmbodiments.length
+                                            : 0}{" "}
+                                          embodiments)
+                                        </span>
+                                      </h3>
+
+                                      {/* Sub-section summary box */}
+                                      <div className="mb-6 p-4 border rounded-lg bg-gray-50 shadow-sm">
+                                        <h4 className="font-semibold text-md mb-2 text-gray-700">
+                                          Summary for {category}
+                                        </h4>
+                                        <div className="text-sm text-gray-600">
+                                          {headerEmbodiments[0]
+                                            ?.headingSummary ||
+                                            "No summary available."}
+                                        </div>
+                                      </div>
+
+                                      <div className="grid grid-cols-2 gap-4">
+                                        {categoryEmbodiments.map(
+                                          (embodiment) =>
+                                            embodiment.description !== "" && (
+                                              <div
+                                                key={embodiment.id}
+                                                className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
+                                              >
+                                                <div className="flex justify-between items-center mb-2">
+                                                  <h3 className="font-medium">
+                                                    {embodiment.title}
+                                                  </h3>
+                                                  <div className="flex items-center gap-2">
+                                                    <button
+                                                      className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${
+                                                        embodiment.selected
+                                                          ? "bg-green-100 text-green-700 border border-green-300"
+                                                          : "bg-red-100 text-red-600 border border-red-300 hover:bg-red-200"
+                                                      }`}
+                                                      onClick={(e) => {
+                                                        toggleEmbodimentSelection(
+                                                          "description",
+                                                          embodiment.id
+                                                        );
+                                                      }}
+                                                    >
+                                                      {embodiment.selected
+                                                        ? "approved"
+                                                        : "rejected"}
+                                                    </button>
+                                                    <button
+                                                      className="text-xs bg-white border border-gray-200 px-2 py-1 rounded hover:bg-gray-50"
+                                                      onClick={() =>
+                                                        showExtractedMetadata(
+                                                          embodiment
+                                                        )
+                                                      }
+                                                    >
+                                                      Meta-data
+                                                    </button>
+                                                  </div>
+                                                </div>
+                                                <div className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md">
+                                                  {embodiment.summary}
+                                                </div>
+
+                                                <p className="text-sm">
+                                                  {embodiment.description}
+                                                </p>
+                                                <div className="mt-3 flex justify-between items-center">
+                                                  <Badge
+                                                    variant="outline"
+                                                    className="text-xs"
+                                                  >
+                                                    Source: {embodiment.source}
+                                                  </Badge>
+                                                  <button
+                                                    className="text-xs bg-primary text-white px-3 py-1.5 rounded hover:bg-primary/90"
+                                                    onClick={() =>
+                                                      setOpenPopupId(
+                                                        embodiment.id
+                                                      )
+                                                    }
+                                                  >
+                                                    Create
+                                                  </button>
+                                                </div>
+                                              </div>
+                                            )
+                                        )}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            );
+                          })}
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* Claims Section */}
+                <div
+                  id="claims"
+                  data-section-id="claims"
+                  className="mb-12 pt-4"
+                >
+                  <div className="border-l-4 border-primary pl-4 mb-6 flex justify-between items-center">
+                    <div>
+                      <h3 className="text-2xl font-bold text-primary">
+                        Claims
+                      </h3>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {embodiments.claims.length} embodiments extracted
                       </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setShowClaims(!showClaims)}
+                        aria-label={
+                          showClaims ? "Collapse Claims" : "Expand Claims"
+                        }
+                        className="mr-2" // Add some margin if needed
+                      >
+                        {showClaims ? (
+                          <ChevronDown className="h-5 w-5" />
+                        ) : (
+                          <ChevronRight className="h-5 w-5" />
+                        )}
+                      </Button>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    {embodiments.summary.map(
-                      (embodiment) =>
-                        embodiment.description !== "" && (
+                  {/* Section Summary Box */}
+                  {showClaims && (
+                    <>
+                      <div className="mb-6 p-4 border rounded-lg bg-gray-50 shadow-sm">
+                        <h4 className="font-semibold text-md mb-2 text-gray-700">
+                          Section Summary
+                        </h4>
+                        <div className="space-y-2 text-sm text-gray-600">
+                          <p>
+                            This section defines the legal scope of the
+                            invention. It includes independent claims covering
+                            the overall system and method, as well as dependent
+                            claims that specify particular features and
+                            refinements. The claims are drafted to protect the
+                            novel aspects of the manufacturing process and the
+                            resulting electronic device.
+                          </p>
+                          <p>
+                            The claims cover the unique combination of material
+                            processing, component assembly, and quality control
+                            subsystems, which collectively achieve unprecedented
+                            efficiency and product quality.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end gap-2 mb-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleSelectAll("claims", true)}
+                        >
+                          Approve All
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleSelectAll("claims", false)}
+                        >
+                          Reject All
+                        </Button>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        {embodiments.claims.map((embodiment) => (
                           <div
                             key={embodiment.id}
                             className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
@@ -1475,19 +1890,21 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                               </h3>
                               <div className="flex items-center gap-2">
                                 <button
-                                  className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                                  className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${
                                     embodiment.selected
-                                      ? "text-green-500"
-                                      : "text-gray-300"
+                                      ? "bg-green-100 text-green-700 border border-green-300"
+                                      : "bg-red-100 text-red-600 border border-red-300 hover:bg-red-200"
                                   }`}
                                   onClick={(e) => {
                                     toggleEmbodimentSelection(
-                                      "summary",
+                                      "claims",
                                       embodiment.id
                                     );
                                   }}
                                 >
-                                  <CheckCircle className="h-5 w-5" />
+                                  {embodiment.selected
+                                    ? "approved"
+                                    : "rejected"}
                                 </button>
                                 <button
                                   className="text-xs bg-white border border-gray-200 px-2 py-1 rounded hover:bg-gray-50"
@@ -1516,266 +1933,10 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                               </button>
                             </div>
                           </div>
-                        )
-                    )}
-                  </div>
-                </div>
-
-                {/* Detailed Description Section */}
-                <div
-                  id="detailed-description"
-                  data-section-id="detailed-description"
-                  className="mb-12 pt-4"
-                >
-                  <div className="border-l-4 border-primary pl-4 mb-6">
-                    <h3 className="text-2xl font-bold text-primary">
-                      Detailed Description
-                    </h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {embodiments.description.length} embodiments extracted
-                    </p>
-                  </div>
-
-                  <div className="space-y-6">
-                    {/* Group embodiments by header first, then by category */}
-                    {Array.from(
-                      new Set(embodiments.description.map((e) => e.header))
-                    )
-                      .filter(Boolean)
-                      .map((header) => {
-                        const headerId = slugify(header!);
-                        // Get all embodiments with this header
-                        const headerEmbodiments =
-                          embodiments.description.filter(
-                            (e) => e.header === header
-                          );
-
-                        const headingSummary =
-                          headerEmbodiments[0].headingSummary;
-
-                        console.log("Header", header);
-                        console.log("Hello", headerEmbodiments);
-                        console.log("Summary", headingSummary);
-
-                        // Get unique categories within this header
-                        const categories = Array.from(
-                          new Set(headerEmbodiments.map((e) => e.category))
-                        ).filter(Boolean);
-
-                        return (
-                          <div
-                            key={`header-${header}`}
-                            id={headerId}
-                            data-section-id={headerId}
-                            className="mb-10 pt-4"
-                          >
-                            <h2 className="text-xl font-bold mb-6 pb-2 border-b">
-                              {header}
-                            </h2>
-
-                            {categories.map((category) => {
-                              const categoryId = `${headerId}-${slugify(
-                                category!
-                              )}`;
-                              // Get embodiments for this header and category
-                              const categoryEmbodiments =
-                                headerEmbodiments.filter(
-                                  (e) => e.category === category
-                                );
-
-                              return (
-                                <div
-                                  key={`${header}-${category}`}
-                                  id={categoryId}
-                                  data-section-id={categoryId}
-                                  className="mb-8 pt-4"
-                                >
-                                  <h3 className="text-lg font-semibold capitalize border-b pb-2 mb-4">
-                                    {category}
-                                    <span className="ml-2 text-sm text-muted-foreground font-normal">
-                                      (
-                                      {categoryEmbodiments[0].description !== ""
-                                        ? categoryEmbodiments.length
-                                        : 0}{" "}
-                                      embodiments)
-                                    </span>
-                                  </h3>
-
-                                  {/* Sub-section summary box */}
-                                  <div className="mb-6 p-4 border rounded-lg bg-gray-50 shadow-sm">
-                                    <h4 className="font-semibold text-md mb-2 text-gray-700">
-                                      Summary for {category}
-                                    </h4>
-                                    <div className="text-sm text-gray-600">
-                                      {headerEmbodiments[0]?.headingSummary ||
-                                        "No summary available."}
-                                    </div>
-                                  </div>
-
-                                  <div className="grid grid-cols-2 gap-4">
-                                    {categoryEmbodiments.map(
-                                      (embodiment) =>
-                                        embodiment.description !== "" && (
-                                          <div
-                                            key={embodiment.id}
-                                            className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
-                                          >
-                                            <div className="flex justify-between items-center mb-2">
-                                              <h3 className="font-medium">
-                                                {embodiment.title}
-                                              </h3>
-                                              <div className="flex items-center gap-2">
-                                                <button
-                                                  className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                                                    embodiment.selected
-                                                      ? "text-green-500"
-                                                      : "text-gray-300"
-                                                  }`}
-                                                  onClick={(e) => {
-                                                    toggleEmbodimentSelection(
-                                                      "description",
-                                                      embodiment.id
-                                                    );
-                                                  }}
-                                                >
-                                                  <CheckCircle className="h-5 w-5" />
-                                                </button>
-                                                <button
-                                                  className="text-xs bg-white border border-gray-200 px-2 py-1 rounded hover:bg-gray-50"
-                                                  onClick={() =>
-                                                    showExtractedMetadata(
-                                                      embodiment
-                                                    )
-                                                  }
-                                                >
-                                                  Meta-data
-                                                </button>
-                                              </div>
-                                            </div>
-                                            <div className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md">
-                                              {embodiment.summary}
-                                            </div>
-
-                                            <p className="text-sm">
-                                              {embodiment.description}
-                                            </p>
-                                            <div className="mt-3 flex justify-between items-center">
-                                              <Badge
-                                                variant="outline"
-                                                className="text-xs"
-                                              >
-                                                Source: {embodiment.source}
-                                              </Badge>
-                                              <button
-                                                className="text-xs bg-primary text-white px-3 py-1.5 rounded hover:bg-primary/90"
-                                                onClick={() =>
-                                                  setOpenPopupId(embodiment.id)
-                                                }
-                                              >
-                                                Create
-                                              </button>
-                                            </div>
-                                          </div>
-                                        )
-                                    )}
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        );
-                      })}
-                  </div>
-                </div>
-
-                {/* Claims Section */}
-                <div
-                  id="claims"
-                  data-section-id="claims"
-                  className="mb-12 pt-4"
-                >
-                  <div className="border-l-4 border-primary pl-4 mb-6">
-                    <h3 className="text-2xl font-bold text-primary">Claims</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {embodiments.claims.length} embodiments extracted
-                    </p>
-                  </div>
-
-                  {/* Section Summary Box */}
-                  <div className="mb-6 p-4 border rounded-lg bg-gray-50 shadow-sm">
-                    <h4 className="font-semibold text-md mb-2 text-gray-700">
-                      Section Summary
-                    </h4>
-                    <div className="space-y-2 text-sm text-gray-600">
-                      <p>
-                        This section defines the legal scope of the invention.
-                        It includes independent claims covering the overall
-                        system and method, as well as dependent claims that
-                        specify particular features and refinements. The claims
-                        are drafted to protect the novel aspects of the
-                        manufacturing process and the resulting electronic
-                        device.
-                      </p>
-                      <p>
-                        The claims cover the unique combination of material
-                        processing, component assembly, and quality control
-                        subsystems, which collectively achieve unprecedented
-                        efficiency and product quality.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    {embodiments.claims.map((embodiment) => (
-                      <div
-                        key={embodiment.id}
-                        className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
-                      >
-                        <div className="flex justify-between items-center mb-2">
-                          <h3 className="font-medium">{embodiment.title}</h3>
-                          <div className="flex items-center gap-2">
-                            <button
-                              className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                                embodiment.selected
-                                  ? "text-green-500"
-                                  : "text-gray-300"
-                              }`}
-                              onClick={(e) => {
-                                toggleEmbodimentSelection(
-                                  "claims",
-                                  embodiment.id
-                                );
-                              }}
-                            >
-                              <CheckCircle className="h-5 w-5" />
-                            </button>
-                            <button
-                              className="text-xs bg-white border border-gray-200 px-2 py-1 rounded hover:bg-gray-50"
-                              onClick={() => showExtractedMetadata(embodiment)}
-                            >
-                              Meta-data
-                            </button>
-                          </div>
-                        </div>
-                        <div className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md">
-                          {embodiment.summary}
-                        </div>
-
-                        <p className="text-sm">{embodiment.description}</p>
-                        <div className="mt-3 flex justify-between items-center">
-                          <Badge variant="outline" className="text-xs">
-                            Source: {embodiment.source}
-                          </Badge>
-                          <button
-                            className="text-xs bg-primary text-white px-3 py-1.5 rounded hover:bg-primary/90"
-                            onClick={() => setOpenPopupId(embodiment.id)}
-                          >
-                            Create
-                          </button>
-                        </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
