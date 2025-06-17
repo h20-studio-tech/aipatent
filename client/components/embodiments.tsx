@@ -233,6 +233,7 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
   const [activeSection, setActiveSection] = useState("abstract");
   const [showSummaryOfInvention, setShowSummaryOfInvention] = useState(true);
   const [showDetailedDescription, setShowDetailedDescription] = useState(true);
+  const [showAbstract, setShowAbstract] = useState(true);
   const [showClaims, setShowClaims] = useState(true);
   const [abstract, setAbstract] = useState<string | "">("");
   const [visibleSummaries, setVisibleSummaries] = useState<
@@ -1378,20 +1379,37 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                   data-section-id="abstract"
                   className="mb-12 pt-4"
                 >
-                  <div className="border-l-4 border-primary pl-4 mb-6">
-                    <h3 className="text-2xl font-bold text-primary">
-                      Abstract
-                    </h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Patent abstract and overview
-                    </p>
-                  </div>
-
-                  <div className="border rounded-lg p-6 bg-gray-50 shadow-sm">
-                    <div className="space-y-4 text-sm text-gray-700">
-                      <p>{abstract}</p>
+                  <div className="border-l-4 border-primary pl-4 mb-6 flex justify-between items-center">
+                    <div>
+                      <h3 className="text-2xl font-bold text-primary">
+                        Abstract
+                      </h3>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Patent abstract and overview
+                      </p>
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setShowAbstract(!showAbstract)}
+                      aria-label={
+                        showAbstract ? "Collapse Abstract" : "Expand Abstract"
+                      }
+                    >
+                      {showAbstract ? (
+                        <ChevronDown className="h-5 w-5" />
+                      ) : (
+                        <ChevronRight className="h-5 w-5" />
+                      )}
+                    </Button>
                   </div>
+                  {showAbstract && (
+                    <div className="border rounded-lg p-6 bg-gray-50 shadow-sm">
+                      <div className="space-y-4 text-sm text-gray-700">
+                        <p>{abstract}</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Key Terms Section - Before all embodiment sections */}
@@ -1400,24 +1418,28 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                   data-section-id="key-terms"
                   className="mb-12 pt-4"
                 >
-                  <div className="border-l-4 border-primary pl-4 mb-6">
-                    <h3 className="text-2xl font-bold text-primary">
-                      Key Terms
-                    </h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Important terminology and definitions
-                    </p>
-                  </div>
-
-                  <div className="flex justify-between items-center mb-4">
-                    <h4 className="text-lg font-semibold">{""}</h4>
+                  <div className="border-l-4 border-primary pl-4 mb-6 flex justify-between items-center">
+                    <div>
+                      <h3 className="text-2xl font-bold text-primary">
+                        Key Terms
+                      </h3>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Important terminology and definitions
+                      </p>
+                    </div>
                     <Button
-                      variant="outline"
-                      size="sm"
+                      variant="ghost"
+                      size="icon"
                       onClick={() => setShowKeyTerms(!showKeyTerms)}
-                      className="text-xs"
+                      aria-label={
+                        showKeyTerms ? "Collapse Key Terms" : "Expand Key Terms"
+                      }
                     >
-                      {showKeyTerms ? "Hide Terms" : "Show Terms"}
+                      {showKeyTerms ? (
+                        <ChevronDown className="h-5 w-5" />
+                      ) : (
+                        <ChevronRight className="h-5 w-5" />
+                      )}
                     </Button>
                   </div>
 
@@ -1570,14 +1592,14 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                                   <Badge variant="outline" className="text-xs">
                                     Source: {embodiment.source}
                                   </Badge>
-                                  <button
+                                  {/* <button
                                     className="text-xs bg-primary text-white px-3 py-1.5 rounded hover:bg-primary/90"
                                     onClick={() =>
                                       setOpenPopupId(embodiment.id)
                                     }
                                   >
                                     Create
-                                  </button>
+                                  </button> */}
                                 </div>
                               </div>
                             )
@@ -1775,7 +1797,7 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                                                   >
                                                     Source: {embodiment.source}
                                                   </Badge>
-                                                  <button
+                                                  {/* <button
                                                     className="text-xs bg-primary text-white px-3 py-1.5 rounded hover:bg-primary/90"
                                                     onClick={() =>
                                                       setOpenPopupId(
@@ -1784,7 +1806,7 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                                                     }
                                                   >
                                                     Create
-                                                  </button>
+                                                  </button> */}
                                                 </div>
                                               </div>
                                             )
@@ -1925,12 +1947,12 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                               <Badge variant="outline" className="text-xs">
                                 Source: {embodiment.source}
                               </Badge>
-                              <button
+                              {/* <button
                                 className="text-xs bg-primary text-white px-3 py-1.5 rounded hover:bg-primary/90"
                                 onClick={() => setOpenPopupId(embodiment.id)}
                               >
                                 Create
-                              </button>
+                              </button> */}
                             </div>
                           </div>
                         ))}
