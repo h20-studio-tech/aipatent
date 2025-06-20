@@ -1379,7 +1379,10 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                   data-section-id="abstract"
                   className="mb-12 pt-4"
                 >
-                  <div className="border-l-4 border-primary pl-4 mb-6 flex justify-between items-center">
+                  <div
+                    className="border-l-4 border-primary pl-4 mb-6 flex justify-between items-center cursor-pointer"
+                    onClick={() => setShowAbstract(!showAbstract)}
+                  >
                     <div>
                       <h3 className="text-2xl font-bold text-primary">
                         Abstract
@@ -1418,7 +1421,10 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                   data-section-id="key-terms"
                   className="mb-12 pt-4"
                 >
-                  <div className="border-l-4 border-primary pl-4 mb-6 flex justify-between items-center">
+                  <div
+                    className="border-l-4 border-primary pl-4 mb-6 flex justify-between items-center cursor-pointer"
+                    onClick={() => setShowKeyTerms(!showKeyTerms)}
+                  >
                     <div>
                       <h3 className="text-2xl font-bold text-primary">
                         Key Terms
@@ -1469,7 +1475,12 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                   data-section-id="summary-of-invention"
                   className="mb-12 pt-4"
                 >
-                  <div className="border-l-4 border-primary pl-4 mb-6 flex justify-between items-center">
+                  <div
+                    className="border-l-4 border-primary pl-4 mb-6 flex justify-between items-center cursor-pointer"
+                    onClick={() =>
+                      setShowSummaryOfInvention(!showSummaryOfInvention)
+                    }
+                  >
                     <div>
                       <h3 className="text-2xl font-bold text-primary">
                         Summary of Invention
@@ -1615,7 +1626,12 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                   data-section-id="detailed-description"
                   className="mb-12 pt-4"
                 >
-                  <div className="border-l-4 border-primary pl-4 mb-6 flex justify-between items-center">
+                  <div
+                    className="border-l-4 border-primary pl-4 mb-6 flex justify-between items-center cursor-pointer"
+                    onClick={() =>
+                      setShowDetailedDescription(!showDetailedDescription)
+                    }
+                  >
                     <div className="">
                       <h3 className="text-2xl font-bold text-primary">
                         Detailed Description
@@ -1829,7 +1845,10 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                   data-section-id="claims"
                   className="mb-12 pt-4"
                 >
-                  <div className="border-l-4 border-primary pl-4 mb-6 flex justify-between items-center">
+                  <div
+                    className="border-l-4 border-primary pl-4 mb-6 flex justify-between items-center cursor-pointer"
+                    onClick={() => setShowClaims(!showClaims)}
+                  >
                     <div>
                       <h3 className="text-2xl font-bold text-primary">
                         Claims
