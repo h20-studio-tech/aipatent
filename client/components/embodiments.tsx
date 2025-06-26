@@ -294,10 +294,11 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
         `${backendUrl}/v1/raw-sections/${patentId}`
       );
 
-      const { abstract, keyterms, sections } = response.data;
+      const { sections } = response.data;
 
       setRawData({
-        keyterms: keyterms || "No Raw Data Found for this section",
+        keyterms:
+          sections?.["key terms"] || "No Raw Data Found for this section",
         summary:
           sections?.["summary of invention"] ||
           "No Raw Data Found for this section",
@@ -409,9 +410,14 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
   useEffect(() => {
     if (patentId) {
       fetchStoredKnowledge();
-      fetchRawContent();
     }
   }, [patentId]);
+
+  useEffect(() => {
+    if (embodiments && patentId) {
+      fetchRawContent();
+    }
+  }, [embodiments, patentId]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
