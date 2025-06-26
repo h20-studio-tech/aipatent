@@ -68,6 +68,13 @@ interface RemixedEmbodiment {
   createdAt: string;
 }
 
+interface RawData {
+  keyterms?: string;
+  summary?: string;
+  description?: string;
+  claims?: string;
+}
+
 // Interface for stored knowledge objects
 interface StoredKnowledge {
   id: number;
@@ -101,6 +108,12 @@ type EmbodimentMap = {
   description: Embodiment[];
   claims: Embodiment[];
 };
+
+const slugify = (text: string) =>
+  text
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^\w-]+/g, "");
 
 export function transformGroupedEmbodiments(response: any): EmbodimentMap {
   let idCounter = 1;
@@ -233,12 +246,23 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
   const [activeSection, setActiveSection] = useState("abstract");
   const [showSummaryOfInvention, setShowSummaryOfInvention] = useState(true);
   const [showDetailedDescription, setShowDetailedDescription] = useState(true);
+  const [showRawDataModal, setShowRawDataModal] = useState(false);
+  const [rawDataContent, setRawDataContent] = useState({
+    title: "",
+    content: "",
+  });
   const [showAbstract, setShowAbstract] = useState(true);
   const [showClaims, setShowClaims] = useState(true);
   const [abstract, setAbstract] = useState<string | "">("");
   const [visibleSummaries, setVisibleSummaries] = useState<
     Record<number, boolean>
   >({});
+  const [rawData, setRawData] = useState<RawData>({
+    keyterms: "",
+    summary: "",
+    description: "",
+    claims: "",
+  });
   const [isProcessingPdf, setIsProcessingPdf] = useState(false);
   const [processingComplete, setProcessingComplete] = useState(false);
   const [processingFileName, setProcessingFileName] = useState("");
@@ -248,6 +272,13 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
     description: [],
     claims: [],
   });
+
+  const slugify = (text: string) =>
+    text
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^\w-]+/g, "");
+
   const [patentId, setPatentId] = useState<string>("");
 
   const toggleSummary = (embodimentId: number) => {
@@ -255,6 +286,36 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
       ...prev,
       [embodimentId]: !prev[embodimentId],
     }));
+  };
+
+  const fetchRawContent = async () => {
+    try {
+      const response = await axios.get(
+        `${backendUrl}/v1/raw-sections/${patentId}`
+      );
+
+      const { abstract, keyterms, sections } = response.data;
+
+      setRawData({
+        keyterms: keyterms || "No Raw Data Found for this section",
+        summary:
+          sections?.["summary of invention"] ||
+          "No Raw Data Found for this section",
+        description:
+          sections?.["detailed description"] ||
+          "No Raw Data Found for this section",
+        claims: sections?.["claims"] || "No Raw Data Found for this section",
+      });
+
+      console.log("response ABC", response);
+    } catch (err) {
+      console.log(err);
+      toast({
+        title: "Error",
+        description: "Error while fetching raw text.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSelectAll = (
@@ -348,6 +409,7 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
   useEffect(() => {
     if (patentId) {
       fetchStoredKnowledge();
+      fetchRawContent();
     }
   }, [patentId]);
 
@@ -1043,12 +1105,6 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
     }
   };
 
-  const slugify = (text: string) =>
-    text
-      .toLowerCase()
-      .replace(/\s+/g, "-")
-      .replace(/[^\w-]+/g, "");
-
   const tableOfContents = [
     { id: "abstract", title: "Abstract", level: 1 },
     { id: "key-terms", title: "Key Terms", level: 1 },
@@ -1380,7 +1436,7 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                   className="mb-12 pt-4"
                 >
                   <div
-                    className="border-l-4 border-primary pl-4 mb-6 flex justify-between items-center cursor-pointer"
+                    className=" border-l-4 border-primary pl-4 mb-6 flex justify-between items-center cursor-pointer"
                     onClick={() => setShowAbstract(!showAbstract)}
                   >
                     <div>
@@ -1391,20 +1447,22 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                         Patent abstract and overview
                       </p>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setShowAbstract(!showAbstract)}
-                      aria-label={
-                        showAbstract ? "Collapse Abstract" : "Expand Abstract"
-                      }
-                    >
-                      {showAbstract ? (
-                        <ChevronDown className="h-5 w-5" />
-                      ) : (
-                        <ChevronRight className="h-5 w-5" />
-                      )}
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setShowAbstract(!showAbstract)}
+                        aria-label={
+                          showAbstract ? "Collapse Abstract" : "Expand Abstract"
+                        }
+                      >
+                        {showAbstract ? (
+                          <ChevronDown className="h-5 w-5" />
+                        ) : (
+                          <ChevronRight className="h-5 w-5" />
+                        )}
+                      </Button>
+                    </div>
                   </div>
                   {showAbstract && (
                     <div className="border rounded-lg p-6 bg-gray-50 shadow-sm">
@@ -1422,7 +1480,7 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                   className="mb-12 pt-4"
                 >
                   <div
-                    className="border-l-4 border-primary pl-4 mb-6 flex justify-between items-center cursor-pointer"
+                    className="group border-l-4 border-primary pl-4 mb-6 flex justify-between items-center cursor-pointer"
                     onClick={() => setShowKeyTerms(!showKeyTerms)}
                   >
                     <div>
@@ -1433,20 +1491,39 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                         Important terminology and definitions
                       </p>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setShowKeyTerms(!showKeyTerms)}
-                      aria-label={
-                        showKeyTerms ? "Collapse Key Terms" : "Expand Key Terms"
-                      }
-                    >
-                      {showKeyTerms ? (
-                        <ChevronDown className="h-5 w-5" />
-                      ) : (
-                        <ChevronRight className="h-5 w-5" />
-                      )}
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setRawDataContent({
+                            title: "Key Terms",
+                            content: rawData.keyterms,
+                          });
+                          setShowRawDataModal(true);
+                        }}
+                      >
+                        View Original
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setShowKeyTerms(!showKeyTerms)}
+                        aria-label={
+                          showKeyTerms
+                            ? "Collapse Key Terms"
+                            : "Expand Key Terms"
+                        }
+                      >
+                        {showKeyTerms ? (
+                          <ChevronDown className="h-5 w-5" />
+                        ) : (
+                          <ChevronRight className="h-5 w-5" />
+                        )}
+                      </Button>
+                    </div>
                   </div>
 
                   {showKeyTerms && (
@@ -1476,7 +1553,7 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                   className="mb-12 pt-4"
                 >
                   <div
-                    className="border-l-4 border-primary pl-4 mb-6 flex justify-between items-center cursor-pointer"
+                    className="group border-l-4 border-primary pl-4 mb-6 flex justify-between items-center cursor-pointer"
                     onClick={() =>
                       setShowSummaryOfInvention(!showSummaryOfInvention)
                     }
@@ -1489,24 +1566,41 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                         {embodiments.summary.length} embodiments extracted
                       </p>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() =>
-                        setShowSummaryOfInvention(!showSummaryOfInvention)
-                      }
-                      aria-label={
-                        showSummaryOfInvention
-                          ? "Collapse Summary of Invention"
-                          : "Expand Summary of Invention"
-                      }
-                    >
-                      {showSummaryOfInvention ? (
-                        <ChevronDown className="h-5 w-5" />
-                      ) : (
-                        <ChevronRight className="h-5 w-5" />
-                      )}
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setRawDataContent({
+                            title: "Summary of Invention",
+                            content: rawData.summary,
+                          });
+                          setShowRawDataModal(true);
+                        }}
+                      >
+                        View Original
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() =>
+                          setShowSummaryOfInvention(!showSummaryOfInvention)
+                        }
+                        aria-label={
+                          showSummaryOfInvention
+                            ? "Collapse Summary of Invention"
+                            : "Expand Summary of Invention"
+                        }
+                      >
+                        {showSummaryOfInvention ? (
+                          <ChevronDown className="h-5 w-5" />
+                        ) : (
+                          <ChevronRight className="h-5 w-5" />
+                        )}
+                      </Button>
+                    </div>
                   </div>
 
                   {/* Section Summary Box */}
@@ -1627,7 +1721,7 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                   className="mb-12 pt-4"
                 >
                   <div
-                    className="border-l-4 border-primary pl-4 mb-6 flex justify-between items-center cursor-pointer"
+                    className="group border-l-4 border-primary pl-4 mb-6 flex justify-between items-center cursor-pointer"
                     onClick={() =>
                       setShowDetailedDescription(!showDetailedDescription)
                     }
@@ -1640,25 +1734,43 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                         {embodiments.description.length} embodiments extracted
                       </p>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() =>
-                        setShowDetailedDescription(!showDetailedDescription)
-                      }
-                      aria-label={
-                        showDetailedDescription
-                          ? "Collapse Detailed Description"
-                          : "Expand Detailed Description"
-                      }
-                      className="mr-2" // Add some margin if needed
-                    >
-                      {showDetailedDescription ? (
-                        <ChevronDown className="h-5 w-5" />
-                      ) : (
-                        <ChevronRight className="h-5 w-5" />
-                      )}
-                    </Button>
+
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setRawDataContent({
+                            title: "Detailed Description",
+                            content: rawData.description,
+                          });
+                          setShowRawDataModal(true);
+                        }}
+                      >
+                        View Original
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() =>
+                          setShowDetailedDescription(!showDetailedDescription)
+                        }
+                        aria-label={
+                          showDetailedDescription
+                            ? "Collapse Detailed Description"
+                            : "Expand Detailed Description"
+                        }
+                        className="mr-2" // Add some margin if needed
+                      >
+                        {showDetailedDescription ? (
+                          <ChevronDown className="h-5 w-5" />
+                        ) : (
+                          <ChevronRight className="h-5 w-5" />
+                        )}
+                      </Button>
+                    </div>
                   </div>
 
                   {showDetailedDescription && (
@@ -1846,7 +1958,7 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                   className="mb-12 pt-4"
                 >
                   <div
-                    className="border-l-4 border-primary pl-4 mb-6 flex justify-between items-center cursor-pointer"
+                    className="group border-l-4 border-primary pl-4 mb-6 flex justify-between items-center cursor-pointer"
                     onClick={() => setShowClaims(!showClaims)}
                   >
                     <div>
@@ -1857,7 +1969,23 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                         {embodiments.claims.length} embodiments extracted
                       </p>
                     </div>
+
                     <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setRawDataContent({
+                            title: "Claims",
+                            content: rawData.claims,
+                          });
+                          setShowRawDataModal(true);
+                        }}
+                      >
+                        View Original
+                      </Button>
                       <Button
                         variant="ghost"
                         size="icon"
@@ -2238,6 +2366,21 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                     )}
                   </>
                 )}
+              </ScrollArea>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={showRawDataModal} onOpenChange={setShowRawDataModal}>
+            <DialogContent className="sm:max-w-[800px] max-h-[80vh]">
+              <DialogHeader>
+                <DialogTitle>
+                  Original Raw Data: {rawDataContent.title}
+                </DialogTitle>
+              </DialogHeader>
+              <ScrollArea className="h-[60vh] pr-4">
+                <pre className="text-sm whitespace-pre-wrap bg-muted p-4 rounded-md font-mono">
+                  {rawDataContent.content}
+                </pre>
               </ScrollArea>
             </DialogContent>
           </Dialog>
