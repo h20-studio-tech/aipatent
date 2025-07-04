@@ -107,19 +107,19 @@ export default function Home() {
   }, [patentId]);
 
   return (
-    <main className="container mx-auto px-4 py-8 relative">
+    <main className="w-100 mx-auto relative">
       {stage === 1 ? (
-        <>
+        <div className="px-4 py-8">
           <StoredKnowledge stage={stage} setStage={setStage} />
           <KnowledgeCreation />
-        </>
+        </div>
       ) : stage === 2 ? (
         <Embodiments stage={stage} setStage={setStage} />
       ) : (
-        <>
+        <div className="px-4 py-8">
           <StoredKnowledge stage={stage} setStage={setStage} />
           <PatentComponentGenerator antigen={antigen} disease={disease} />
-        </>
+        </div>
       )}
     </main>
   );

@@ -652,7 +652,13 @@ This section should be detailed, technically accurate, and formatted appropriate
             {expandedSections[section] && (
               <div className="space-y-6">
                 {hasContent ? (
-                  <div ref={section === lastGeneratedSection ? latestGeneratedRef : null}>
+                  <div
+                    ref={
+                      section === lastGeneratedSection
+                        ? latestGeneratedRef
+                        : null
+                    }
+                  >
                     <ResizableSection
                       key={componentKey}
                       title={section}
@@ -663,18 +669,20 @@ This section should be detailed, technically accurate, and formatted appropriate
                           timestamp: Date.now(),
                         }
                       }
-                      onContentChange={(newContent) => handleContentChange(section, section, newContent)}
+                      onContentChange={(newContent) =>
+                        handleContentChange(section, section, newContent)
+                      }
                       onEdit={() => {
-                        setGeneratedContent(editedComponents[componentKey])
-                        setLastGeneratedSection(section)
-                        setLastGeneratedSubsection(section)
-                        setCorrectionModalOpen(true)
+                        setGeneratedContent(editedComponents[componentKey]);
+                        setLastGeneratedSection(section);
+                        setLastGeneratedSubsection(section);
+                        setCorrectionModalOpen(true);
                       }}
                       onRegenerate={() => {
-                        setGeneratedContent(editedComponents[componentKey])
-                        setLastGeneratedSection(section)
-                        setLastGeneratedSubsection(section)
-                        setRegenerateModalOpen(true)
+                        setGeneratedContent(editedComponents[componentKey]);
+                        setLastGeneratedSection(section);
+                        setLastGeneratedSubsection(section);
+                        setRegenerateModalOpen(true);
                       }}
                     />
                   </div>
