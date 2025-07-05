@@ -1,6 +1,8 @@
+// Refactored: Fix mixed data on tab reopen by tracking current tab with state and syncing filtering
+
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -9,12 +11,23 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Database, FileDown, FileText, Save } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
 import axios from "axios";
 import { backendUrl } from "@/config/config";
-import { toast } from "./ui/use-toast";
-import { SectionMetadata } from "./resizeable-section";
 
+interface DBData {
+  id: string;
+  section: string;
+  question: string;
+  answer: string;
+  timestamp: string;
+  saved: boolean;
+  remixed?: boolean;
+}
+
+interface SectionMetadata {}
 interface SavedPatentData {
   editedComponents: Record<string, string>;
   sectionMetadata: Record<string, SectionMetadata>;
@@ -24,13 +37,8 @@ interface SavedPatentData {
   lastGeneratedSubsection: string | null;
   timestamp: number;
 }
-interface DBData {
-  patentId: number;
-  question: string;
-  answer: string;
-  section: string;
-  timestamp: string;
-}
+
+const STORAGE_KEY = "patent_generator_progress";
 
 interface StoredKnowledgeProps {
   stage: number;
@@ -41,28 +49,28 @@ export default function StoredKnowledge({
   stage,
   setStage,
 }: StoredKnowledgeProps) {
-  const STORAGE_KEY = "patent_generator_progress";
   const [open, setOpen] = useState(false);
-  const [localChats, setLocalChats] = useState<any[]>([]);
+  const [localChats, setLocalChats] = useState<DBData[]>([]);
   const [hasNewItems, setHasNewItems] = useState(false);
+  const [activeTab, setActiveTab] = useState("other");
   const [error, setError] = useState<string | null>(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
-  const [currentSubsectionIndex, setCurrentSubsectionIndex] = useState(0);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [editedComponents, setEditedComponents] = useState<
     Record<string, string>
   >({});
-  const [lastGeneratedSection, setLastGeneratedSection] = useState<
-    string | null
-  >(null);
   const [lastGeneratedSubsection, setLastGeneratedSubsection] = useState<
     string | null
   >(null);
+  const [lastGeneratedSection, setLastGeneratedSection] = useState<
+    string | null
+  >(null);
+  const [currentSubsectionIndex, setCurrentSubsectionIndex] = useState(0);
   const [sectionMetadata, setSectionMetadata] = useState<
     Record<string, SectionMetadata>
   >({});
+  const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
 
   const handleGeneratePDF = async () => {
     if (Object.keys(editedComponents).length === 0) return;
@@ -96,47 +104,23 @@ export default function StoredKnowledge({
       setIsGeneratingPDF(false);
     }
   };
-
   useEffect(() => {
     window.__globalKnowledgeCache = [];
+
     window.addStoredData = async (type: string, data: DBData) => {
-      if (type === "knowledge") {
-        const newNote = {
-          id: `${Date.now()}-${Math.random()}`,
-          section: data.section,
-          question: data.question,
-          answer: data.answer,
-          timestamp: data.timestamp,
-          saved: true,
-        };
-
-        setLocalChats((prev) =>
-          [newNote, ...prev].sort(
-            (a, b) =>
-              new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-          )
-        );
-        window.__globalKnowledgeCache.push(newNote);
-      } else {
-        const newNote = {
-          id: `${Date.now()}-${Math.random()}`,
-          section: data.section,
-          question: data.question,
-          answer: data.answer,
-          timestamp: data.timestamp,
-          saved: true,
-        };
-
-        setLocalChats((prev) =>
-          [newNote, ...prev].sort(
-            (a, b) =>
-              new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-          )
-        );
-        window.__globalKnowledgeCache.push(newNote);
-      }
+      const newNote = {
+        id: `${Date.now()}-${Math.random()}`,
+        section: data.section,
+        question: data.question,
+        answer: data.answer,
+        timestamp: data.timestamp,
+        saved: true,
+      };
+      setLocalChats((prev) => [newNote, ...prev]);
+      window.__globalKnowledgeCache.push(newNote);
+      setHasNewItems(true);
     };
-    // Set the global function to update local state
+
     window.addResearchNote = async (
       section: string,
       content: string,
@@ -150,13 +134,9 @@ export default function StoredKnowledge({
       };
 
       try {
-        const response = await axios.post(
-          `${backendUrl}/v1/knowledge/research-note`,
-          payload
-        );
-        console.log("✅ API Response:", response?.data);
+        await axios.post(`${backendUrl}/v1/knowledge/research-note`, payload);
       } catch (err: any) {
-        console.error("❌ API Error:", err?.response?.data || err.message);
+        console.error("API Error:", err?.response?.data || err.message);
       }
 
       const newNote = {
@@ -169,21 +149,14 @@ export default function StoredKnowledge({
       };
 
       setLocalChats((prev) => [newNote, ...prev]);
-      setHasNewItems(true);
       window.__globalKnowledgeCache.push(newNote);
+      setHasNewItems(true);
 
-      if (typeof window !== "undefined") {
-        const event = new CustomEvent("knowledgeEntryAdded", {
-          detail: newNote,
-        });
-        window.dispatchEvent(event);
-      }
+      window.dispatchEvent(
+        new CustomEvent("researchNoteAdded", { detail: newNote })
+      );
 
       return newNote;
-    };
-
-    window.getStoredKnowlegde = async () => {
-      return window.__globalKnowledgeCache || [];
     };
 
     window.addKnowledgeEntry = async (
@@ -202,21 +175,16 @@ export default function StoredKnowledge({
 
       try {
         let endpoint = "";
-
-        if (section === "Approach") {
+        if (section === "Approach")
           endpoint = `${backendUrl}/v1/knowledge/approach`;
-        } else if (section === "Technology") {
+        if (section === "Technology")
           endpoint = `${backendUrl}/v1/knowledge/technology`;
-        } else if (section === "Innovation") {
+        if (section === "Innovation")
           endpoint = `${backendUrl}/v1/knowledge/innovation`;
-        }
 
-        if (endpoint) {
-          const response = await axios.post(endpoint, payload);
-          console.log("✅ API Success:", response?.data);
-        }
+        if (endpoint) await axios.post(endpoint, payload);
       } catch (err: any) {
-        console.error("❌ API Error:", err?.response?.data || err?.message);
+        console.error("API Error:", err?.response?.data || err?.message);
       }
 
       const newEntry = {
@@ -229,49 +197,36 @@ export default function StoredKnowledge({
         remixed: remixed ?? false,
       };
 
-      // Always store locally
       setLocalChats((prev) => [newEntry, ...prev]);
-      setHasNewItems(true);
       window.__globalKnowledgeCache.push(newEntry);
+      setHasNewItems(true);
 
-      if (typeof window !== "undefined") {
-        const event = new CustomEvent("knowledgeEntryAdded", {
-          detail: newEntry,
-        });
-        window.dispatchEvent(event);
-      }
+      window.dispatchEvent(
+        new CustomEvent("knowledgeEntryAdded", { detail: newEntry })
+      );
 
       return newEntry;
     };
 
-    window.setLastGeneratedSection = async (section) => {
-      setLastGeneratedSection(section);
-    };
-    window.setLastGeneratedSubSection = async (section) => {
-      setLastGeneratedSubsection(section);
-    };
-    window.setIsLoading = async (bool) => {
-      setIsLoading(bool);
-    };
-    window.setIsGeneratingPDF = async (bool) => {
-      setIsGeneratingPDF(bool);
-    };
-    window.setEditComponents = async (key, content) => {
-      setEditedComponents((prev) => ({
-        ...prev,
-        [key]: content,
-      }));
+    window.getStoredKnowlegde = async () => {
+      return window.__globalKnowledgeCache || [];
     };
   }, []);
 
-  useEffect(() => {
-    const handleNewItem = () => {
-      setHasNewItems(true);
-    };
+  const getFilteredKnowledge = (section: string) => {
+    const mainSections = ["approach", "technology", "innovation"];
+    if (section === "other") {
+      return localChats.filter(
+        (item) => !mainSections.includes(item.section.toLowerCase())
+      );
+    }
+    return localChats.filter((item) => item.section.toLowerCase() === section);
+  };
 
+  useEffect(() => {
+    const handleNewItem = () => setHasNewItems(true);
     window.addEventListener("researchNoteAdded", handleNewItem);
     window.addEventListener("knowledgeEntryAdded", handleNewItem);
-
     return () => {
       window.removeEventListener("researchNoteAdded", handleNewItem);
       window.removeEventListener("knowledgeEntryAdded", handleNewItem);
@@ -280,7 +235,6 @@ export default function StoredKnowledge({
 
   const saveProgress = useCallback(() => {
     setIsSaving(true);
-
     try {
       const dataToSave: SavedPatentData = {
         editedComponents,
@@ -291,10 +245,7 @@ export default function StoredKnowledge({
         lastGeneratedSubsection,
         timestamp: Date.now(),
       };
-
       localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
-
-      // Show success toast
       toast({
         title: "Success",
         description: "Progress saved successfully!",
@@ -302,7 +253,6 @@ export default function StoredKnowledge({
         duration: 3000,
       });
     } catch (err) {
-      console.error("Error saving progress:", err);
       toast({
         title: "Error",
         description: "Failed to save progress",
@@ -319,7 +269,6 @@ export default function StoredKnowledge({
     currentSubsectionIndex,
     lastGeneratedSection,
     lastGeneratedSubsection,
-    toast,
   ]);
 
   return (
@@ -431,60 +380,79 @@ export default function StoredKnowledge({
             </DialogTitle>
           </DialogHeader>
 
-          <ScrollArea className="h-[60vh] pr-4">
-            <div className="space-y-6">
-              {localChats.map((item) => (
-                <div
-                  key={item.id}
-                  className="border rounded-lg overflow-hidden"
-                >
-                  <div className="bg-muted px-4 py-2 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">{item.section}</span>
-                      <span className="text-muted-foreground text-sm">
-                        {new Date(item.timestamp).toLocaleString()}
-                      </span>
-                    </div>
-                    {item.saved && item.remixed ? (
-                      <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
-                        Remixed
-                      </span>
-                    ) : (
-                      <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
-                        Saved
-                      </span>
-                    )}
-                  </div>
-                  <div className="p-4 space-y-3">
-                    {item.question === "Research Note" ? (
-                      // Research Note format
-                      <div className="bg-primary/5 p-3 rounded-md">
-                        <div className="flex items-center gap-2 mb-2">
-                          <FileText className="h-4 w-4 text-primary" />
-                          <p className="font-medium text-sm">Research Note</p>
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
+            <TabsList className="grid w-full grid-cols-4 mb-2">
+              <TabsTrigger value="other">Other</TabsTrigger>
+              <TabsTrigger value="approach">Approach</TabsTrigger>
+              <TabsTrigger value="technology">Technology</TabsTrigger>
+              <TabsTrigger value="innovation">Innovation</TabsTrigger>
+            </TabsList>
+
+            {["other", "approach", "technology", "innovation"].map((tab) => (
+              <TabsContent key={tab} value={tab}>
+                <ScrollArea className="h-[60vh] pr-4">
+                  <div className="space-y-6 py-4">
+                    {getFilteredKnowledge(tab).length > 0 ? (
+                      getFilteredKnowledge(tab).map((item) => (
+                        <div
+                          key={item.id}
+                          className="border rounded-lg overflow-hidden"
+                        >
+                          <div className="bg-muted px-4 py-2 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium">
+                                {item.section}
+                              </span>
+                              <span className="text-muted-foreground text-sm">
+                                {new Date(item.timestamp).toLocaleString()}
+                              </span>
+                            </div>
+                            <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+                              {item.saved && item.remixed ? "Remixed" : "Saved"}
+                            </span>
+                          </div>
+                          <div className="p-4 space-y-3">
+                            {item.question === "Research Note" ? (
+                              <div className="bg-primary/5 p-3 rounded-md">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <FileText className="h-4 w-4 text-primary" />
+                                  <p className="font-medium text-sm">
+                                    Research Note
+                                  </p>
+                                </div>
+                                <p className="text-sm whitespace-pre-wrap">
+                                  {item.answer}
+                                </p>
+                              </div>
+                            ) : (
+                              <>
+                                <div className="bg-accent/30 p-3 rounded-md">
+                                  <p className="font-medium text-sm">
+                                    Q: {item.question}
+                                  </p>
+                                </div>
+                                <div className="bg-primary/5 p-3 rounded-md">
+                                  <p className="text-sm">A: {item.answer}</p>
+                                </div>
+                              </>
+                            )}
+                          </div>
                         </div>
-                        <p className="text-sm whitespace-pre-wrap">
-                          {item.answer}
-                        </p>
+                      ))
+                    ) : (
+                      <div className="text-center text-muted-foreground py-10">
+                        No knowledge items in this section yet.
                       </div>
-                    ) : (
-                      // Regular Q&A format
-                      <>
-                        <div className="bg-accent/30 p-3 rounded-md">
-                          <p className="font-medium text-sm">
-                            Q: {item.question}
-                          </p>
-                        </div>
-                        <div className="bg-primary/5 p-3 rounded-md">
-                          <p className="text-sm">A: {item.answer}</p>
-                        </div>
-                      </>
                     )}
                   </div>
-                </div>
-              ))}
-            </div>
-          </ScrollArea>
+                </ScrollArea>
+              </TabsContent>
+            ))}
+          </Tabs>
         </DialogContent>
       </Dialog>
     </>

@@ -650,7 +650,7 @@ This section should be detailed, technically accurate, and formatted appropriate
             </div>
 
             {expandedSections[section] && (
-              <div className="pl-8 space-y-6">
+              <div className="space-y-6">
                 {hasContent ? (
                   <div
                     ref={
