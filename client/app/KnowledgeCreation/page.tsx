@@ -114,7 +114,9 @@ export default function Home() {
           <KnowledgeCreation />
         </div>
       ) : stage === 2 ? (
-        <Embodiments stage={stage} setStage={setStage} />
+        <div className="">
+          <Embodiments stage={stage} setStage={setStage} />
+        </div>
       ) : (
         <div className="px-4 py-8">
           <StoredKnowledge stage={stage} setStage={setStage} />

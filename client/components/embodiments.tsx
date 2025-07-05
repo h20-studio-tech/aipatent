@@ -70,10 +70,12 @@ interface RemixedEmbodiment {
 }
 
 interface RawData {
+  abstract?: string;
   keyterms?: string;
   summary?: string;
   description?: string;
   claims?: string;
+  [key: string]: string | undefined; // To support dynamic keys like `description_header_*`
 }
 
 // Interface for stored knowledge objects
@@ -234,72 +236,6 @@ interface EmbodimentsProps {
   setStage: (stage: number) => void;
 }
 
-const mockRawData = {
-  abstract: `[RAW PATENT TEXT - ABSTRACT]\n\nAn invention is disclosed for a system and method for immunoglobulin Y (IgY) antibody extraction from avian sources, specifically chicken egg yolks. The method improves extraction efficiency and antibody stability. The invention includes novel purification protocols that maintain the structural integrity and biological activity of IgY antibodies. The system comprises an automated extraction apparatus, purification columns, and quality control mechanisms. Applications include therapeutic treatments, diagnostic assays, and research.`,
-  keyTerms: `[RAW PATENT TEXT - DEFINITIONS SECTION]\n\n1.1 Document Processing System: A software solution for managing the lifecycle of digital documents.\n1.2 Cloud-based Storage: A model of data storage where digital information is stored in logical pools across multiple servers.\n1.3 Version Control: A system that records changes to files over time.\n1.4 Multi-factor Authentication: A security process that requires users to provide two or more verification factors to gain access to a resource, typically combining something they know (password) with something they have (security token) or something they are (biometric).`,
-  summary: `[RAW PATENT TEXT - SUMMARY OF INVENTION]\n\nThe invention provides for a manufacturing system for electronic devices. The system is designed to enhance durability and reduce environmental impact. It addresses challenges in modern electronics manufacturing. The system includes a modular assembly process, energy-efficient techniques, and novel material compositions. The advantages include reduced production costs, extended product lifespan, and improved customer satisfaction. The invention relates to methods and systems for extracting, purifying, and utilizing immunoglobulin Y (IgY) antibodies from avian sources, particularly chicken egg yolks. The disclosed methods provide improved extraction efficiency and antibody stability compared to conventional techniques.`,
-  description: `[RAW PATENT TEXT - DETAILED DESCRIPTION - OVERVIEW]\n\nFIG. 1 shows a block diagram of the electronic device manufacturing system (100). The system comprises a material processing subsystem (110), a component assembly subsystem (120), and a quality control subsystem (130). The material processing subsystem (110) handles the preparation of raw materials. The component assembly subsystem (120) manages the precision assembly of electronic components. The quality control subsystem (130) implements automated inspection and testing. The security module implements multi-factor authentication for accessing sensitive documents. Encryption is applied to documents both in transit and at rest. Access control lists define user permissions at the document and section levels. Audit logs track all document access and modifications for compliance purposes.`,
-  claims: `[RAW PATENT TEXT - CLAIMS]\n\nWhat is claimed is:\n1. A system for manufacturing electronic devices, comprising: a material processing subsystem configured to prepare and allocate materials with precision control; a component assembly subsystem configured to assemble electronic components with adaptive positioning; and a quality control subsystem configured to detect manufacturing defects using multi-spectral imaging.\n2. The system of claim 1, wherein the material processing subsystem is further configured to incorporate recycled materials.\n3. A method for automated document classification comprising: receiving a document; extracting text features using natural language processing; applying a machine learning classifier to categorize the document; assigning metadata tags based on the classification; and storing the document with its classification information in a searchable database.`,
-
-  [`description_header_${slugify(
-    "Document Management Systems"
-  )}`]: `[RAW PATENT TEXT - DETAILED DESCRIPTION - DOCUMENT MANAGEMENT SYSTEMS]\n\nThis subsection elaborates on the various embodiments related to document management systems. It covers aspects like cloud-based storage, version control, collaborative editing, and security features such as multi-factor authentication and encryption. The focus is on systems that ensure efficient and secure handling of documents throughout their lifecycle.`,
-  [`description_category_${slugify("Document Management Systems")}-${slugify(
-    "disease rationale"
-  )}`]: `[RAW PATENT TEXT - DETAILED DESCRIPTION - DOCUMENT MANAGEMENT SYSTEMS - DISEASE RATIONALE]\n\nSpecific embodiments under this category within Document Management Systems specifically address the rationale behind certain design choices or functionalities as they pertain to disease-related information management or similar critical applications. This includes ensuring data integrity, traceability, and secure access for sensitive information.`,
-
-  [`description_header_${slugify(
-    "Mobile Applications"
-  )}`]: `[RAW PATENT TEXT - DETAILED DESCRIPTION - MOBILE APPLICATIONS]\n\nThis part of the detailed description focuses on embodiments related to mobile applications for document access. Key features include responsive design for various screen sizes, offline access capabilities, and synchronization mechanisms for changes made while offline. The aim is to provide seamless document interaction on mobile devices.`,
-  [`description_category_${slugify("Mobile Applications")}-${slugify(
-    "disease rationale"
-  )}`]: `[RAW PATENT TEXT - DETAILED DESCRIPTION - MOBILE APPLICATIONS - DISEASE RATIONALE]\n\nWithin mobile applications, these embodiments highlight the importance of secure and reliable access to potentially critical information (e.g., related to disease management or patient data) on the go. This includes considerations for data privacy and usability in mobile contexts.`,
-
-  [`description_header_${slugify(
-    "AI Assistants"
-  )}`]: `[RAW PATENT TEXT - DETAILED DESCRIPTION - AI ASSISTANTS]\n\nThis subsection describes embodiments involving AI-powered assistants integrated into the document system. These assistants analyze document content to provide contextual recommendations, suggest similar documents, extract key information like deadlines, and identify important entities.`,
-  [`description_category_${slugify("AI Assistants")}-${slugify(
-    "disease rationale"
-  )}`]: `[RAW PATENT TEXT - DETAILED DESCRIPTION - AI ASSISTANTS - DISEASE RATIONALE]\n\nAI assistants in this context are detailed for their role in processing and understanding complex information, such as medical texts or research papers. The rationale focuses on improving comprehension, speeding up research, and aiding in decision-making by highlighting relevant data points.`,
-
-  [`description_header_${slugify(
-    "Workflow Automation"
-  )}`]: `[RAW PATENT TEXT - DETAILED DESCRIPTION - WORKFLOW AUTOMATION]\n\nEmbodiments concerning document workflow automation are detailed here. This includes engines that automate business processes involving document handling, customizable workflows for routing and approval, notification systems, and analytics for process efficiency.`,
-  [`description_category_${slugify("Workflow Automation")}-${slugify(
-    "product composition"
-  )}`]: `[RAW PATENT TEXT - DETAILED DESCRIPTION - WORKFLOW AUTOMATION - PRODUCT COMPOSITION]\n\nThese embodiments describe the structural components and features of workflow automation systems. This includes the design of the workflow engine, the rule-based systems for routing, and the mechanisms for notifications and escalations, forming the core product composition for automated document processes.`,
-
-  [`description_header_${slugify(
-    "System Integration"
-  )}`]: `[RAW PATENT TEXT - DETAILED DESCRIPTION - SYSTEM INTEGRATION]\n\nThis section covers the integration framework that connects the document system with other external applications. It discusses APIs, pre-built connectors for common business systems, webhook support for event-driven integration, and custom data mappings.`,
-  [`description_category_${slugify("System Integration")}-${slugify(
-    "product composition"
-  )}`]: `[RAW PATENT TEXT - DETAILED DESCRIPTION - SYSTEM INTEGRATION - PRODUCT COMPOSITION]\n\nHere, the focus is on the components that enable system integration, such as the API architecture, the design of connectors, and the data transformation tools. These elements constitute the product's ability to interoperate with other software.`,
-
-  [`description_header_${slugify(
-    "Compliance Management"
-  )}`]: `[RAW PATENT TEXT - DETAILED DESCRIPTION - COMPLIANCE MANAGEMENT]\n\nEmbodiments related to compliance management are described, ensuring documents adhere to regulatory requirements. This includes policy templates, retention policies, compliance reporting, and audit trails.`,
-  [`description_category_${slugify("Compliance Management")}-${slugify(
-    "product composition"
-  )}`]: `[RAW PATENT TEXT - DETAILED DESCRIPTION - COMPLIANCE MANAGEMENT - PRODUCT COMPOSITION]\n\nThis details the features and modules designed for compliance, such as the policy enforcement engine, automated archiving/deletion mechanisms based on retention rules, and the generation of compliance reports. These are key parts of the product's compliance capabilities.`,
-
-  [`description_header_${slugify(
-    "Document Templates"
-  )}`]: `[RAW PATENT TEXT - DETAILED DESCRIPTION - DOCUMENT TEMPLATES]\n\nThis subsection details the document template system for standardizing content creation. It covers templates with predefined sections, dynamic fields, approval workflows for templates, and analytics on template usage.`,
-  [`description_category_${slugify("Document Templates")}-${slugify(
-    "product composition"
-  )}`]: `[RAW PATENT TEXT - DETAILED DESCRIPTION - DOCUMENT TEMPLATES - PRODUCT COMPOSITION]\n\nEmbodiments here describe the structure of the template system itself: how templates are created, stored, and managed; how dynamic fields are implemented; and how versioning or approval for templates works. This forms the product features for template management.`,
-};
-
-const combinedRawData = Object.entries(mockRawData)
-  .map(
-    ([key, value]) =>
-      `----------\n\n[ ${key
-        .replace(/_/g, " ")
-        .toUpperCase()} ]\n\n----------\n\n${value}`
-  )
-  .join("\n\n\n");
-
 export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
   const [isExtracting, setIsExtracting] = useState(false);
   const [keyTermsFromApi, setKeyTermsFromApi] = useState<
@@ -336,9 +272,17 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
   const [showSplitScreen, setShowSplitScreen] = useState<boolean>(false);
   const [sourcesPanelCollapsed, setSourcesPanelCollapsed] =
     useState<boolean>(false);
+  const combinedRawData = Object.entries(rawData)
+    .map(
+      ([key, value]) =>
+        `----------\n\n[ ${key
+          .replace(/_/g, " ")
+          .toUpperCase()} ]\n\n----------\n\n${value}`
+    )
+    .join("\n\n\n");
   const [splitScreenContent, setSplitScreenContent] = useState({
     title: "All Sources",
-    content: combinedRawData,
+    content: "",
   });
   const [isProcessingPdf, setIsProcessingPdf] = useState(false);
   const [processingComplete, setProcessingComplete] = useState(false);
@@ -380,10 +324,9 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
       const response = await axios.get(
         `${backendUrl}/v1/raw-sections/${patentId}`
       );
-
       const { sections } = response.data;
 
-      setRawData({
+      const formatted: RawData = {
         keyterms:
           sections?.["key terms"] || "No Raw Data Found for this section",
         summary:
@@ -393,11 +336,24 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
           sections?.["detailed description"] ||
           "No Raw Data Found for this section",
         claims: sections?.["claims"] || "No Raw Data Found for this section",
-      });
+      };
 
-      console.log("response ABC", response);
+      for (const [key, value] of Object.entries(sections || {})) {
+        if (
+          ![
+            "key terms",
+            "summary of invention",
+            "detailed description",
+            "claims",
+          ].includes(key)
+        ) {
+          formatted[slugify(key)] = value;
+        }
+      }
+
+      setRawData(formatted);
     } catch (err) {
-      console.log(err);
+      console.error("Error fetching raw content:", err);
       toast({
         title: "Error",
         description: "Error while fetching raw text.",
@@ -680,6 +636,22 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
       console.error("Error fetching documents:", error);
     }
   };
+
+  useEffect(() => {
+    const combinedRawData = Object.entries(rawData)
+      .map(
+        ([key, value]) =>
+          `----------\n\n[ ${key
+            .replace(/_/g, " ")
+            .toUpperCase()} ]\n\n----------\n\n${value}`
+      )
+      .join("\n\n\n");
+
+    setSplitScreenContent({
+      title: "All Sources",
+      content: combinedRawData,
+    });
+  }, [rawData]);
 
   useEffect(() => {
     fetchDocuments();
@@ -1318,9 +1290,9 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
         </aside>
       )}
 
-      <div className={`flex-1`}>
+      <div className={`flex-1 `}>
         <ScrollArea className="flex-1">
-          <main className="container mx-auto px-4 py-8 relative">
+          <main className="container mx-auto px-4 py-8 relative h-screen overflow-y-auto">
             <StoredKnowledge stage={stage} setStage={setStage} />
             {/* Patent Documents Section - Adjust top margin since we removed the header */}
             <div className="border rounded-lg p-6 shadow-sm mb-8 mt-16">
@@ -1533,7 +1505,6 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                     </span>
                   </div>
 
-                  {/* Abstract Section - Before Key Terms */}
                   <div
                     id="abstract"
                     data-section-id="abstract"
@@ -1552,7 +1523,7 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button
+                        {/* <Button
                           variant="outline"
                           size="sm"
                           className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-transparent"
@@ -1565,7 +1536,7 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                           }}
                         >
                           View Original
-                        </Button>
+                        </Button> */}
                         <Button
                           variant="ghost"
                           size="icon"
@@ -1618,10 +1589,7 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                           className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-transparent"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleViewOriginal(
-                              "Key Terms",
-                              mockRawData.keyTerms
-                            );
+                            handleViewOriginal("Key Terms", rawData.keyterms);
                           }}
                         >
                           View Original
@@ -1694,7 +1662,7 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                             e.stopPropagation();
                             handleViewOriginal(
                               "Summary of Invention",
-                              mockRawData.summary
+                              rawData.summary
                             );
                           }}
                         >
@@ -1865,7 +1833,7 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                             e.stopPropagation();
                             handleViewOriginal(
                               "Detailed Description",
-                              mockRawData.description
+                              rawData.description
                             );
                           }}
                         >
@@ -2104,7 +2072,7 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                           className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-transparent"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleViewOriginal("Claims", mockRawData.claims);
+                            handleViewOriginal("Claims", rawData.claims);
                           }}
                         >
                           View Original

@@ -646,7 +646,7 @@ This section should be detailed, technically accurate, and formatted appropriate
                 <ChevronRight className="h-5 w-5 mr-2" />
               )}
               {/* Removed section number, showing just the section name */}
-              <h3 className="text-xl font-semibold">{section} h</h3>
+              <h3 className="text-xl font-semibold">{section}</h3>
             </div>
 
             {expandedSections[section] && (
