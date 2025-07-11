@@ -136,11 +136,11 @@ const ApproachInsights = forwardRef<ApproachInsightsRef, ApproachInsightsProps>(
               </div>
               <div className="flex items-center gap-2">
                 <Dialog>
-                  <DialogTrigger asChild>
+                  {/* <DialogTrigger asChild>
                     <Button variant="outline" size="sm">
                       Meta-data
                     </Button>
-                  </DialogTrigger>
+                  </DialogTrigger> */}
                   <DialogContent className="sm:max-w-[500px]">
                     <DialogHeader>
                       <DialogTitle>Approach Meta-data</DialogTitle>
@@ -157,15 +157,31 @@ const ApproachInsights = forwardRef<ApproachInsightsRef, ApproachInsightsProps>(
                               key={`${item.chunk_id}-${index}`}
                               className="border border-gray-300 p-3 rounded-md"
                             >
-                              <p><span className="font-semibold">Chunk ID:</span> {item.chunk_id}</p>
-                              <p><span className="font-semibold">Filename:</span> {item.filename}</p>
-                              <p><span className="font-semibold">Page Number:</span> {item.page_number}</p>
-                              <p><span className="font-semibold">Text:</span> <span className="italic">{item.text}</span></p>
+                              <p>
+                                <span className="font-semibold">Chunk ID:</span>{" "}
+                                {item.chunk_id}
+                              </p>
+                              <p>
+                                <span className="font-semibold">Filename:</span>{" "}
+                                {item.filename}
+                              </p>
+                              <p>
+                                <span className="font-semibold">
+                                  Page Number:
+                                </span>{" "}
+                                {item.page_number}
+                              </p>
+                              <p>
+                                <span className="font-semibold">Text:</span>{" "}
+                                <span className="italic">{item.text}</span>
+                              </p>
                             </div>
                           ))}
                         </div>
                       ) : (
-                        <p className="text-gray-500 text-center">No metadata available.</p>
+                        <p className="text-gray-500 text-center">
+                          No metadata available.
+                        </p>
                       )}
                     </div>
                   </DialogContent>
@@ -181,13 +197,26 @@ const ApproachInsights = forwardRef<ApproachInsightsRef, ApproachInsightsProps>(
                       <Save className="h-4 w-4 mr-2" />
                       {isSaving ? "Saving..." : "Save"}
                     </Button>
-                    <Button size="sm" variant="outline" onClick={handleCancelEdit} disabled={isSaving}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleCancelEdit}
+                      disabled={isSaving}
+                    >
                       <X className="h-4 w-4 mr-2" /> Cancel
                     </Button>
                   </>
                 ) : (
-                  <Button size="sm" onClick={handleSave} disabled={!content || isSaving || lastSaved === response}>
-                    {lastSaved === response ? "Saved" : isSaving ? "Saving" : "Save"}
+                  <Button
+                    size="sm"
+                    onClick={handleSave}
+                    disabled={!content || isSaving || lastSaved === response}
+                  >
+                    {lastSaved === response
+                      ? "Saved"
+                      : isSaving
+                      ? "Saving"
+                      : "Save"}
                   </Button>
                 )}
               </div>
@@ -222,8 +251,12 @@ const ApproachInsights = forwardRef<ApproachInsightsRef, ApproachInsightsProps>(
               <div className="space-y-4">
                 <div className="bg-muted/50 p-8 rounded-lg text-center">
                   <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-medium mb-2">No insights generated yet</h3>
-                  <p className="text-muted-foreground">Send a message in the chat to generate insights.</p>
+                  <h3 className="text-lg font-medium mb-2">
+                    No insights generated yet
+                  </h3>
+                  <p className="text-muted-foreground">
+                    Send a message in the chat to generate insights.
+                  </p>
                 </div>
               </div>
             )}
@@ -232,7 +265,9 @@ const ApproachInsights = forwardRef<ApproachInsightsRef, ApproachInsightsProps>(
                 <div className="text-center">
                   <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
                   <p className="font-medium">Generating Approach Insights...</p>
-                  <p className="text-sm text-muted-foreground mt-1">This may take a few moments</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    This may take a few moments
+                  </p>
                 </div>
               </div>
             )}

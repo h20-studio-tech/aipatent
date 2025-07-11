@@ -109,10 +109,7 @@ export default function Home() {
   return (
     <main className="w-100 mx-auto relative">
       {stage === 1 ? (
-        <div className="px-4 py-8">
-          <StoredKnowledge stage={stage} setStage={setStage} />
-          <KnowledgeCreation />
-        </div>
+        <KnowledgeCreation stage={stage} setStage={setStage} />
       ) : stage === 2 ? (
         <div className="">
           <Embodiments stage={stage} setStage={setStage} />
