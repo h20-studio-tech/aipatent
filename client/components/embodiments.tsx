@@ -294,14 +294,16 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
     claims: [],
   });
 
-  const handleViewOriginal = (title: string, content: string) => {
-    setSplitScreenContent({ title, content });
-    if (!showSplitScreen) {
-      setShowSplitScreen(true);
-    }
-    if (sourcesPanelCollapsed) {
-      setSourcesPanelCollapsed(false);
-    }
+  const handleViewOriginal = (section: string) => {
+    setShowSplitScreen(true);
+
+    // Scroll after slight delay to ensure DOM renders
+    setTimeout(() => {
+      const el = document.getElementById(`section-${section.toLowerCase()}`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 100);
   };
 
   const slugify = (text: string) =>
@@ -1229,6 +1231,8 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
     return a.localeCompare(b);
   });
 
+  const scrollRef = useRef<HTMLDivElement>(null);
+
   return (
     <div className="flex">
       {isProcessingPdf && (
@@ -1279,10 +1283,21 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                 </h2>
               </div>
               <ScrollArea className="flex-1">
-                <div className="p-4">
-                  <pre className="text-sm whitespace-pre-wrap font-mono bg-background p-4 rounded-md">
-                    {splitScreenContent.content}
-                  </pre>
+                <div className="p-4" ref={scrollRef}>
+                  {Object.entries(rawData).map(([section, content]) => (
+                    <div
+                      key={section}
+                      className="mb-4 p-4 border rounded-lg bg-background shadow-sm"
+                      id={`section-${section.toLowerCase()}`}
+                    >
+                      <h3 className="text-md font-bold mb-2 capitalize">
+                        {section === "keyterms" ? "Key Terms" : section}
+                      </h3>
+                      <pre className="text-sm whitespace-pre-wrap font-mono">
+                        {content}
+                      </pre>
+                    </div>
+                  ))}
                 </div>
               </ScrollArea>
             </>
@@ -1515,7 +1530,12 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                       onClick={() => setShowAbstract(!showAbstract)}
                     >
                       <div>
-                        <h3 className="text-2xl font-bold text-primary">
+                        <h3
+                          className="text-2xl font-bold text-primary"
+                          onClick={() => {
+                            console.log("Same", rawData);
+                          }}
+                        >
                           Abstract
                         </h3>
                         <p className="text-sm text-muted-foreground mt-1">
@@ -1589,7 +1609,7 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                           className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-transparent"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleViewOriginal("Key Terms", rawData.keyterms);
+                            handleViewOriginal("keyterms");
                           }}
                         >
                           View Original
@@ -1660,10 +1680,7 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                           className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-transparent"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleViewOriginal(
-                              "Summary of Invention",
-                              rawData.summary
-                            );
+                            handleViewOriginal("Summary");
                           }}
                         >
                           View Original
@@ -1831,10 +1848,7 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                           className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-transparent"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleViewOriginal(
-                              "Detailed Description",
-                              rawData.description
-                            );
+                            handleViewOriginal("description");
                           }}
                         >
                           View Original
@@ -2072,7 +2086,7 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                           className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-transparent"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleViewOriginal("Claims", rawData.claims);
+                            handleViewOriginal("Claims");
                           }}
                         >
                           View Original
