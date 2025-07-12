@@ -19,12 +19,22 @@ import { Dispatch, SetStateAction } from "react";
 import { PDF } from "@/lib/types";
 import { useRouter } from "next/router";
 import { useSearchParams } from "next/navigation";
+import StoredKnowledge from "./stored-knowledge";
+import MetadataPanel from "./metadata-panel";
 
 type InsightsRef = {
   generateContent: () => void;
 };
 
-export default function KnowledgeCreation() {
+interface KnowledgeCreationProps {
+  stage: number;
+  setStage: (stage: number) => void;
+}
+
+export default function KnowledgeCreation({
+  stage,
+  setStage,
+}: KnowledgeCreationProps) {
   const [patentName, setPatentName] = useState<string | null>(null);
   const [patentId, setPatentId] = useState<string>("");
 
@@ -36,7 +46,9 @@ export default function KnowledgeCreation() {
     }
   }, []);
   const [pdfs, setPdfs] = useState<PDF[]>([]);
-  const [activeTab, setActiveTab] = useState("approach");
+  const [activeTab, setActiveTab] = useState<
+    "approach" | "technology" | "innovation"
+  >("approach");
   const [question, setQuestion] = useState<string>("");
   const [innovationResponse, setInnovationResponse] = useState("");
   const [lastSavedApproach, setLastSavedApproach] = useState("");
@@ -97,139 +109,160 @@ export default function KnowledgeCreation() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">
-          {patentName ? patentName : "Knowledge Creation"}
-        </h1>
-        <p className="text-muted-foreground">
-          Synthesize knowledge from existing sources to craft a new patent
-        </p>
+    <main className="grid grid-cols-1 md:grid-cols-[350px_1fr] gap-6 py-2 h-screen bg-background">
+      {/* Left Panel */}
+      <div className="hidden md:block h-full overflow-y-auto rounded-lg border bg-card text-card-foreground shadow-sm">
+        <MetadataPanel
+          activeSection={activeTab}
+          metaData={
+            activeTab === "approach"
+              ? approachmetaData
+              : activeTab === "technology"
+              ? technologymetaData
+              : innovationmetaData
+          }
+        />
       </div>
 
-      {/* Tabs for different sections */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Research Sections</CardTitle>
-          <CardDescription>
-            Upload PDFs and chat with them to generate insights for your patent
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs
-            defaultValue="approach"
-            className="w-full"
-            onValueChange={(value) => setActiveTab(value)} // ✅ Ensure state updates on tab change
-          >
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="approach">Approach</TabsTrigger>
-              <TabsTrigger value="technology">Technology</TabsTrigger>
-              <TabsTrigger value="innovation">Innovation</TabsTrigger>
-            </TabsList>
+      {/* Right Panel */}
+      <div className="relative h-full overflow-y-auto">
+        <div className="container mx-auto px-4 py-8">
+          <StoredKnowledge stage={stage} setStage={setStage} />
+          <div className="text-center space-y-2 mb-4">
+            <h1 className="text-3xl font-bold tracking-tight">
+              {patentName ? patentName : "Knowledge Creation"}
+            </h1>
+            <p className="text-muted-foreground">
+              Synthesize knowledge from existing sources to craft a new patent
+            </p>
+          </div>
 
-            <TabsContent value="approach">
-              <SectionPanel
-                setQuestion={setQuestion}
-                patentId={patentId}
-                setMetaData={setApproachMetaData}
-                setInsightResponse={setApproachResponse}
-                sectionId="approach"
-                title="Approach"
-                pdfList={pdfs}
-                setPdfList={setPdfs}
-                selectedPdfIds={selectedPdfIds}
-                setSelectedPdfIds={setSelectedPdfIds}
-                selectedPdfs={selectedPdfs}
-                setSelectedPdfs={setSelectedPdfs}
-                pdfs={pdfs.filter(
-                  (pdf) => pdf.section === "approach" || !pdf.section
-                )}
-                onPdfUpload={handlePdfUpload}
-                hideInsights={true}
-              />
-            </TabsContent>
+          {/* Tabs for different sections */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Research Sections</CardTitle>
+              <CardDescription>
+                Upload PDFs and chat with them to generate insights for your
+                patent
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Tabs
+                defaultValue="approach"
+                className="w-full"
+                onValueChange={(value) => setActiveTab(value)} // ✅ Ensure state updates on tab change
+              >
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="approach">Approach</TabsTrigger>
+                  <TabsTrigger value="technology">Technology</TabsTrigger>
+                  <TabsTrigger value="innovation">Innovation</TabsTrigger>
+                </TabsList>
 
-            <TabsContent value="technology">
-              <SectionPanel
-                setQuestion={setQuestion}
-                patentId={patentId}
-                setMetaData={setTechnologyMetaData}
-                setInsightResponse={setTechnologyResponse}
-                sectionId="technology"
-                title="Technology"
-                pdfList={pdfs}
-                setPdfList={setPdfs}
-                selectedPdfIds={selectedPdfIds}
-                setSelectedPdfIds={setSelectedPdfIds}
-                selectedPdfs={selectedPdfs}
-                setSelectedPdfs={setSelectedPdfs}
-                pdfs={pdfs.filter(
-                  (pdf) => pdf.section === "technology" || !pdf.section
-                )}
-                onPdfUpload={handlePdfUpload}
-                hideInsights={true}
-              />
-            </TabsContent>
+                <TabsContent value="approach">
+                  <SectionPanel
+                    setQuestion={setQuestion}
+                    patentId={patentId}
+                    setMetaData={setApproachMetaData}
+                    setInsightResponse={setApproachResponse}
+                    sectionId="approach"
+                    title="Approach"
+                    pdfList={pdfs}
+                    setPdfList={setPdfs}
+                    selectedPdfIds={selectedPdfIds}
+                    setSelectedPdfIds={setSelectedPdfIds}
+                    selectedPdfs={selectedPdfs}
+                    setSelectedPdfs={setSelectedPdfs}
+                    pdfs={pdfs.filter(
+                      (pdf) => pdf.section === "approach" || !pdf.section
+                    )}
+                    onPdfUpload={handlePdfUpload}
+                    hideInsights={true}
+                  />
+                </TabsContent>
 
-            <TabsContent value="innovation">
-              <SectionPanel
-                setQuestion={setQuestion}
-                patentId={patentId}
-                setMetaData={setInnovationMetaData}
-                setInsightResponse={setInnovationResponse}
-                sectionId="innovation"
-                title="Innovation"
-                pdfList={pdfs}
-                setPdfList={setPdfs}
-                selectedPdfIds={selectedPdfIds}
-                setSelectedPdfIds={setSelectedPdfIds}
-                selectedPdfs={selectedPdfs}
-                setSelectedPdfs={setSelectedPdfs}
-                pdfs={pdfs.filter(
-                  (pdf) => pdf.section === "innovation" || !pdf.section
-                )}
-                onPdfUpload={handlePdfUpload}
-                hideInsights={true}
-              />
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+                <TabsContent value="technology">
+                  <SectionPanel
+                    setQuestion={setQuestion}
+                    patentId={patentId}
+                    setMetaData={setTechnologyMetaData}
+                    setInsightResponse={setTechnologyResponse}
+                    sectionId="technology"
+                    title="Technology"
+                    pdfList={pdfs}
+                    setPdfList={setPdfs}
+                    selectedPdfIds={selectedPdfIds}
+                    setSelectedPdfIds={setSelectedPdfIds}
+                    selectedPdfs={selectedPdfs}
+                    setSelectedPdfs={setSelectedPdfs}
+                    pdfs={pdfs.filter(
+                      (pdf) => pdf.section === "technology" || !pdf.section
+                    )}
+                    onPdfUpload={handlePdfUpload}
+                    hideInsights={true}
+                  />
+                </TabsContent>
 
-      {/* Conditional Insights Section based on active tab */}
-      {activeTab === "approach" && (
-        <ApproachInsights
-          patentId={patentId}
-          response={approachResponse}
-          question={question}
-          metaData={approachmetaData}
-          ref={approachInsightsRef}
-          lastSaved={lastSavedApproach}
-          setLastSaved={setLastSavedApproach}
-        />
-      )}
-      {activeTab === "technology" && (
-        <TechnologyInsights
-          patentId={patentId}
-          response={technologyResponse}
-          question={question}
-          metaData={technologymetaData}
-          ref={technologyInsightsRef}
-          lastSaved={lastSavedTechnology}
-          setLastSaved={setLastSavedTechnology}
-        />
-      )}
-      {activeTab === "innovation" && (
-        <InnovationInsights
-          patentId={patentId}
-          response={innovationResponse}
-          question={question}
-          metaData={innovationmetaData}
-          ref={innovationInsightsRef}
-          lastSaved={lastSavedInnovation}
-          setLastSaved={setLastSavedInnovation}
-        />
-      )}
-    </div>
+                <TabsContent value="innovation">
+                  <SectionPanel
+                    setQuestion={setQuestion}
+                    patentId={patentId}
+                    setMetaData={setInnovationMetaData}
+                    setInsightResponse={setInnovationResponse}
+                    sectionId="innovation"
+                    title="Innovation"
+                    pdfList={pdfs}
+                    setPdfList={setPdfs}
+                    selectedPdfIds={selectedPdfIds}
+                    setSelectedPdfIds={setSelectedPdfIds}
+                    selectedPdfs={selectedPdfs}
+                    setSelectedPdfs={setSelectedPdfs}
+                    pdfs={pdfs.filter(
+                      (pdf) => pdf.section === "innovation" || !pdf.section
+                    )}
+                    onPdfUpload={handlePdfUpload}
+                    hideInsights={true}
+                  />
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+
+          {/* Conditional Insights Section based on active tab */}
+          {activeTab === "approach" && (
+            <ApproachInsights
+              patentId={patentId}
+              response={approachResponse}
+              question={question}
+              metaData={approachmetaData}
+              ref={approachInsightsRef}
+              lastSaved={lastSavedApproach}
+              setLastSaved={setLastSavedApproach}
+            />
+          )}
+          {activeTab === "technology" && (
+            <TechnologyInsights
+              patentId={patentId}
+              response={technologyResponse}
+              question={question}
+              metaData={technologymetaData}
+              ref={technologyInsightsRef}
+              lastSaved={lastSavedTechnology}
+              setLastSaved={setLastSavedTechnology}
+            />
+          )}
+          {activeTab === "innovation" && (
+            <InnovationInsights
+              patentId={patentId}
+              response={innovationResponse}
+              question={question}
+              metaData={innovationmetaData}
+              ref={innovationInsightsRef}
+              lastSaved={lastSavedInnovation}
+              setLastSaved={setLastSavedInnovation}
+            />
+          )}
+        </div>
+      </div>
+    </main>
   );
 }
