@@ -126,7 +126,7 @@ export default function KnowledgeCreation({
 
       {/* Right Panel */}
       <div className="relative h-full overflow-y-auto">
-        <div className="container mx-auto px-4 py-8 space-y-8">
+        <div className="container mx-auto px-4 py-8">
           <StoredKnowledge stage={stage} setStage={setStage} />
           <div className="text-center space-y-2 mb-4">
             <h1 className="text-3xl font-bold tracking-tight">

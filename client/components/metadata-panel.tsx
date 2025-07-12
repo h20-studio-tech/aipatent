@@ -7,16 +7,20 @@ import { Info } from "lucide-react";
 
 interface MetadataPanelProps {
   activeSection: "approach" | "technology" | "innovation";
-  metaData: {
-    chunk_id: number;
-    filename: string;
-    page_number: number;
-    text: string;
-  }[];
+  metaData:
+    | {
+        chunk_id: number;
+        filename: string;
+        page_number: number;
+        text: string;
+      }[]
+    | null;
 }
 
 const MetadataPanel: FC<MetadataPanelProps> = ({ activeSection, metaData }) => {
   const sectionMetadata = metadata[activeSection];
+
+  const hasMetadata = metaData && metaData.length > 0;
 
   return (
     <div className="h-full">
@@ -27,13 +31,35 @@ const MetadataPanel: FC<MetadataPanelProps> = ({ activeSection, metaData }) => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="bg-muted p-2 rounded-md max-h-[calc(100vh-100px)] overflow-y-auto">
-          {metaData.length > 0 ? (
-            <pre className="text-xs whitespace-pre-wrap break-words">
-              {JSON.stringify(metaData, null, 2)}
-            </pre>
+        <div className="flex-1 overflow-auto space-y-3 p-2 text-sm break-words whitespace-pre-wrap">
+          {hasMetadata ? (
+            metaData!.map((item, index) => (
+              <div
+                key={`${item.chunk_id}-${index}`}
+                className="border border-border bg-white dark:bg-muted p-4 rounded-lg shadow-sm"
+              >
+                <p>
+                  <span className="font-semibold">Chunk ID:</span>{" "}
+                  {item.chunk_id}
+                </p>
+                <p>
+                  <span className="font-semibold">Filename:</span>{" "}
+                  <span className="break-words">{item.filename}</span>
+                </p>
+                <p>
+                  <span className="font-semibold">Page Number:</span>{" "}
+                  {item.page_number}
+                </p>
+                <p>
+                  <span className="font-semibold">Text:</span>{" "}
+                  <span className="italic text-muted-foreground break-words whitespace-pre-wrap">
+                    {item.text}
+                  </span>
+                </p>
+              </div>
+            ))
           ) : (
-            <div className="text-sm text-muted-foreground italic text-center py-8">
+            <div className="text-center text-muted-foreground italic py-8">
               💡 Ask a question to inspect the metadata here.
             </div>
           )}
