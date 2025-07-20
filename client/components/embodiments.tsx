@@ -362,11 +362,11 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
       setRawData(formatted);
     } catch (err) {
       console.error("Error fetching raw content:", err);
-      toast({
-        title: "Error",
-        description: "Error while fetching raw text.",
-        variant: "destructive",
-      });
+      // toast({
+      //   title: "Error",
+      //   description: "Error while fetching raw text.",
+      //   variant: "destructive",
+      // });
     }
   };
 
