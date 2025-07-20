@@ -1325,7 +1325,7 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
 </div>
 
                 <div className="p-4 space-y-4" ref={pagesScrollRef}>
-  {embodimentPages.map((page: any, id: number) => (
+  {embodimentPages.length > 1 && embodimentPages.map((page: any, id: number) => (
     <div
       key={id}
       id={`section-${page.section.toLowerCase()}_page_number-${page.page_number}`}
