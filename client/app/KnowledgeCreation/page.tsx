@@ -115,9 +115,14 @@ export default function Home() {
           <Embodiments stage={stage} setStage={setStage} />
         </div>
       ) : (
-        <div className="px-4 py-8">
-          <StoredKnowledge stage={stage} setStage={setStage} />
-          <PatentComponentGenerator antigen={antigen} disease={disease} />
+        <div className="">
+          {/* <StoredKnowledge stage={stage} setStage={setStage} /> */}
+          <PatentComponentGenerator
+            antigen={antigen}
+            disease={disease}
+            stage={stage}
+            setStage={setStage}
+          />
         </div>
       )}
     </main>

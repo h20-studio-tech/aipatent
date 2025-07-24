@@ -116,11 +116,10 @@ export async function generatePatentContent(
 
       // return loremIpsum;
     }
-    if (subsectionType === "Disease Overview") {
-      
-       const response = await axios.post(
+    if (subsectionType === "Disease Rationale") {
+      const response = await axios.post(
         `${backendUrl}/v1/sections/disease_overview`,
-         {
+        {
           innovation: innovation,
           technology: technology,
           approach: approach,
