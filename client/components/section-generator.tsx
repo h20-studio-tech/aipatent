@@ -16,9 +16,19 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ResizableSection, type SectionMetadata } from "./resizeable-section";
-import { Save, FileDown, ChevronDown, ChevronRight } from "lucide-react";
+import {
+  Save,
+  FileDown,
+  ChevronDown,
+  ChevronRight,
+  ChevronLeft,
+} from "lucide-react";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "./ui/use-toast";
+import { ScrollArea } from "./ui/scroll-area";
+import { backendUrl } from "@/config/config";
+import axios from "axios";
+import StoredKnowledge from "./stored-knowledge";
 
 interface PatentComponentGeneratorProps {
   patentContext: string;
@@ -26,6 +36,17 @@ interface PatentComponentGeneratorProps {
   generatedComponents: string[];
   antigen?: string;
   disease?: string;
+  stage: number;
+  setStage: (stage: number) => void;
+}
+
+interface RawData {
+  abstract?: string;
+  keyterms?: string;
+  summary?: string;
+  description?: string;
+  claims?: string;
+  [key: string]: string | undefined; // To support dynamic keys like `description_header_*`
 }
 
 interface SavedPatentData {
@@ -40,29 +61,54 @@ interface SavedPatentData {
 
 // Define the main sections (hardcoded headers)
 // Removed "Figures/Diagrams" as requested
+
+// const MAIN_SECTIONS = [
+//   "Background",
+//   "Summary of Invention",
+//   "Target Overview",
+//   "Underlying Mechanism",
+//   "High Level Concept",
+//   "Terms / Definitions",
+//   "Disease Rationale",
+//   "Formulations & Variations",
+//   "Claims",
+// ];
+
+// const SUBSECTIONS: Record<string, string[]> = {
+//   Background: ["Background"],
+//   "Summary of Invention": ["Summary of Invention"],
+//   "Target Overview": ["Target Overview"],
+//   "Underlying Mechanism": ["Underlying Mechanism"],
+//   "High Level Concept": ["High Level Concept"],
+//   "Terms / Definitions": ["Terms / Definitions"],
+//   "Disease Rationale": ["Disease Rationale"],
+//   "Formulations & Variations": ["Formulations & Variations"],
+//   Claims: ["Claims"],
+// };
+
 const MAIN_SECTIONS = [
   "Background",
   "Summary of Invention",
   "Field of Invention",
   "Target Overview",
-  "Disease Overview",
+  "Disease Rationale",
   "Underlying Mechanism",
   "High Level Concept",
   "Claims",
   "Abstract",
 ];
 
-// Define the subsections for each main section (these will be generated)
-// Now each section just has itself as a subsection
-// Removed "Figures/Diagrams" as requested
 const SUBSECTIONS: Record<string, string[]> = {
   Background: ["Background"],
   "Summary of Invention": ["Summary of Invention"],
   "Field of Invention": ["Field of Invention"],
   "Target Overview": ["Target Overview"],
-  "Disease Overview": ["Disease Overview"],
+  "Disease Rationale": ["Disease Rationale"],
   "Underlying Mechanism": ["Underlying Mechanism"],
   "High Level Concept": ["High Level Concept"],
+  // "Terms / Definitions": ["Terms / Definitions"],
+  // "Disease Rationale": ["Disease Rationale"],
+  // "Formulations & Variations": ["Formulations & Variations"],
   Claims: ["Claims"],
   Abstract: ["Abstract"],
 };
@@ -75,6 +121,8 @@ const PatentComponentGenerator: React.FC<PatentComponentGeneratorProps> = ({
   generatedComponents,
   antigen,
   disease,
+  stage,
+  setStage,
 }) => {
   const { toast } = useToast();
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
@@ -82,6 +130,14 @@ const PatentComponentGenerator: React.FC<PatentComponentGeneratorProps> = ({
   const currentSection = MAIN_SECTIONS[currentSectionIndex];
   const currentSubsections = SUBSECTIONS[currentSection];
   const currentSubsection = currentSubsections?.[currentSubsectionIndex];
+  const [embodimentPages, setEmbdoimentPages] = useState<any>({});
+  const [showSplitScreen, setShowSplitScreen] = useState<boolean>(true);
+  const [sourcesPanelCollapsed, setSourcesPanelCollapsed] =
+    useState<boolean>(false);
+  const [splitScreenContent, setSplitScreenContent] = useState({
+    title: "All Sources",
+    content: "",
+  });
 
   const [generatedContent, setGeneratedContent] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -98,6 +154,13 @@ const PatentComponentGenerator: React.FC<PatentComponentGeneratorProps> = ({
   const latestGeneratedRef = useRef<HTMLDivElement>(null);
   const correctionRef = useRef<HTMLTextAreaElement>(null);
   const regenerateRef = useRef<HTMLTextAreaElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [rawData, setRawData] = useState<RawData>({
+    keyterms: "",
+    summary: "",
+    description: "",
+    claims: "",
+  });
   const [lastGeneratedSection, setLastGeneratedSection] = useState<
     string | null
   >(null);
@@ -242,6 +305,69 @@ const PatentComponentGenerator: React.FC<PatentComponentGeneratorProps> = ({
     lastGeneratedSubsection,
     toast,
   ]);
+
+  const fetchRawContent = async () => {
+    try {
+      const response = await axios.get(
+        `${backendUrl}/v1/raw-sections/${patentId}`
+      );
+
+      const embodimentsRawResponse = await axios.get(
+        `${backendUrl}/v1/pages/${patentId}`
+      );
+      console.log("Hello pp emb", embodimentsRawResponse);
+
+      setEmbdoimentPages(embodimentsRawResponse.data.pages);
+      const { sections } = response.data;
+
+      const formatted: RawData = {
+        keyterms:
+          sections?.["key terms"] || "No Raw Data Found for this section",
+        summary:
+          sections?.["summary of invention"] ||
+          "No Raw Data Found for this section",
+        description:
+          sections?.["detailed description"] ||
+          "No Raw Data Found for this section",
+        claims: sections?.["claims"] || "No Raw Data Found for this section",
+      };
+
+      for (const [key, value] of Object.entries(sections || {})) {
+        if (
+          ![
+            "key terms",
+            "summary of invention",
+            "detailed description",
+            "claims",
+          ].includes(key)
+        ) {
+          formatted[slugify(key)] = value;
+        }
+      }
+
+      setRawData(formatted);
+    } catch (err) {
+      console.error("Error fetching raw content:", err);
+      // toast({
+      //   title: "Error",
+      //   description: "Error while fetching raw text.",
+      //   variant: "destructive",
+      // });
+    }
+  };
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      setPatentId(params.get("patentId"));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (patentId) {
+      fetchRawContent();
+    }
+  }, [patentId]);
 
   const handleGenerate = useCallback(async () => {
     if (typeof window !== "undefined" && window.setIsLoading) {
@@ -705,215 +831,327 @@ This section should be detailed, technically accurate, and formatted appropriate
   };
 
   return (
-    <>
-      <div className="mb-6">
-        {/* Navigation bar */}
-
-        {/* Header text */}
-        <div className="mt-10">
-          <h2 className="text-2xl font-bold">Patent Section Generator</h2>
-          <p className="text-gray-500">
-            Generate patent sections sequentially with AI assistance
-          </p>
-        </div>
-      </div>
-
-      <Card className="border rounded-lg">
-        <CardContent
-          className="relative max-h-[80vh] overflow-y-auto pt-6"
-          ref={contentRef}
+    <div className="flex h-screen w-full">
+      {showSplitScreen && (
+        <aside
+          className={`relative bg-muted/30 border-r z-20 transition-all duration-300 ease-in-out ${
+            sourcesPanelCollapsed ? "w-12" : "w-1/3 max-w-lg"
+          } hidden lg:flex flex-col flex-shrink-0 h-full`}
         >
-          <div className="grid gap-4">
-            {error && (
-              <Alert
-                variant={
-                  error.includes("successfully") ? "default" : "destructive"
-                }
-              >
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
-            {/* Regenerate Dialog */}
-            <Dialog
-              open={regenerateModalOpen}
-              onOpenChange={setRegenerateModalOpen}
+          {/* Collapse/Expand Button */}
+          <div className="absolute top-4 right-0 z-10">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSourcesPanelCollapsed(!sourcesPanelCollapsed)}
+              className="h-8 w-8"
+              aria-label={
+                sourcesPanelCollapsed
+                  ? "Expand sources panel"
+                  : "Collapse sources panel"
+              }
             >
-              <DialogContent className="sm:max-w-[500px]">
-                <DialogHeader>
-                  <DialogTitle>Regenerate {lastGeneratedSection}</DialogTitle>
-                  <DialogDescription>
-                    Provide specific guidance to steer the AI in generating a
-                    new version of this section.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="py-4">
-                  <textarea
-                    ref={regenerateRef}
-                    defaultValue={regenerateInput}
-                    onChange={handleRegenerateInputChange}
-                    placeholder="Enter specific instructions for regeneration (e.g., 'Make it more technical', 'Focus more on the advantages', 'Simplify the language')..."
-                    className="w-full min-h-[200px] p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-                  />
-                </div>
-                <DialogFooter>
-                  <Button
-                    variant="outline"
-                    onClick={() => setRegenerateModalOpen(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={handleRegenerateWithCorrections}
-                    className="bg-black text-white hover:bg-gray-800"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? "Regenerating..." : "Submit & Regenerate"}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-
-            {/* Render all sections */}
-            {renderSections()}
-
-            {/* Hidden reference for scrolling to the latest generated content */}
-            <div ref={latestGeneratedRef} className="h-0 w-0" />
-
-            {/* Feedback Dialog */}
-            <Dialog
-              open={correctionModalOpen}
-              onOpenChange={setCorrectionModalOpen}
-            >
-              <DialogContent className="sm:max-w-[500px]">
-                <DialogHeader>
-                  <DialogTitle>
-                    Provide Feedback for {lastGeneratedSection}
-                  </DialogTitle>
-                  <DialogDescription>
-                    Please provide specific feedback or corrections to improve
-                    the generated content.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="py-4">
-                  <textarea
-                    ref={correctionRef}
-                    defaultValue={userCorrection}
-                    onChange={handleCorrectionChange}
-                    placeholder="Enter your specific feedback or corrections here..."
-                    className="w-full min-h-[200px] p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-                  />
-                </div>
-                <DialogFooter>
-                  <Button
-                    variant="outline"
-                    onClick={() => setCorrectionModalOpen(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      // Ensure we have the latest value from the textarea
-                      const text = correctionRef.current?.value || "";
-
-                      // Update the state with the latest value
-                      setUserCorrection(text);
-
-                      // Close the dialog
-                      setCorrectionModalOpen(false);
-
-                      // Show success toast
-                      toast({
-                        title: "Success",
-                        description: "Feedback saved successfully!",
-                        duration: 3000,
-                      });
-                    }}
-                    className="bg-black text-white hover:bg-gray-800"
-                  >
-                    Submit Feedback
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-
-            {/* Bottom Button - Either Generate or Generate PDF */}
-            <div className="mt-8 flex justify-start">
-              {isGenerationComplete() ? (
-                // Show Generate PDF button when generation is complete
-                <Button
-                  onClick={handleGeneratePDF}
-                  disabled={isGeneratingPDF}
-                  className="bg-black text-white hover:bg-gray-800 px-8 py-6 text-lg relative"
-                >
-                  {isGeneratingPDF ? (
-                    <div className="flex items-center">
-                      <div className="mr-2 flex">
-                        <span
-                          className="animate-bounce inline-block mx-0.5 h-1.5 w-1.5 rounded-full bg-white"
-                          style={{ animationDelay: "0ms" }}
-                        ></span>
-                        <span
-                          className="animate-bounce inline-block mx-0.5 h-1.5 w-1.5 rounded-full bg-white"
-                          style={{ animationDelay: "150ms" }}
-                        ></span>
-                        <span
-                          className="animate-bounce inline-block mx-0.5 h-1.5 w-1.5 rounded-full bg-white"
-                          style={{ animationDelay: "300ms" }}
-                        ></span>
-                      </div>
-                      Generating PDF...
-                    </div>
-                  ) : (
-                    <>
-                      <FileDown className="h-5 w-5 mr-2" />
-                      Generate PDF
-                    </>
-                  )}
-                </Button>
+              {sourcesPanelCollapsed ? (
+                <ChevronRight className="h-4 w-4" />
               ) : (
-                // Show Generate button when there are still sections to generate
-                <Button
-                  onClick={handleGenerate}
-                  disabled={isLoading}
-                  className="bg-black text-white hover:bg-gray-800 px-8 py-6 text-lg relative"
-                >
-                  {isLoading ? (
-                    <div className="flex items-center">
-                      <div className="mr-2 flex">
-                        <span
-                          className="animate-bounce inline-block mx-0.5 h-1.5 w-1.5 rounded-full bg-white"
-                          style={{ animationDelay: "0ms" }}
-                        ></span>
-                        <span
-                          className="animate-bounce inline-block mx-0.5 h-1.5 w-1.5 rounded-full bg-white"
-                          style={{ animationDelay: "150ms" }}
-                        ></span>
-                        <span
-                          className="animate-bounce inline-block mx-0.5 h-1.5 w-1.5 rounded-full bg-white"
-                          style={{ animationDelay: "300ms" }}
-                        ></span>
-                      </div>
-                      Generating...
-                    </div>
-                  ) : (
-                    <>
-                      Generate {currentSection}
-                      <span className="ml-2 opacity-70 text-sm">
-                        (Ctrl+Enter)
-                      </span>
-                    </>
-                  )}
-                </Button>
+                <ChevronLeft className="h-4 w-4" />
               )}
-            </div>
+            </Button>
           </div>
-        </CardContent>
-      </Card>
 
+          {!sourcesPanelCollapsed && (
+            <>
+              <div className="border-b p-4 flex items-center justify-between bg-muted/50 flex-shrink-0">
+                <h2 className="text-lg font-semibold">
+                  Data: {splitScreenContent.title}
+                </h2>
+              </div>
+              <ScrollArea className="flex-1">
+                <div className="p-4 space-y-4" ref={scrollRef}>
+                  {Object.entries(rawData).map(([section, content]) => (
+                    <div
+                      key={section}
+                      id={`section-${section.toLowerCase()}`}
+                      className="rounded-2xl border border-p200 bg-white shadow-md hover:shadow-lg transition-shadow duration-300 p-6"
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <h3 className="text-lg font-semibold text-n900 capitalize">
+                            {section === "keyterms" ? "Key Terms" : section}
+                          </h3>
+                          <p className="text-xs text-n900 opacity-70">
+                            Section: {section}
+                          </p>
+                        </div>
+                      </div>
+
+                      <pre className="text-sm text-n900 whitespace-pre-wrap leading-relaxed font-mono border-t border-dashed pt-4 mt-4">
+                        {content}
+                      </pre>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="p-4 space-y-4">
+                  {embodimentPages.length > 1 &&
+                    embodimentPages.map((page: any, id: number) => (
+                      <div
+                        key={id}
+                        id={`section-${page.section.toLowerCase()}_page_number-${
+                          page.page_number
+                        }`}
+                        className="rounded-2xl border border-p200 bg-white shadow-md hover:shadow-lg transition-shadow duration-300 p-6"
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <div>
+                            <h2 className="text-lg font-semibold text-n900 capitalize">
+                              {page.section}
+                            </h2>
+                            <p className="text-xs text-n900 opacity-70">
+                              Page {page.page_number} – {page.filename}
+                            </p>
+                          </div>
+                        </div>
+
+                        <p className="text-sm text-n900 whitespace-pre-wrap leading-relaxed font-mono border-t border-dashed pt-4 mt-4">
+                          {page.text}
+                        </p>
+                      </div>
+                    ))}
+                </div>
+              </ScrollArea>
+            </>
+          )}
+        </aside>
+      )}
+      <main
+        className={`flex-1 transition-all duration-300 ease-in-out px-4 ${
+          showSplitScreen
+            ? sourcesPanelCollapsed
+              ? "lg:w-[calc(100%-3rem)]"
+              : "lg:w-[calc(100%-33.3333%)]"
+            : "w-full"
+        }`}
+        style={{
+          width: showSplitScreen
+            ? sourcesPanelCollapsed
+              ? "calc(100% - 3rem)"
+              : "calc(100% - 33.3333%)"
+            : "100%",
+        }}
+      >
+        <Card className="border rounded-lg">
+          <CardContent
+            className="relative max-h-[80vh] overflow-y-auto pt-6"
+            ref={contentRef}
+          >
+            <div className="flex-1">
+              <StoredKnowledge stage={stage} setStage={setStage} />
+              <div className="mt-10">
+                <h2
+                  className="text-2xl font-bold"
+                  onClick={() => {
+                    console.log("Le", rawData);
+                  }}
+                >
+                  Patent Section Generator
+                </h2>
+                <p className="text-gray-500">
+                  Generate patent sections sequentially with AI assistance
+                </p>
+              </div>
+            </div>
+            <div className="grid gap-4">
+              {error && (
+                <Alert
+                  variant={
+                    error.includes("successfully") ? "default" : "destructive"
+                  }
+                >
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+
+              {/* Regenerate Dialog */}
+              <Dialog
+                open={regenerateModalOpen}
+                onOpenChange={setRegenerateModalOpen}
+              >
+                <DialogContent className="sm:max-w-[500px]">
+                  <DialogHeader>
+                    <DialogTitle>Regenerate {lastGeneratedSection}</DialogTitle>
+                    <DialogDescription>
+                      Provide specific guidance to steer the AI in generating a
+                      new version of this section.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="py-4">
+                    <textarea
+                      ref={regenerateRef}
+                      defaultValue={regenerateInput}
+                      onChange={handleRegenerateInputChange}
+                      placeholder="Enter specific instructions for regeneration (e.g., 'Make it more technical', 'Focus more on the advantages', 'Simplify the language')..."
+                      className="w-full min-h-[200px] p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+                    />
+                  </div>
+                  <DialogFooter>
+                    <Button
+                      variant="outline"
+                      onClick={() => setRegenerateModalOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleRegenerateWithCorrections}
+                      className="bg-black text-white hover:bg-gray-800"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? "Regenerating..." : "Submit & Regenerate"}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+
+              {/* Render all sections */}
+              {renderSections()}
+
+              {/* Hidden reference for scrolling to the latest generated content */}
+              <div ref={latestGeneratedRef} className="h-0 w-0" />
+
+              {/* Feedback Dialog */}
+              <Dialog
+                open={correctionModalOpen}
+                onOpenChange={setCorrectionModalOpen}
+              >
+                <DialogContent className="sm:max-w-[500px]">
+                  <DialogHeader>
+                    <DialogTitle>
+                      Provide Feedback for {lastGeneratedSection}
+                    </DialogTitle>
+                    <DialogDescription>
+                      Please provide specific feedback or corrections to improve
+                      the generated content.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="py-4">
+                    <textarea
+                      ref={correctionRef}
+                      defaultValue={userCorrection}
+                      onChange={handleCorrectionChange}
+                      placeholder="Enter your specific feedback or corrections here..."
+                      className="w-full min-h-[200px] p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+                    />
+                  </div>
+                  <DialogFooter>
+                    <Button
+                      variant="outline"
+                      onClick={() => setCorrectionModalOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        // Ensure we have the latest value from the textarea
+                        const text = correctionRef.current?.value || "";
+
+                        // Update the state with the latest value
+                        setUserCorrection(text);
+
+                        // Close the dialog
+                        setCorrectionModalOpen(false);
+
+                        // Show success toast
+                        toast({
+                          title: "Success",
+                          description: "Feedback saved successfully!",
+                          duration: 3000,
+                        });
+                      }}
+                      className="bg-black text-white hover:bg-gray-800"
+                    >
+                      Submit Feedback
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+
+              {/* Bottom Button - Either Generate or Generate PDF */}
+              <div className="mt-8 flex justify-start">
+                {isGenerationComplete() ? (
+                  // Show Generate PDF button when generation is complete
+                  <Button
+                    onClick={handleGeneratePDF}
+                    disabled={isGeneratingPDF}
+                    className="bg-black text-white hover:bg-gray-800 px-8 py-6 text-lg relative"
+                  >
+                    {isGeneratingPDF ? (
+                      <div className="flex items-center">
+                        <div className="mr-2 flex">
+                          <span
+                            className="animate-bounce inline-block mx-0.5 h-1.5 w-1.5 rounded-full bg-white"
+                            style={{ animationDelay: "0ms" }}
+                          ></span>
+                          <span
+                            className="animate-bounce inline-block mx-0.5 h-1.5 w-1.5 rounded-full bg-white"
+                            style={{ animationDelay: "150ms" }}
+                          ></span>
+                          <span
+                            className="animate-bounce inline-block mx-0.5 h-1.5 w-1.5 rounded-full bg-white"
+                            style={{ animationDelay: "300ms" }}
+                          ></span>
+                        </div>
+                        Generating PDF...
+                      </div>
+                    ) : (
+                      <>
+                        <FileDown className="h-5 w-5 mr-2" />
+                        Generate PDF
+                      </>
+                    )}
+                  </Button>
+                ) : (
+                  // Show Generate button when there are still sections to generate
+                  <Button
+                    onClick={handleGenerate}
+                    disabled={isLoading}
+                    className="bg-black text-white hover:bg-gray-800 px-8 py-6 text-lg relative"
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center">
+                        <div className="mr-2 flex">
+                          <span
+                            className="animate-bounce inline-block mx-0.5 h-1.5 w-1.5 rounded-full bg-white"
+                            style={{ animationDelay: "0ms" }}
+                          ></span>
+                          <span
+                            className="animate-bounce inline-block mx-0.5 h-1.5 w-1.5 rounded-full bg-white"
+                            style={{ animationDelay: "150ms" }}
+                          ></span>
+                          <span
+                            className="animate-bounce inline-block mx-0.5 h-1.5 w-1.5 rounded-full bg-white"
+                            style={{ animationDelay: "300ms" }}
+                          ></span>
+                        </div>
+                        Generating...
+                      </div>
+                    ) : (
+                      <>
+                        Generate {currentSection}
+                        <span className="ml-2 opacity-70 text-sm">
+                          (Ctrl+Enter)
+                        </span>
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </main>
       {/* Toast notifications */}
       <Toaster />
-    </>
+    </div>
   );
 };
 

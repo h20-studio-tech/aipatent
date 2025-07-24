@@ -57,7 +57,7 @@ interface Embodiment {
   header?: string;
   headingSummary?: string;
   category?: string;
-  page_number: number
+  page_number: number;
 }
 
 // Interface for remixed embodiment objects
@@ -156,7 +156,7 @@ export function transformGroupedEmbodiments(response: any): EmbodimentMap {
             headingSummary: sub.summary,
             header: sub.header ? sub.header : "",
             category: emb.sub_category ? emb.sub_category : "",
-            page_number: emb.page_number
+            page_number: emb.page_number,
           });
         }
       } else {
@@ -172,7 +172,7 @@ export function transformGroupedEmbodiments(response: any): EmbodimentMap {
           headingSummary: sub.summary,
           header: sub.header,
           category: "product composition",
-          page_number: 0
+          page_number: 0,
         });
       }
     }
@@ -192,7 +192,7 @@ export function transformGroupedEmbodiments(response: any): EmbodimentMap {
       pageNumber: chunk.page_number,
       section: chunk.section,
       summary: chunk.summary || "",
-      page_number: chunk.page_number
+      page_number: chunk.page_number,
     });
   }
 
@@ -230,7 +230,7 @@ export function transformApiEmbodiments(data: RawChunk[]): EmbodimentMap {
       section: chunk.section, // ✅
       summary: chunk.summary || "Lorem Ipsum dolor sit amet.",
       header: chunk.header,
-      page_number: chunk.page_number
+      page_number: chunk.page_number,
     });
   }
 
@@ -271,7 +271,7 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
     claims: "",
   });
 
-  const [embodimentPages, setEmbdoimentPages] = useState<any>({})
+  const [embodimentPages, setEmbdoimentPages] = useState<any>({});
   const [showRawDataModal, setShowRawDataModal] = useState(false);
 
   const [tocCollapsed, setTocCollapsed] = useState(false);
@@ -279,7 +279,7 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
   const [showSplitScreen, setShowSplitScreen] = useState<boolean>(false);
   const [sourcesPanelCollapsed, setSourcesPanelCollapsed] =
     useState<boolean>(false);
-  
+
   const [splitScreenContent, setSplitScreenContent] = useState({
     title: "All Sources",
     content: "",
@@ -327,10 +327,12 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
         `${backendUrl}/v1/raw-sections/${patentId}`
       );
 
-      const embodimentsRawResponse = await axios.get(`${backendUrl}/v1/pages/${patentId}`);
-      console.log("Hello pp emb", embodimentsRawResponse)
+      const embodimentsRawResponse = await axios.get(
+        `${backendUrl}/v1/pages/${patentId}`
+      );
+      console.log("Hello pp emb", embodimentsRawResponse);
 
-      setEmbdoimentPages(embodimentsRawResponse.data.pages)
+      setEmbdoimentPages(embodimentsRawResponse.data.pages);
       const { sections } = response.data;
 
       const formatted: RawData = {
@@ -343,7 +345,6 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
           sections?.["detailed description"] ||
           "No Raw Data Found for this section",
         claims: sections?.["claims"] || "No Raw Data Found for this section",
-        
       };
 
       for (const [key, value] of Object.entries(sections || {})) {
@@ -459,12 +460,12 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
   };
 
   const scrollToPageSection = (section: string, pageNumber: number) => {
-  const sectionId = `section-${section.toLowerCase()}_page_number-${pageNumber}`;
-  const targetElement = document.getElementById(sectionId);
-  if (targetElement) {
-    targetElement.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-};
+    const sectionId = `section-${section.toLowerCase()}_page_number-${pageNumber}`;
+    const targetElement = document.getElementById(sectionId);
+    if (targetElement) {
+      targetElement.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   useEffect(() => {
     if (patentId) {
@@ -1293,63 +1294,68 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
           {!sourcesPanelCollapsed && (
             <>
               <div className="border-b p-4 flex items-center justify-between bg-muted/50 flex-shrink-0">
-                <h2 className="text-lg font-semibold" onClick={() => {
-                  console.log("PP hg", rawData)
-                }}>
+                <h2
+                  className="text-lg font-semibold"
+                  onClick={() => {
+                    console.log("PP hg", rawData);
+                  }}
+                >
                   Data: {splitScreenContent.title}
                 </h2>
               </div>
               <ScrollArea className="flex-1">
                 <div className="p-4 space-y-4" ref={scrollRef}>
-  {Object.entries(rawData).map(([section, content]) => (
-    <div
-      key={section}
-      id={`section-${section.toLowerCase()}`}
-      className="rounded-2xl border border-p200 bg-white shadow-md hover:shadow-lg transition-shadow duration-300 p-6"
-    >
-      <div className="flex items-start justify-between mb-3">
-        <div>
-          <h3 className="text-lg font-semibold text-n900 capitalize">
-            {section === "keyterms" ? "Key Terms" : section}
-          </h3>
-          <p className="text-xs text-n900 opacity-70">Section: {section}</p>
-        </div>
-        
-      </div>
+                  {Object.entries(rawData).map(([section, content]) => (
+                    <div
+                      key={section}
+                      id={`section-${section.toLowerCase()}`}
+                      className="rounded-2xl border border-p200 bg-white shadow-md hover:shadow-lg transition-shadow duration-300 p-6"
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <h3 className="text-lg font-semibold text-n900 capitalize">
+                            {section === "keyterms" ? "Key Terms" : section}
+                          </h3>
+                          <p className="text-xs text-n900 opacity-70">
+                            Section: {section}
+                          </p>
+                        </div>
+                      </div>
 
-      <pre className="text-sm text-n900 whitespace-pre-wrap leading-relaxed font-mono border-t border-dashed pt-4 mt-4">
-        {content}
-      </pre>
-    </div>
-  ))}
-</div>
+                      <pre className="text-sm text-n900 whitespace-pre-wrap leading-relaxed font-mono border-t border-dashed pt-4 mt-4">
+                        {content}
+                      </pre>
+                    </div>
+                  ))}
+                </div>
 
                 <div className="p-4 space-y-4" ref={pagesScrollRef}>
-  {embodimentPages.length > 1 && embodimentPages.map((page: any, id: number) => (
-    <div
-      key={id}
-      id={`section-${page.section.toLowerCase()}_page_number-${page.page_number}`}
-      className="rounded-2xl border border-p200 bg-white shadow-md hover:shadow-lg transition-shadow duration-300 p-6"
-    >
-      <div className="flex items-start justify-between mb-3">
-        <div>
-          <h2 className="text-lg font-semibold text-n900 capitalize">
-            {page.section}
-          </h2>
-          <p className="text-xs text-n900 opacity-70">
-            Page {page.page_number} – {page.filename}
-          </p>
-        </div>
-        
-      </div>
+                  {embodimentPages.length > 1 &&
+                    embodimentPages.map((page: any, id: number) => (
+                      <div
+                        key={id}
+                        id={`section-${page.section.toLowerCase()}_page_number-${
+                          page.page_number
+                        }`}
+                        className="rounded-2xl border border-p200 bg-white shadow-md hover:shadow-lg transition-shadow duration-300 p-6"
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <div>
+                            <h2 className="text-lg font-semibold text-n900 capitalize">
+                              {page.section}
+                            </h2>
+                            <p className="text-xs text-n900 opacity-70">
+                              Page {page.page_number} – {page.filename}
+                            </p>
+                          </div>
+                        </div>
 
-      <p className="text-sm text-n900 whitespace-pre-wrap leading-relaxed font-mono border-t border-dashed pt-4 mt-4">
-        {page.text}
-      </p>
-    </div>
-  ))}
-</div>
-
+                        <p className="text-sm text-n900 whitespace-pre-wrap leading-relaxed font-mono border-t border-dashed pt-4 mt-4">
+                          {page.text}
+                        </p>
+                      </div>
+                    ))}
+                </div>
               </ScrollArea>
             </>
           )}
@@ -1807,9 +1813,15 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                                 <div
                                   key={embodiment.id}
                                   className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
+                                  onClick={() =>
+                                    scrollToPageSection(
+                                      "summary of invention",
+                                      embodiment.page_number
+                                    )
+                                  }
                                 >
                                   <div className="flex justify-between items-center mb-2">
-                                    <h3 className="font-medium" onClick={() => scrollToPageSection("summary of invention", embodiment.page_number)}>
+                                    <h3 className="font-medium">
                                       {embodiment.title}
                                     </h3>
                                     <div className="flex items-center gap-2">
@@ -2035,11 +2047,15 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                                                 <div
                                                   key={embodiment.id}
                                                   className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
+                                                  onClick={() => {
+                                                    scrollToPageSection(
+                                                      "detailed description",
+                                                      embodiment.page_number
+                                                    );
+                                                  }}
                                                 >
                                                   <div className="flex justify-between items-center mb-2">
-                                                    <h3 className="font-medium" onClick={() => {
-                                                      
-                                                      scrollToPageSection("detailed description", embodiment.page_number)}}>
+                                                    <h3 className="font-medium">
                                                       {embodiment.title}
                                                     </h3>
                                                     <div className="flex items-center gap-2">
@@ -2211,11 +2227,15 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                             <div
                               key={embodiment.id}
                               className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
+                              onClick={() => {
+                                scrollToPageSection(
+                                  "claims",
+                                  embodiment.page_number
+                                );
+                              }}
                             >
                               <div className="flex justify-between items-center mb-2">
-                                <h3 className="font-medium" onClick={() => {
-                                                      
-                                                      scrollToPageSection("claims", embodiment.page_number)}}>
+                                <h3 className="font-medium">
                                   {embodiment.title}
                                 </h3>
                                 <div className="flex items-center gap-2">
