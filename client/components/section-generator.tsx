@@ -233,32 +233,77 @@ const PatentComponentGenerator: React.FC<PatentComponentGeneratorProps> = ({
   }, [generatedContent]);
 
   const fetchStoredKnowledge = async () => {
-    if (typeof window !== "undefined" && window.getStoredKnowlegde) {
-      const storedKnowledge = await window.getStoredKnowlegde();
-      console.log("DFvdf", storedKnowledge);
+    try {
+      const approachResponse = await axios.get(
+        `${backendUrl}/v1/knowledge/approach/${patentId}`
+      );
+      const innovationResponse = await axios.get(
+        `${backendUrl}/v1/knowledge/innovation/${patentId}`
+      );
+      const technologyResponse = await axios.get(
+        `${backendUrl}/v1/knowledge/technology/${patentId}`
+      );
+      const notesResponse = await axios.get(
+        `${backendUrl}/v1/knowledge/research-note/${patentId}`
+      );
 
-      let approachKnowledge;
-      let innovationKnowledge;
-      let technologyKnowledge;
-
-      for (const knowledge of storedKnowledge) {
-        if (knowledge.section === "Approach") {
-          approachKnowledge = knowledge;
+      if (typeof window !== "undefined" && window.addStoredData) {
+        if (approachResponse.data.data.length > 0) {
+          for (const approachKnowledge of approachResponse.data.data) {
+            const newNote = {
+              patentId: patentId,
+              question: approachKnowledge.question,
+              answer: approachKnowledge.answer,
+              section: "Approach",
+              timestamp: approachKnowledge.created_at,
+            };
+            window.addStoredData("knowledge", newNote);
+          }
         }
 
-        if (knowledge.section === "Innovation") {
-          innovationKnowledge = knowledge;
+        if (innovationResponse.data.data.length > 0) {
+          for (const innovationKnowledge of innovationResponse.data.data) {
+            const newNote = {
+              patentId: patentId,
+              question: innovationKnowledge.question,
+              answer: innovationKnowledge.answer,
+              section: "Innovation",
+              timestamp: innovationKnowledge.created_at,
+            };
+            window.addStoredData("knowledge", newNote);
+          }
         }
 
-        if (knowledge.section === "Technology") {
-          technologyKnowledge = knowledge;
+        if (technologyResponse.data.data.length > 0) {
+          for (const technologyKnowledge of technologyResponse.data.data) {
+            const newNote = {
+              patentId: patentId,
+              question: technologyKnowledge.question,
+              answer: technologyKnowledge.answer,
+              section: "Technology",
+              timestamp: technologyKnowledge.created_at,
+            };
+            window.addStoredData("knowledge", newNote);
+          }
+        }
+
+        if (notesResponse.data.data.length > 0) {
+          console.log("A");
+          for (const notes of notesResponse.data.data) {
+            const newNote = {
+              patentId: patentId,
+              question: "Research Note",
+              answer: notes.content,
+              section: "Note",
+              timestamp: notes.created_at,
+            };
+            console.log("B", newNote);
+            window.addStoredData("note", newNote);
+          }
         }
       }
-      return {
-        approachKnowledge,
-        innovationKnowledge,
-        technologyKnowledge,
-      };
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -366,6 +411,7 @@ const PatentComponentGenerator: React.FC<PatentComponentGeneratorProps> = ({
   useEffect(() => {
     if (patentId) {
       fetchRawContent();
+      fetchStoredKnowledge();
     }
   }, [patentId]);
 
