@@ -1821,7 +1821,15 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                                   }
                                 >
                                   <div className="flex justify-between items-center mb-2">
-                                    <h3 className="font-medium">
+                                    <h3
+                                      className="font-medium"
+                                      onClick={() =>
+                                        scrollToPageSection(
+                                          "summary of invention",
+                                          embodiment.page_number
+                                        )
+                                      }
+                                    >
                                       {embodiment.title}
                                     </h3>
                                     <div className="flex items-center gap-2">
@@ -1852,17 +1860,33 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                                       </button>
                                     </div>
                                   </div>
-                                  <div className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md">
+                                  <div
+                                    className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md"
+                                    onClick={() =>
+                                      scrollToPageSection(
+                                        "summary of invention",
+                                        embodiment.page_number
+                                      )
+                                    }
+                                  >
                                     {embodiment.summary}
                                   </div>
 
-                                  <p className="text-sm">
+                                  <p
+                                    className="text-sm"
+                                    onClick={() =>
+                                      scrollToPageSection(
+                                        "summary of invention",
+                                        embodiment.page_number
+                                      )
+                                    }
+                                  >
                                     {embodiment.description}
                                   </p>
-                                  <div className="mt-3 flex justify-between items-center">
+                                  <div className="mt-3 flex flex-wrap justify-between items-center gap-2">
                                     <Badge
                                       variant="outline"
-                                      className="text-xs"
+                                      className="text-xs break-all max-w-full"
                                     >
                                       Source: {embodiment.source}
                                     </Badge>
@@ -2055,7 +2079,15 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                                                   }}
                                                 >
                                                   <div className="flex justify-between items-center mb-2">
-                                                    <h3 className="font-medium">
+                                                    <h3
+                                                      className="font-medium"
+                                                      onClick={() => {
+                                                        scrollToPageSection(
+                                                          "detailed description",
+                                                          embodiment.page_number
+                                                        );
+                                                      }}
+                                                    >
                                                       {embodiment.title}
                                                     </h3>
                                                     <div className="flex items-center gap-2">
@@ -2088,17 +2120,33 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                                                       </button>
                                                     </div>
                                                   </div>
-                                                  <div className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md">
+                                                  <div
+                                                    className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md"
+                                                    onClick={() => {
+                                                      scrollToPageSection(
+                                                        "detailed description",
+                                                        embodiment.page_number
+                                                      );
+                                                    }}
+                                                  >
                                                     {embodiment.summary}
                                                   </div>
 
-                                                  <p className="text-sm">
+                                                  <p
+                                                    className="text-sm"
+                                                    onClick={() => {
+                                                      scrollToPageSection(
+                                                        "detailed description",
+                                                        embodiment.page_number
+                                                      );
+                                                    }}
+                                                  >
                                                     {embodiment.description}
                                                   </p>
-                                                  <div className="mt-3 flex justify-between items-center">
+                                                  <div className="mt-3 flex flex-wrap justify-between items-center gap-2">
                                                     <Badge
                                                       variant="outline"
-                                                      className="text-xs"
+                                                      className="text-xs break-all max-w-full"
                                                     >
                                                       Source:{" "}
                                                       {embodiment.source}
@@ -2235,7 +2283,15 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                               }}
                             >
                               <div className="flex justify-between items-center mb-2">
-                                <h3 className="font-medium">
+                                <h3
+                                  className="font-medium"
+                                  onClick={() => {
+                                    scrollToPageSection(
+                                      "claims",
+                                      embodiment.page_number
+                                    );
+                                  }}
+                                >
                                   {embodiment.title}
                                 </h3>
                                 <div className="flex items-center gap-2">
@@ -2266,15 +2322,34 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                                   </button>
                                 </div>
                               </div>
-                              <div className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md">
+                              <div
+                                className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md"
+                                onClick={() => {
+                                  scrollToPageSection(
+                                    "claims",
+                                    embodiment.page_number
+                                  );
+                                }}
+                              >
                                 {embodiment.summary}
                               </div>
 
-                              <p className="text-sm">
+                              <p
+                                className="text-sm"
+                                onClick={() => {
+                                  scrollToPageSection(
+                                    "claims",
+                                    embodiment.page_number
+                                  );
+                                }}
+                              >
                                 {embodiment.description}
                               </p>
-                              <div className="mt-3 flex justify-between items-center">
-                                <Badge variant="outline" className="text-xs">
+                              <div className="mt-3 flex flex-wrap justify-between items-center gap-2">
+                                <Badge
+                                  variant="outline"
+                                  className="text-xs break-all max-w-full"
+                                >
                                   Source: {embodiment.source}
                                 </Badge>
                                 {/* <button
