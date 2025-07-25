@@ -341,12 +341,12 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
     claims: [],
   });
 
-  const handleViewOriginal = (embId: any) => {
+  const handleViewOriginal = (section: String) => {
     setShowSplitScreen(true);
 
     // Scroll after slight delay to ensure DOM renders
     setTimeout(() => {
-      const el = document.getElementById(`embodiment-${embId}`);
+      const el = document.getElementById(`section-${section.toLowerCase()}`);
       if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "start" });
       }
@@ -368,7 +368,7 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
       );
 
       const embodimentsRawResponse = await axios.get(`${backendUrl}/v1/pages/${patentId}`);
-      console.log("Hello pp emb", embodimentsRawResponse)
+      
 
       setEmbdoimentPages(embodimentsRawResponse.data.pages)
       const { sections } = response.data;
@@ -479,7 +479,6 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
         }
 
         if (notesResponse.data.data.length > 0) {
-          console.log("A");
           for (const notes of notesResponse.data.data) {
             const newNote = {
               patentId: patentId,
@@ -488,7 +487,6 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
               section: "Note",
               timestamp: notes.created_at,
             };
-            console.log("B", newNote);
             window.addStoredData("note", newNote);
           }
         }
@@ -500,7 +498,10 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
 
   const scrollToPageSection = (section: string, pageNumber: number) => {
   const sectionId = `section-${section.toLowerCase()}_page_number-${pageNumber}`;
+
+  console.log("SectioNId", sectionId)  
   const targetElement = document.getElementById(sectionId);
+  console.log("target", targetElement)  
   if (targetElement) {
     targetElement.scrollIntoView({ behavior: "smooth", block: "start" });
   }
@@ -1275,7 +1276,6 @@ Object.values(embodiments).flat().forEach((emb) => {
             <>
               <div className="border-b p-4 flex items-center justify-between bg-muted/50 flex-shrink-0">
                 <h2 className="text-lg font-semibold" onClick={() => {
-                  console.log("PP hg", rawData)
                 }}>
                   Data: {splitScreenContent.title}
                 </h2>
@@ -1601,9 +1601,7 @@ Object.values(embodiments).flat().forEach((emb) => {
                       <div>
                         <h3
                           className="text-2xl font-bold text-primary"
-                          onClick={() => {
-                            console.log("Same", rawData);
-                          }}
+                          
                         >
                           Abstract
                         </h3>
@@ -2000,9 +1998,7 @@ Object.values(embodiments).flat().forEach((emb) => {
                               const headingSummary =
                                 headerEmbodiments[0].headingSummary;
 
-                              console.log("Header", header);
-                              console.log("Hello", headerEmbodiments);
-                              console.log("Summary", headingSummary);
+                              
 
                               // Get unique categories within this header
                               const categories = Array.from(
