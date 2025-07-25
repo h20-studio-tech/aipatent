@@ -43,6 +43,14 @@ import StoredKnowledge from "./stored-knowledge";
 import ProcessingLoader from "./processingLoader";
 import ProcessCompleteLoader from "./processCompleteLoader";
 
+
+interface SentenceSource {
+  sentence: string;
+  matchedSourceText: string;
+  page_number: number;
+  sourceId: string; // DOM ID to scroll to
+  matchConfidence: number;
+}
 // Interface for embodiment objects
 interface Embodiment {
   id: number;
@@ -57,7 +65,8 @@ interface Embodiment {
   header?: string;
   headingSummary?: string;
   category?: string;
-  page_number: number;
+  page_number: number
+  sentenceSources?: SentenceSource[];
 }
 
 // Interface for remixed embodiment objects
@@ -113,11 +122,50 @@ type EmbodimentMap = {
   claims: Embodiment[];
 };
 
-const slugify = (text: string) =>
-  text
-    .toLowerCase()
-    .replace(/\s+/g, "-")
-    .replace(/[^\w-]+/g, "");
+function matchEmbodimentSentencesToRaw(
+  description: string,
+  rawPageText: string,
+  section: string,
+  pageNumber: number
+): SentenceSource[] {
+  const sentences = description.match(/[^\.!\?]+[\.!\?]+/g) || [];
+  const rawChunks = rawPageText.split(/(?<=[.?!])\s+/); // Split by sentence
+  
+  const results: SentenceSource[] = [];
+
+  sentences.forEach((sentence, idx) => {
+    let bestMatch = "";
+    let bestConfidence = 0;
+    let bestChunkIndex = -1;
+
+    rawChunks.forEach((chunk, chunkIdx) => {
+      const s = sentence.toLowerCase();
+      const c = chunk.toLowerCase();
+
+      const overlap = s.length + c.length - new Set(s + c).size;
+      const jaccard = overlap / new Set([...s, ...c]).size;
+
+      if (jaccard > bestConfidence) {
+        bestConfidence = jaccard;
+        bestMatch = chunk;
+        bestChunkIndex = chunkIdx;
+      }
+    });
+
+    if (bestConfidence > 0.5) {
+      results.push({
+        sentence: sentence.trim(),
+        matchedSourceText: bestMatch.trim(),
+        page_number: pageNumber,
+        sourceId: `section-${section.toLowerCase()}_page_number-${pageNumber}__chunk-${bestChunkIndex}`,
+        matchConfidence: bestConfidence,
+      });
+    }
+  });
+
+  return results;
+}
+
 
 export function transformGroupedEmbodiments(response: any): EmbodimentMap {
   let idCounter = 1;
@@ -156,7 +204,7 @@ export function transformGroupedEmbodiments(response: any): EmbodimentMap {
             headingSummary: sub.summary,
             header: sub.header ? sub.header : "",
             category: emb.sub_category ? emb.sub_category : "",
-            page_number: emb.page_number,
+            page_number: emb.page_number
           });
         }
       } else {
@@ -172,7 +220,7 @@ export function transformGroupedEmbodiments(response: any): EmbodimentMap {
           headingSummary: sub.summary,
           header: sub.header,
           category: "product composition",
-          page_number: 0,
+          page_number: 0
         });
       }
     }
@@ -192,7 +240,7 @@ export function transformGroupedEmbodiments(response: any): EmbodimentMap {
       pageNumber: chunk.page_number,
       section: chunk.section,
       summary: chunk.summary || "",
-      page_number: chunk.page_number,
+      page_number: chunk.page_number
     });
   }
 
@@ -230,7 +278,7 @@ export function transformApiEmbodiments(data: RawChunk[]): EmbodimentMap {
       section: chunk.section, // ✅
       summary: chunk.summary || "Lorem Ipsum dolor sit amet.",
       header: chunk.header,
-      page_number: chunk.page_number,
+      page_number: chunk.page_number
     });
   }
 
@@ -271,15 +319,14 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
     claims: "",
   });
 
-  const [embodimentPages, setEmbdoimentPages] = useState<any>({});
+  
+
+  const [embodimentPages, setEmbdoimentPages] = useState<any>({})
   const [showRawDataModal, setShowRawDataModal] = useState(false);
-
-  const [tocCollapsed, setTocCollapsed] = useState(false);
-
   const [showSplitScreen, setShowSplitScreen] = useState<boolean>(false);
   const [sourcesPanelCollapsed, setSourcesPanelCollapsed] =
     useState<boolean>(false);
-
+  
   const [splitScreenContent, setSplitScreenContent] = useState({
     title: "All Sources",
     content: "",
@@ -294,12 +341,12 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
     claims: [],
   });
 
-  const handleViewOriginal = (section: string) => {
+  const handleViewOriginal = (embId: any) => {
     setShowSplitScreen(true);
 
     // Scroll after slight delay to ensure DOM renders
     setTimeout(() => {
-      const el = document.getElementById(`section-${section.toLowerCase()}`);
+      const el = document.getElementById(`embodiment-${embId}`);
       if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "start" });
       }
@@ -314,25 +361,16 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
 
   const [patentId, setPatentId] = useState<string>("");
 
-  const toggleSummary = (embodimentId: number) => {
-    setVisibleSummaries((prev) => ({
-      ...prev,
-      [embodimentId]: !prev[embodimentId],
-    }));
-  };
-
   const fetchRawContent = async () => {
     try {
       const response = await axios.get(
         `${backendUrl}/v1/raw-sections/${patentId}`
       );
 
-      const embodimentsRawResponse = await axios.get(
-        `${backendUrl}/v1/pages/${patentId}`
-      );
-      console.log("Hello pp emb", embodimentsRawResponse);
+      const embodimentsRawResponse = await axios.get(`${backendUrl}/v1/pages/${patentId}`);
+      console.log("Hello pp emb", embodimentsRawResponse)
 
-      setEmbdoimentPages(embodimentsRawResponse.data.pages);
+      setEmbdoimentPages(embodimentsRawResponse.data.pages)
       const { sections } = response.data;
 
       const formatted: RawData = {
@@ -345,6 +383,7 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
           sections?.["detailed description"] ||
           "No Raw Data Found for this section",
         claims: sections?.["claims"] || "No Raw Data Found for this section",
+        
       };
 
       for (const [key, value] of Object.entries(sections || {})) {
@@ -460,12 +499,12 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
   };
 
   const scrollToPageSection = (section: string, pageNumber: number) => {
-    const sectionId = `section-${section.toLowerCase()}_page_number-${pageNumber}`;
-    const targetElement = document.getElementById(sectionId);
-    if (targetElement) {
-      targetElement.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
+  const sectionId = `section-${section.toLowerCase()}_page_number-${pageNumber}`;
+  const targetElement = document.getElementById(sectionId);
+  if (targetElement) {
+    targetElement.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+};
 
   useEffect(() => {
     if (patentId) {
@@ -492,10 +531,7 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
   >([]);
   const [isCreatingRemix, setIsCreatingRemix] = useState(false);
   const [storedKnowledge, setStoredKnowledge] = useState<StoredKnowledge[]>([]);
-  const [showStoredKnowledge, setShowStoredKnowledge] = useState(false);
-  const [editingEmbodimentId, setEditingEmbodimentId] = useState<number | null>(
-    null
-  );
+  
   const [editingText, setEditingText] = useState("");
   const { toast } = useToast();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -674,11 +710,7 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
     fetchDocuments();
   }, []);
 
-  // New state for filtering and sorting
-  const [filterQuery, setFilterQuery] = useState("");
   const [pdfs, setPdfs] = useState(mockPdfs);
-  const [sortOrder, setSortOrder] = useState<"name" | "date" | "size">("name");
-  const [viewMode, setViewMode] = useState<"card" | "list">("card");
   const [processingProgress, setProcessingProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState<
     "upload" | "extract" | "review" | "create"
@@ -815,9 +847,7 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
     }
   };
 
-  const handleTabClick = (tab: string) => {
-    setActiveTab(tab);
-  };
+  
 
   const toggleEmbodimentSelection = (tabName: string, embodimentId: number) => {
     setEmbodiments((prev) => {
@@ -1073,19 +1103,6 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
     }, 1500);
   };
 
-  const handlePdfUpload = (sectionId: string, file: File) => {
-    // In a real app, we would upload the file to a server
-    // For now, we'll just add it to our mock data
-    const newPdf = {
-      id: `pdf-${Date.now()}`,
-      name: file.name,
-      section: sectionId,
-      url: URL.createObjectURL(file),
-    };
-
-    setPdfs([...pdfs, newPdf]);
-  };
-
   // Add this function to handle showing metadata for extracted embodiments
   const showExtractedMetadata = (embodiment: Embodiment) => {
     setSelectedMetadataEmbodiment(embodiment);
@@ -1154,76 +1171,6 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
 
   const [showKeyTerms, setShowKeyTerms] = useState(true);
 
-  // Handle file upload
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const newPdfs: PdfFile[] = [];
-
-      Array.from(e.target.files).forEach((file) => {
-        const fileSize = (file.size / (1024 * 1024)).toFixed(1) + " MB";
-        const newPdf: PdfFile = {
-          id: `pdf-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-          name: file.name,
-          selected: true,
-          size: fileSize,
-          uploadDate: new Date().toISOString().split("T")[0],
-        };
-
-        newPdfs.push(newPdf);
-        setSelectedPatents((prev) => [...prev, file.name]);
-      });
-
-      setAvailablePdfs((prev) => [...prev, ...newPdfs]);
-    }
-
-    // Reset file input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
-      setActiveSection(sectionId);
-    }
-  };
-
-  const tableOfContents = [
-    { id: "abstract", title: "Abstract", level: 1 },
-    { id: "key-terms", title: "Key Terms", level: 1 },
-    { id: "summary-of-invention", title: "Summary of Invention", level: 1 },
-    { id: "detailed-description", title: "Detailed Description", level: 1 },
-    ...Array.from(new Set(embodiments.description.map((e) => e.header)))
-      .filter(Boolean)
-      .flatMap((header) => {
-        const headerId = slugify(header!);
-        const headerItem = { id: headerId, title: header!, level: 2 };
-        const categoryItems = Array.from(
-          new Set(
-            embodiments.description
-              .filter((e) => e.header === header)
-              .map((e) => e.category)
-          )
-        )
-          .filter(Boolean)
-          .map((category) => ({
-            id: `${headerId}-${slugify(category!)}`,
-            title: category!,
-            level: 3,
-          }));
-        return [headerItem, ...categoryItems];
-      }),
-    { id: "claims", title: "Claims", level: 1 },
-    ...(remixedEmbodiments.length > 0
-      ? [{ id: "new-embodiments", title: "New Embodiments", level: 1 }]
-      : []),
-  ];
-
-  // Filter and sort PDFs
-  const filteredPdfs = availablePdfs;
-
   const allHeaders = Array.from(
     new Set(embodiments.description.map((e) => e.header || "Ungrouped"))
   );
@@ -1240,14 +1187,47 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
     grouped[key].push(emb);
   }
 
-  const sortedGroupedEntries = Object.entries(grouped).sort(([a], [b]) => {
-    if (a === "Ungrouped") return 1;
-    if (b === "Ungrouped") return -1;
-    return a.localeCompare(b);
-  });
-
   const scrollRef = useRef<HTMLDivElement>(null);
   const pagesScrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+  const updated = { ...embodiments };
+
+  ["summary", "description", "claims"].forEach((key: any) => {
+    updated[key] = updated[key].map((emb, idx) => {
+  const raw = embodimentPages.find(p => p.page_number === emb.page_number);
+  if (!raw) return emb;
+
+  const matches = matchEmbodimentSentencesToRaw(
+    emb.description,
+    raw.text,
+    raw.section,
+    raw.page_number
+  );
+
+  return {
+    ...emb,
+    sentenceSources: matches,
+    internalId: `emb-${key}-${idx}`, // ✅ unique and stable ID
+  };
+});
+
+  });
+
+  setEmbodiments(updated);
+}, [embodimentPages]);
+
+const sourceToEmbodimentMap: Record<string, string[]> = {};
+
+Object.values(embodiments).flat().forEach((emb) => {
+  emb.sentenceSources?.forEach((s) => {
+    if (!sourceToEmbodimentMap[s.sourceId]) {
+      sourceToEmbodimentMap[s.sourceId] = [];
+    }
+    sourceToEmbodimentMap[s.sourceId].push(emb.internalId);
+  });
+});
+
 
   return (
     <div className="flex">
@@ -1294,68 +1274,100 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
           {!sourcesPanelCollapsed && (
             <>
               <div className="border-b p-4 flex items-center justify-between bg-muted/50 flex-shrink-0">
-                <h2
-                  className="text-lg font-semibold"
-                  onClick={() => {
-                    console.log("PP hg", rawData);
-                  }}
-                >
+                <h2 className="text-lg font-semibold" onClick={() => {
+                  console.log("PP hg", rawData)
+                }}>
                   Data: {splitScreenContent.title}
                 </h2>
               </div>
               <ScrollArea className="flex-1">
                 <div className="p-4 space-y-4" ref={scrollRef}>
-                  {Object.entries(rawData).map(([section, content]) => (
-                    <div
-                      key={section}
-                      id={`section-${section.toLowerCase()}`}
-                      className="rounded-2xl border border-p200 bg-white shadow-md hover:shadow-lg transition-shadow duration-300 p-6"
-                    >
-                      <div className="flex items-start justify-between mb-3">
-                        <div>
-                          <h3 className="text-lg font-semibold text-n900 capitalize">
-                            {section === "keyterms" ? "Key Terms" : section}
-                          </h3>
-                          <p className="text-xs text-n900 opacity-70">
-                            Section: {section}
-                          </p>
-                        </div>
-                      </div>
+  {Object.entries(rawData).map(([section, content]) => (
+    <div
+      key={section}
+      id={`section-${section.toLowerCase()}`}
+      className="rounded-2xl border border-p200 bg-white shadow-md hover:shadow-lg transition-shadow duration-300 p-6"
+    >
+      <div className="flex items-start justify-between mb-3">
+        <div>
+          <h3 className="text-lg font-semibold text-n900 capitalize">
+            {section === "keyterms" ? "Key Terms" : section}
+          </h3>
+          <p className="text-xs text-n900 opacity-70">Section: {section}</p>
+        </div>
+        
+      </div>
 
-                      <pre className="text-sm text-n900 whitespace-pre-wrap leading-relaxed font-mono border-t border-dashed pt-4 mt-4">
-                        {content}
-                      </pre>
-                    </div>
-                  ))}
-                </div>
+      <pre className="text-sm text-n900 whitespace-pre-wrap leading-relaxed font-mono border-t border-dashed pt-4 mt-4">
+        {content}
+      </pre>
+    </div>
+  ))}
+</div>
 
                 <div className="p-4 space-y-4" ref={pagesScrollRef}>
-                  {embodimentPages.length > 1 &&
-                    embodimentPages.map((page: any, id: number) => (
-                      <div
-                        key={id}
-                        id={`section-${page.section.toLowerCase()}_page_number-${
-                          page.page_number
-                        }`}
-                        className="rounded-2xl border border-p200 bg-white shadow-md hover:shadow-lg transition-shadow duration-300 p-6"
-                      >
-                        <div className="flex items-start justify-between mb-3">
-                          <div>
-                            <h2 className="text-lg font-semibold text-n900 capitalize">
-                              {page.section}
-                            </h2>
-                            <p className="text-xs text-n900 opacity-70">
-                              Page {page.page_number} – {page.filename}
-                            </p>
-                          </div>
-                        </div>
+  {embodimentPages.length > 1 &&
+  embodimentPages.map((page: any, id: number) => {
+    const chunks = page.text.split(/(?<=[.?!])\s+/);
 
-                        <p className="text-sm text-n900 whitespace-pre-wrap leading-relaxed font-mono border-t border-dashed pt-4 mt-4">
-                          {page.text}
-                        </p>
-                      </div>
-                    ))}
-                </div>
+    return (
+      <div
+        key={id}
+        id={`section-${page.section.toLowerCase()}_page_number-${page.page_number}`}
+        className="rounded-2xl border border-p200 bg-white shadow-md hover:shadow-lg transition-shadow duration-300 p-6"
+      >
+        <div className="flex items-start justify-between mb-3">
+          <div>
+            <h2 className="text-lg font-semibold text-n900 capitalize">
+              {page.section}
+            </h2>
+            <p className="text-xs text-n900 opacity-70">
+              Page {page.page_number} – {page.filename}
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-2 mt-4">
+          {chunks.map((chunk: string, chunkIndex: number) => {
+  const sourceId = `section-${page.section.toLowerCase()}_page_number-${page.page_number}__chunk-${chunkIndex}`;
+  const referencingEmbodiments = sourceToEmbodimentMap[sourceId] || [];
+
+  return (
+    <p
+      key={chunkIndex}
+      id={sourceId}
+      className="text-sm font-mono leading-relaxed"
+    >
+      {chunk}
+      {referencingEmbodiments.length > 0 && (
+        <span className="ml-1">
+          {referencingEmbodiments.map((internalId: string, i: number) => (
+            <button
+              key={i}
+              onClick={() =>
+                document
+                  .getElementById(`embodiment-${internalId}`)
+                  ?.scrollIntoView({ behavior: "smooth", block: "start" })
+              }
+              className="text-blue-600 text-xs ml-1"
+            >
+              [{i + 1}]
+            </button>
+          ))}
+        </span>
+      )}
+    </p>
+  );
+})}
+
+        </div>
+      </div>
+    );
+  })}
+
+
+</div>
+
               </ScrollArea>
             </>
           )}
@@ -1812,24 +1824,11 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                               embodiment.description !== "" && (
                                 <div
                                   key={embodiment.id}
+                                  id={`embodiment-${embodiment.internalId}`}
                                   className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
-                                  onClick={() =>
-                                    scrollToPageSection(
-                                      "summary of invention",
-                                      embodiment.page_number
-                                    )
-                                  }
                                 >
                                   <div className="flex justify-between items-center mb-2">
-                                    <h3
-                                      className="font-medium"
-                                      onClick={() =>
-                                        scrollToPageSection(
-                                          "summary of invention",
-                                          embodiment.page_number
-                                        )
-                                      }
-                                    >
+                                    <h3 className="font-medium" onClick={() => scrollToPageSection("summary of invention", embodiment.page_number)}>
                                       {embodiment.title}
                                     </h3>
                                     <div className="flex items-center gap-2">
@@ -1860,28 +1859,28 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                                       </button>
                                     </div>
                                   </div>
-                                  <div
-                                    className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md"
-                                    onClick={() =>
-                                      scrollToPageSection(
-                                        "summary of invention",
-                                        embodiment.page_number
-                                      )
-                                    }
-                                  >
+                                  <div className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md">
                                     {embodiment.summary}
                                   </div>
 
-                                  <p
-                                    className="text-sm"
-                                    onClick={() =>
-                                      scrollToPageSection(
-                                        "summary of invention",
-                                        embodiment.page_number
-                                      )
-                                    }
-                                  >
-                                    {embodiment.description}
+                                  <p className="text-sm">
+                                    {embodiment.sentenceSources?.length
+  ? embodiment.sentenceSources.map((src, idx) => (
+      <span key={idx}>
+        {src.sentence}
+        <button
+          className="text-blue-600 text-xs ml-1"
+          onClick={() =>
+            document
+              .getElementById(src.sourceId)
+              ?.scrollIntoView({ behavior: "smooth", block: "start" })
+          }
+        >
+          [{idx + 1}]
+        </button>{" "}
+      </span>
+    ))
+  : embodiment.description}
                                   </p>
                                   <div className="mt-3 flex flex-wrap justify-between items-center gap-2">
                                     <Badge
@@ -2070,24 +2069,13 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                                               embodiment.description !== "" && (
                                                 <div
                                                   key={embodiment.id}
+                                                  id={`embodiment-${embodiment.internalId}`}
                                                   className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
-                                                  onClick={() => {
-                                                    scrollToPageSection(
-                                                      "detailed description",
-                                                      embodiment.page_number
-                                                    );
-                                                  }}
                                                 >
                                                   <div className="flex justify-between items-center mb-2">
-                                                    <h3
-                                                      className="font-medium"
-                                                      onClick={() => {
-                                                        scrollToPageSection(
-                                                          "detailed description",
-                                                          embodiment.page_number
-                                                        );
-                                                      }}
-                                                    >
+                                                    <h3 className="font-medium" onClick={() => {
+                                                      
+                                                      scrollToPageSection("detailed description", embodiment.page_number)}}>
                                                       {embodiment.title}
                                                     </h3>
                                                     <div className="flex items-center gap-2">
@@ -2120,28 +2108,28 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                                                       </button>
                                                     </div>
                                                   </div>
-                                                  <div
-                                                    className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md"
-                                                    onClick={() => {
-                                                      scrollToPageSection(
-                                                        "detailed description",
-                                                        embodiment.page_number
-                                                      );
-                                                    }}
-                                                  >
+                                                  <div className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md">
                                                     {embodiment.summary}
                                                   </div>
 
-                                                  <p
-                                                    className="text-sm"
-                                                    onClick={() => {
-                                                      scrollToPageSection(
-                                                        "detailed description",
-                                                        embodiment.page_number
-                                                      );
-                                                    }}
-                                                  >
-                                                    {embodiment.description}
+                                                  <p className="text-sm">
+                                                    {embodiment.sentenceSources?.length
+  ? embodiment.sentenceSources.map((src, idx) => (
+      <span key={idx}>
+        {src.sentence}
+        <button
+          className="text-blue-600 text-xs ml-1"
+          onClick={() =>
+            document
+              .getElementById(src.sourceId)
+              ?.scrollIntoView({ behavior: "smooth", block: "start" })
+          }
+        >
+          [{idx + 1}]
+        </button>{" "}
+      </span>
+    ))
+  : embodiment.description}
                                                   </p>
                                                   <div className="mt-3 flex flex-wrap justify-between items-center gap-2">
                                                     <Badge
@@ -2275,23 +2263,11 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                             <div
                               key={embodiment.id}
                               className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
-                              onClick={() => {
-                                scrollToPageSection(
-                                  "claims",
-                                  embodiment.page_number
-                                );
-                              }}
                             >
                               <div className="flex justify-between items-center mb-2">
-                                <h3
-                                  className="font-medium"
-                                  onClick={() => {
-                                    scrollToPageSection(
-                                      "claims",
-                                      embodiment.page_number
-                                    );
-                                  }}
-                                >
+                                <h3 className="font-medium" onClick={() => {
+                                                      
+                                                      scrollToPageSection("claims", embodiment.page_number)}}>
                                   {embodiment.title}
                                 </h3>
                                 <div className="flex items-center gap-2">
@@ -2322,28 +2298,28 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
                                   </button>
                                 </div>
                               </div>
-                              <div
-                                className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md"
-                                onClick={() => {
-                                  scrollToPageSection(
-                                    "claims",
-                                    embodiment.page_number
-                                  );
-                                }}
-                              >
+                              <div className="mb-2 text-sm font-medium p-3 border border-yellow-300 bg-yellow-50 rounded-md">
                                 {embodiment.summary}
                               </div>
 
-                              <p
-                                className="text-sm"
-                                onClick={() => {
-                                  scrollToPageSection(
-                                    "claims",
-                                    embodiment.page_number
-                                  );
-                                }}
-                              >
-                                {embodiment.description}
+                              <p className="text-sm">
+                                {embodiment.sentenceSources?.length
+  ? embodiment.sentenceSources.map((src, idx) => (
+      <span key={idx}>
+        {src.sentence}
+        <button
+          className="text-blue-600 text-xs ml-1"
+          onClick={() =>
+            document
+              .getElementById(src.sourceId)
+              ?.scrollIntoView({ behavior: "smooth", block: "start" })
+          }
+        >
+          [{idx + 1}]
+        </button>{" "}
+      </span>
+    ))
+  : embodiment.description}
                               </p>
                               <div className="mt-3 flex flex-wrap justify-between items-center gap-2">
                                 <Badge
