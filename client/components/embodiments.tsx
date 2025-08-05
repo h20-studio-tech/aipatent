@@ -65,10 +65,8 @@ interface Embodiment {
   header?: string;
   headingSummary?: string;
   category?: string;
-  page_number: number;
+  page_number: number
   sentenceSources?: SentenceSource[];
-  start_char?: number;
-  end_char?: number;
 }
 
 // Interface for remixed embodiment objects
@@ -116,8 +114,6 @@ type RawChunk = {
   text: string;
   summary?: string;
   header?: string;
-  start_char?: number;
-  end_char?: number;
 };
 
 type EmbodimentMap = {
@@ -208,9 +204,7 @@ export function transformGroupedEmbodiments(response: any): EmbodimentMap {
             headingSummary: sub.summary,
             header: sub.header ? sub.header : "",
             category: emb.sub_category ? emb.sub_category : "",
-            page_number: emb.page_number,
-            start_char: emb.start_char,
-            end_char: emb.end_char
+            page_number: emb.page_number
           });
         }
       } else {
@@ -226,9 +220,7 @@ export function transformGroupedEmbodiments(response: any): EmbodimentMap {
           headingSummary: sub.summary,
           header: sub.header,
           category: "product composition",
-          page_number: 0,
-          start_char: 0,
-          end_char: 0
+          page_number: 0
         });
       }
     }
@@ -248,9 +240,7 @@ export function transformGroupedEmbodiments(response: any): EmbodimentMap {
       pageNumber: chunk.page_number,
       section: chunk.section,
       summary: chunk.summary || "",
-      page_number: chunk.page_number,
-      start_char: chunk.start_char,
-      end_char: chunk.end_char
+      page_number: chunk.page_number
     });
   }
 
@@ -288,9 +278,7 @@ export function transformApiEmbodiments(data: RawChunk[]): EmbodimentMap {
       section: chunk.section, // ✅
       summary: chunk.summary || "Lorem Ipsum dolor sit amet.",
       header: chunk.header,
-      page_number: chunk.page_number,
-      start_char: chunk.start_char,
-      end_char: chunk.end_char
+      page_number: chunk.page_number
     });
   }
 
@@ -303,9 +291,7 @@ interface EmbodimentsProps {
 
 export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
   const [isExtracting, setIsExtracting] = useState(false);
-  const [keyTermsFromApi, setKeyTermsFromApi] = useState<
-    { term: string; definition?: string; page_number?: number }[]
-  >([]);
+  const [keyTermsFromApi, setKeyTermsFromApi] = useState<{ term: string; definition?: string; page_number?: number }[]>([]);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [showResearchSections, setShowResearchSections] = useState(false);
   const [selectedPdfIds, setSelectedPdfIds] = useState<string[]>([]);
@@ -321,24 +307,17 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
   const [showAbstract, setShowAbstract] = useState(true);
   const [showClaims, setShowClaims] = useState(true);
   const [abstract, setAbstract] = useState<string | "">("");
-  const [visibleSummaries, setVisibleSummaries] = useState<
-    Record<number, boolean>
-  >({});
+  const [visibleSummaries, setVisibleSummaries] = useState<Record<number, boolean>>({});
   const [rawData, setRawData] = useState<RawData>({
     keyterms: "",
     summary: "",
     description: "",
     claims: "",
   });
-
-  
-
   const [embodimentPages, setEmbdoimentPages] = useState<any>({})
   const [showRawDataModal, setShowRawDataModal] = useState(false);
   const [showSplitScreen, setShowSplitScreen] = useState<boolean>(false);
-  const [sourcesPanelCollapsed, setSourcesPanelCollapsed] =
-    useState<boolean>(false);
-  
+  const [sourcesPanelCollapsed, setSourcesPanelCollapsed] = useState<boolean>(false);
   const [splitScreenContent, setSplitScreenContent] = useState({
     title: "All Sources",
     content: "",
@@ -352,6 +331,33 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
     description: [],
     claims: [],
   });
+  const [openPopupId, setOpenPopupId] = useState<number | null>(null);
+  const [remixedEmbodiments, setRemixedEmbodiments] = useState<
+    RemixedEmbodiment[]
+  >([]);
+  const [isCreatingRemix, setIsCreatingRemix] = useState(false);
+  const [storedKnowledge, setStoredKnowledge] = useState<StoredKnowledge[]>([]);
+  const [editingText, setEditingText] = useState("");
+  const { toast } = useToast();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingEmbodiment, setEditingEmbodiment] =
+    useState<RemixedEmbodiment | null>(null);
+  const [showMetadataDialog, setShowMetadataDialog] = useState(false);
+  const [selectedMetadataEmbodiment, setSelectedMetadataEmbodiment] = useState<Embodiment | RemixedEmbodiment | null>(null);
+  const [metadataType, setMetadataType] = useState<"extracted" | "remixed">("extracted");
+  const [availablePdfs, setAvailablePdfs] = useState<PDF[]>([]);
+  const [pdfDropdownOpen, setPdfDropdownOpen] = useState(false);
+  const [patentName, setPatentName] = useState<string | null>(null);
+  const [antigen, setAntigen] = useState<string | null>(null);
+  const [disease, setDisease] = useState<string | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const successIconRef = useRef<HTMLDivElement>(null);
+  const [pdfs, setPdfs] = useState(mockPdfs);
+  const [processingProgress, setProcessingProgress] = useState(0);
+  const [currentStep, setCurrentStep] = useState<"upload" | "extract" | "review" | "create">("upload");
+  const sourceToEmbodimentMap: Record<string, string[]> = {};
 
   const handleViewOriginal = (section: String) => {
     setShowSplitScreen(true);
@@ -414,11 +420,6 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
       setRawData(formatted);
     } catch (err) {
       console.error("Error fetching raw content:", err);
-      // toast({
-      //   title: "Error",
-      //   description: "Error while fetching raw text.",
-      //   variant: "destructive",
-      // });
     }
   };
 
@@ -508,80 +509,43 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
     }
   };
 
-  const scrollToPageSection = (
-  section: string,
-  pageNumber: number,
-  startChar?: number,
-  endChar?: number
-) => {
+  function highlightElementById(id: string, duration = 3000) {
+  const element = document.getElementById(id);
+  if (element) {
+    element.classList.add("bg-yellow-200", "rounded", "transition-colors");
+
+    // Scroll into view (in case it's not already in view)
+    element.scrollIntoView({ behavior: "smooth", block: "center" });
+
+    // Remove the highlight after `duration` milliseconds
+    setTimeout(() => {
+      element.classList.remove("bg-yellow-200", "rounded", "transition-colors");
+    }, duration);
+  }
+}
+
+  const scrollToPageSection = (section: string, pageNumber: number) => {
   const sectionId = `section-${section.toLowerCase()}_page_number-${pageNumber}`;
+
+  console.log("SectioNId", sectionId)  
   const targetElement = document.getElementById(sectionId);
-
+  console.log("target", targetElement)  
   if (targetElement) {
-    targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
-
-    if (startChar !== undefined && endChar !== undefined) {
-      // Find the correct page from state
-      let page;
-      if (Array.isArray(embodimentPages)) {
-        page = embodimentPages.find((p: any) => p.page_number === pageNumber);
-      } else {
-        page = embodimentPages[pageNumber] || Object.values(embodimentPages).find((p: any) => p?.page_number === pageNumber);
-      }
-
-      if (page && page.text) {
-        const textToHighlight = page.text.substring(startChar, endChar);
-
-        // Create a TreeWalker to find the correct text node
-        const treeWalker = document.createTreeWalker(targetElement, NodeFilter.SHOW_TEXT);
-        let currentNode;
-        let charCount = 0;
-
-        while ((currentNode = treeWalker.nextNode())) {
-          const nodeText = currentNode.textContent || "";
-          const startNode = Math.max(0, startChar - charCount);
-          const endNode = Math.min(nodeText.length, endChar - charCount);
-
-          if (startNode < nodeText.length) {
-            const range = document.createRange();
-            range.setStart(currentNode, startNode);
-            range.setEnd(currentNode, endNode);
-
-            const mark = document.createElement("mark");
-            mark.className = "bg-yellow-300 embodiment-highlight";
-            range.surroundContents(mark);
-
-            // Clean up previous highlights and scroll the new one into view
-            const oldHighlights = document.querySelectorAll(".embodiment-highlight");
-            oldHighlights.forEach(h => {
-              if (h !== mark) {
-                const parent = h.parentNode;
-                if(parent) {
-                  parent.replaceChild(document.createTextNode(h.textContent || ""), h);
-                  parent.normalize();
-                }
-              }
-            });
-
-            mark.scrollIntoView({ behavior: "smooth", block: "center" });
-
-            // Remove the highlight after 3 seconds
-            setTimeout(() => {
-              const parent = mark.parentNode;
-              if (parent) {
-                parent.replaceChild(document.createTextNode(mark.textContent || ""), mark);
-                parent.normalize();
-              }
-            }, 3000);
-
-            break; // Exit after finding and highlighting the text
-          }
-          charCount += nodeText.length;
-        }
-      }
-    }
+    targetElement.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 };
+
+useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      setPatentId(params.get("patentId"));
+      setPatentName(params.get("patentName"));
+      setAntigen(params.get("antigen"));
+      setDisease(params.get("disease"));
+    }
+
+    fetchDocuments();
+  }, []);
 
   useEffect(() => {
     if (patentId) {
@@ -594,74 +558,6 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
       fetchRawContent();
     }
   }, [embodiments, patentId]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      setPatentId(params.get("patentId"));
-    }
-  }, []);
-
-  const [openPopupId, setOpenPopupId] = useState<number | null>(null);
-  const [remixedEmbodiments, setRemixedEmbodiments] = useState<
-    RemixedEmbodiment[]
-  >([]);
-  const [isCreatingRemix, setIsCreatingRemix] = useState(false);
-  const [storedKnowledge, setStoredKnowledge] = useState<StoredKnowledge[]>([]);
-  
-  const [editingText, setEditingText] = useState("");
-  const { toast } = useToast();
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Add a new state for the edit dialog
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [editingEmbodiment, setEditingEmbodiment] =
-    useState<RemixedEmbodiment | null>(null);
-
-  // Add these new state variables after the other state declarations
-  const [showMetadataDialog, setShowMetadataDialog] = useState(false);
-  const [selectedMetadataEmbodiment, setSelectedMetadataEmbodiment] = useState<
-    Embodiment | RemixedEmbodiment | null
-  >(null);
-  const [metadataType, setMetadataType] = useState<"extracted" | "remixed">(
-    "extracted"
-  );
-
-  // Change the availablePdfs state to use IgY Patent related names
-  const [availablePdfs, setAvailablePdfs] = useState<PDF[]>([]);
-
-  const [pdfDropdownOpen, setPdfDropdownOpen] = useState(false);
-  const [patentName, setPatentName] = useState<string | null>(null);
-  const [antigen, setAntigen] = useState<string | null>(null);
-  const [disease, setDisease] = useState<string | null>(null);
-  const [showConfetti, setShowConfetti] = useState(false);
-  const [embodimentsForFileExist, setEmbodimentsForFileExist] =
-    useState<boolean>(false);
-  const confettiRef = useRef(null);
-  const successIconRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      setPatentName(params.get("patentName"));
-      setAntigen(params.get("antigen"));
-      setDisease(params.get("disease"));
-    }
-  }, []);
-
-  const handlePdfRemove = (pdfId: string) => {
-    setSelectedPdfIds(selectedPdfIds.filter((id) => id !== pdfId));
-  };
-
-  const handlePdfSelect = (pdfId: string) => {
-    setSelectedPdfIds((prev) => {
-      const updatedIds = prev.includes(pdfId)
-        ? prev.filter((id) => id !== pdfId) // Remove if already selected
-        : [...prev, pdfId]; // Add if not selected
-      return [...updatedIds]; // ✅ Ensure a new array is returned
-    });
-  };
 
   useEffect(() => {
     if (!showResearchSections) return;
@@ -782,19 +678,6 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
       content: combinedRawData,
     });
   }, [rawData]);
-
-  useEffect(() => {
-    fetchDocuments();
-  }, []);
-
-  const [pdfs, setPdfs] = useState(mockPdfs);
-  const [processingProgress, setProcessingProgress] = useState(0);
-  const [currentStep, setCurrentStep] = useState<
-    "upload" | "extract" | "review" | "create"
-  >("upload");
-
-  // Add a click handler to close the dropdown when clicking outside
-  // Add this useEffect after the state declarations
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -971,12 +854,6 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
     return null;
   };
 
-  // Function to find a remixed embodiment by ID
-  const findRemixedEmbodimentById = (id: number): RemixedEmbodiment | null => {
-    return remixedEmbodiments.find((e) => e.id === id) || null;
-  };
-
-  // Function to create a remixed version of an embodiment based on similarity percentage
   const createRemixedEmbodiment = async (
     originalId: number,
     similarityPercentage: number
@@ -1040,7 +917,6 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
       });
   };
 
-  // Function to save an embodiment to stored knowledge
   const saveEmbodiment = (
     embodiment: Embodiment | RemixedEmbodiment,
     source: string
@@ -1208,23 +1084,12 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
 
     try {
       const res = await axios.get(`${backendUrl}/v1/source-embodiments/${id}`);
-
-      const data = res.data.data;
       const mapped = transformGroupedEmbodiments(res.data || {});
       const abst = res.data.abstract;
       setAbstract(abst);
       setSelectedPdfIds([res.data.data[0].file_id]);
-
       setEmbodiments(mapped);
-
-      // ✅ Correctly assign filename to each chunk
-      const updatedChunks = data.map((chunk) => ({
-        ...chunk,
-        filename: selectedDoc?.name || chunk.filename,
-      }));
-
       const keyTerms = res.data?.terms || null;
-
       setKeyTermsFromApi(keyTerms);
       setEmbodiments(mapped);
       setShowResearchSections(true);
@@ -1294,7 +1159,7 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
   setEmbodiments(updated);
 }, [embodimentPages]);
 
-const sourceToEmbodimentMap: Record<string, string[]> = {};
+
 
 Object.values(embodiments).flat().forEach((emb) => {
   emb.sentenceSources?.forEach((s) => {
@@ -1902,7 +1767,7 @@ Object.values(embodiments).flat().forEach((emb) => {
                                   className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
                                 >
                                   <div className="flex justify-between items-center mb-2">
-                                    <h3 className="font-medium" onClick={() => scrollToPageSection("summary of invention", embodiment.page_number, embodiment.start_char, embodiment.end_char)}>
+                                    <h3 className="font-medium" onClick={() => scrollToPageSection("summary of invention", embodiment.page_number)}>
                                       {embodiment.title}
                                     </h3>
                                     <div className="flex items-center gap-2">
@@ -1945,9 +1810,7 @@ Object.values(embodiments).flat().forEach((emb) => {
         <button
           className="text-blue-600 text-xs ml-1"
           onClick={() =>
-            document
-              .getElementById(src.sourceId)
-              ?.scrollIntoView({ behavior: "smooth", block: "start" })
+            highlightElementById(src.sourceId)
           }
         >
           [{idx + 1}]
@@ -2192,9 +2055,7 @@ Object.values(embodiments).flat().forEach((emb) => {
         <button
           className="text-blue-600 text-xs ml-1"
           onClick={() =>
-            document
-              .getElementById(src.sourceId)
-              ?.scrollIntoView({ behavior: "smooth", block: "start" })
+            highlightElementById(src.sourceId)
           }
         >
           [{idx + 1}]
@@ -2382,9 +2243,7 @@ Object.values(embodiments).flat().forEach((emb) => {
         <button
           className="text-blue-600 text-xs ml-1"
           onClick={() =>
-            document
-              .getElementById(src.sourceId)
-              ?.scrollIntoView({ behavior: "smooth", block: "start" })
+            highlightElementById(src.sourceId)
           }
         >
           [{idx + 1}]
