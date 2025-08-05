@@ -1,0 +1,423 @@
+{
+  "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+  "file_id": "42405113-007b-4618-a8c4-4722761dceb6",
+  "message": "Patent document processed successfully",
+  "status_code": 200,
+  "abstract": "The invention relates to several methods of detection of neutralizing and RBD binding antibodies\n5 in patient samples as a method to understand the patient’s ability to fight the disease, success of a\nvaccine and in selection of patients for vaccination.\n10\nKausalya Santhanam, (digitally signed for e-filing)\n15",
+  "abstract_page": 13,
+  "abstract_pattern": 1,
+  "data": [
+    {
+      "text": "The method includes:\n1.1. analyzing a sample obtained from said subject using COVID-19 RBD (RBD) and anti-human IgG and/or anti-human IgM to determine a possible presence of COVID-19 RBD.",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 4,
+      "section": "Detailed Description",
+      "start_char": 1708,
+      "end_char": 1899,
+      "summary": "This method analyzes subject samples with COVID-19 RBD and anti-human IgG/IgM to detect RBD presence. Unlike lateral flow specifics, it covers RBD plus IgG/IgM analysis without device or epitope details."
+    },
+    {
+      "text": "1.3. The steps of 1.1 and/or 1.2 include certain subdomains and peptides of RBD that are critical for ACE2 binding.",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 5,
+      "section": "Detailed Description",
+      "start_char": 361,
+      "end_char": 477,
+      "summary": "Incorporates RBD subdomains and peptides crucial for ACE2 binding during detection. Focuses on key epitopes versus standard full RBD or generic peptide approaches."
+    },
+    {
+      "text": " The methods described herein, where anti-human IgG is a Fab fragment of IgG, IgY or VHH nanobody antibody.",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 9,
+      "section": "Detailed Description",
+      "start_char": 1027,
+      "end_char": 1134,
+      "summary": "Specifies anti-human IgG detection reagent as either IgG Fab fragment, IgY or nanobody. Consolidates alternative antibody formats, unlike other embodiments enumerating individual antibody types."
+    },
+    {
+      "text": "CLAIMS\nWe Claim:\n1. A method for detecting the presence of antibodies against COVID-19 RBD in a\nsubject, said method comprising:\nanalyzing a sample obtained from said subject using a COVID-19 RBD and anti-\nhuman IgG and anti-human IgM to determine a possible presence of COVID-19\nRBD antibody; and wherein the presence of COVID-19 RBD antibody is an\nindication that neutralizing antibody to COVID-19 is present in said subject.",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 11,
+      "section": "claims",
+      "start_char": 0,
+      "end_char": 426,
+      "summary": "Broad claim: method analyzes subject sample with COVID-19 RBD plus anti-IgG and anti-IgM to detect neutralizing antibodies. Unlike other embodiments, it omits specific assay formats, focusing on general dual IgM/IgG detection."
+    },
+    {
+      "text": "The method of claim 1, wherein RBD of COVID-19 S-protein comprises an amino acid sequence of SEQ ID NO. 1:\nHMASVYAWNRKRISNCVADYSVLYNSASFSTFKCYGVSPTKLNDLCFTNVYADSFVIRGDEVRQ\nIAPGQTGKIADYNYKLPDDFTGCVIAWNSNNLDSKVGGNYNYLYRLFRKSNLKPFERDISTEIY\nQAGSTPCNGVEGFNCYFPLQSYGFQPTNGVGYQPYRVVVLSFELLHAPATVCGPKKSTNLVKNK\nCVNFNFNGLTGTGVLTESNKKFLPFQQFGRDIADTTDAVRDPQTLEILDITPCSFGGVSVITPG\nTNTSNQVAVLYQDVNCTEVPVAIHADQLTPTWRVYSTGSNVFQTLE (SEQ ID NO.1)\n3.",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 11,
+      "section": "claims",
+      "start_char": 430,
+      "end_char": 857,
+      "summary": "Embodiment 3 uses the full SARS-CoV-2 spike RBD SEQ ID NO. 1 as the antigen sequence. Distinct for defining the complete RBD sequence, whereas others cover assays, subdomains or antibody variants."
+    },
+    {
+      "text": "The method of claim 2, wherein the protein sequence is a subset of protein sequences that are neutralizing epitopes of the COVID-19 S-protein.",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 11,
+      "section": "claims",
+      "start_char": 858,
+      "end_char": 994,
+      "summary": "Embodiment restricts RBD to neutralizing epitope subset. Unlike full-length RBD claims, emphasizes minimal neutralizing sequences."
+    },
+    {
+      "text": "4. The method of claim 1, wherein said step of analyzing for the presence of\nCOVID-19 RBD antibody comprises the steps of:\n(i) applying said sample to a lateral flow device to flow laterally towards a distal end\nof the lateral flow device, wherein the lateral flow device sequentially comprising:\n(a) a filter pad;\n(b) a conjugate pad, comprising a mixture of gold colloid having COVID-19\nRBD attached thereto and gold colloid having biotin or streptavidin\nattached thereto;\n(c) a sample pad; and\n(d) a membrane comprising:\nOne or two test regions, wherein one test region comprises anti-human\nIgG and the other test region comprises anti-human IgM, and\na control region comprising streptavidin or biotin-bovine serum antigen;",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 11,
+      "section": "claims",
+      "start_char": 995,
+      "end_char": 1734,
+      "summary": "A lateral flow assay using dual gold-colloid conjugates and separate IgG/IgM test lines plus streptavidin/biotin control. Unlike single-test RBD-only assays, this embodiment employs dual IgG/IgM detection using RBD-labeled colloids."
+    },
+    {
+      "text": "(ii) detecting any binding at both of the test regions and the control region, wherein binding at any test region and the control region is an indication that antibody against COVID-19 RBD is present in said sample.\n5.",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 12,
+      "section": "claims",
+      "start_char": 0,
+      "end_char": 215,
+      "summary": "Detects binding at test and control regions to confirm anti-RBD antibodies in samples. Requires dual-region binding, unlike single-test variants, improving specificity."
+    },
+    {
+      "text": "The method of claim 1, wherein said step of analyzing for the presence of COVID-19 RBD antibody comprises the steps of:\n(i) applying said sample to a lateral flow device to flow laterally towards a distal end of the lateral flow device, wherein the lateral flow device sequentially comprises:\n(a) a filter pad;\n(b) a conjugate pad, comprising a mixture of colloidal gold having anti-human IgG attached thereto and colloidal gold having streptavidin or biotin attached thereto;\n(c) a sample pad; and\n(d) a membrane comprising a test region, wherein the test region comprises RBD, and a control region, comprising streptavidin or biotin-bovine serum antigen;\n(ii) detecting any binding at both the test region and the control region, wherein binding at the test region and the control region is an indication that antibody against COVID-19 RBD is present in said sample.",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 12,
+      "section": "claims",
+      "start_char": 216,
+      "end_char": 1093,
+      "summary": "Single-test lateral flow assay uses RBD-coated test line, dual gold colloids (anti-IgG and biotin/strep), plus control line. Unlike dual IgG/IgM embodiments, this uses RBD capture in one test region simplifying detection."
+    },
+    {
+      "text": "Concept 1: Detection of RBD-binding human IgG in blood (immobilized RBD).",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 4,
+      "section": "detailed description",
+      "start_char": 197,
+      "end_char": 270,
+      "sub_category": "product composition",
+      "header": "BRIEF DESCRIPTION OF FIGURES",
+      "summary": "Immobilized RBD captures human IgG in blood. Uses fixed RBD, unlike other embodiments employing anti-IgG or nanobody capture."
+    },
+    {
+      "text": "Figure 2. Concept 2: Detection of RBD-binding human IgG in blood (anti-human IgG, IgY, or IgY against IgG Fc). Common corrections are for terms like: - faecalis - Enterococcus",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 4,
+      "section": "detailed description",
+      "start_char": 271,
+      "end_char": 382,
+      "sub_category": "product composition",
+      "header": "BRIEF DESCRIPTION OF FIGURES",
+      "summary": "Concept 2 employs anti-human IgG (IgY or anti-IgG-Fc) to detect RBD-binding IgG in blood; unlike Concept 1’s immobilized-RBD approach, it targets antibody Fc via avian IgY."
+    },
+    {
+      "text": "Concept 2: Detection of RBD-binding human IgG in blood (nanobody against IgG-Fc).\nDESCRIPTION OF THE INVENTION\n10 The present invention provides a test kit for determining the presence of COVID-19 RBD antibodies in a subject.",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 4,
+      "section": "detailed description",
+      "start_char": 393,
+      "end_char": 628,
+      "sub_category": "product composition",
+      "header": "BRIEF DESCRIPTION OF FIGURES",
+      "summary": "Concept 2 uses a nanobody against human IgG-Fc in a test kit to detect COVID-19 RBD antibodies. Unlike other embodiments, it replaces standard anti-human IgG with camelid nanobodies for specificity."
+    },
+    {
+      "text": "The method includes analyzing the sample that is obtained from the subject using a test kit comprising a COVID-19 RBD and anti-human IgG and/or anti-human IgM to determine a possible presence of COVID-19 RBD antibody.",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 4,
+      "section": "detailed description",
+      "start_char": 629,
+      "end_char": 846,
+      "sub_category": "product composition",
+      "header": "BRIEF DESCRIPTION OF FIGURES",
+      "summary": "General assay uses RBD and anti-IgG/IgM to detect anti-RBD antibodies. Unlike specific LFA embodiments, this generic test kit doesn’t specify format or epitope subsets."
+    },
+    {
+      "text": "The method includes analyzing the sample obtained from the subject using a test kit 20 comprising a COVID-19 RBD and anti-human IgG and/or anti-human IgM to determine a possible presence of COVID-19 RBD antibody. The concepts of the invention are provided in Figure 1, Figure 2, and Figure 3 and are described in the foregoing sections.",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 4,
+      "section": "detailed description",
+      "start_char": 1225,
+      "end_char": 1568,
+      "sub_category": "product composition",
+      "header": "BRIEF DESCRIPTION OF FIGURES",
+      "summary": "Generic sample analysis using RBD with anti-IgG/IgM kit to detect COVID-19 RBD antibodies. Unlike detailed LFA embodiments, it omits device architecture, epitope subdomains, and specific antibody formats."
+    },
+    {
+      "text": "In particular, the test includes determining the presence of antibodies to peptides derived from the RBD or to the RBD of COVID-19, comprising amino acid sequences including, but not limited to, SEQ ID NO.",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 5,
+      "section": "detailed description",
+      "start_char": 478,
+      "end_char": 669,
+      "sub_category": "product composition",
+      "header": "BRIEF DESCRIPTION OF FIGURES",
+      "summary": "Determines antibodies against peptide fragments or full-length RBD (SEQ ID NO), expanding target epitope range. Extends beyond whole RBD assays by incorporating peptide-derived epitopes, enhancing specificity relative to lateral-flow tests."
+    },
+    {
+      "text": "1 represented by:\nHMASVYAWNRKRISNCVADYSVLYNSASFSTFKCYGVSPTKLNDLCFTNVYADSFVIR\nGDEVRQIAPGQTGKIADYNYKLPDDFTGCVIAWNSNNLDSKVGGNYNYLYRLFRKSNL\nKPFERDISTEIYQAGSTPCNGVEGFNCYFPLQSYGFQPTNGVGYQPYRVVVLSFELLHAP\nATVCGPKKSTNLVKNKCVNFNFNGLTGTGVLTESNKKFLPFQQFGRDIADTTDAVRDP\nQTLEILDITPCSFGGVSVITPGTNTSNQVAVLYQDVNCTEVPVAIHADQLTPTWRVYSTG\nSNVFQTLE\nThe diagnostic test is carried out in a direct or indirect ELISA or using a dot blot. In another\naspect, the invention provides steps for analyzing for the presence of neutralizing antibodies\nagainst COVID-19 RBD by LFA (lateral flow assay) carried out as follows:\n• applying said sample to a lateral flow device to flow laterally towards a distal end of\nthe lateral flow device, wherein the lateral flow device sequentially comprises:\n• a filter pad;\n• a conjugate pad, comprising a mixture of gold colloid having anti-human IgG\nantibody attached thereto and gold colloid having biotin or streptavidin\nattached thereto;\n• a sample pad; and\n• a membrane comprising:\n  • a test region, wherein one test region comprises RBD; and\n  • a control region, comprising streptavidin/biotin-bovine serum albumin;",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 5,
+      "section": "detailed description",
+      "start_char": 670,
+      "end_char": 1805,
+      "sub_category": "product composition",
+      "header": "BRIEF DESCRIPTION OF FIGURES",
+      "summary": "Diagnostic ELISA/dot blot or LFA using RBD test region and gold-colloid anti-IgG with biotin/streptavidin control. Unlike anti-IgG/M capture versions, this LFA uses RBD as sole test region antigen."
+    },
+    {
+      "text": " detecting any binding at the test region and the control region,\n wherein binding at the test region and the control region is an indication that antibodies against COVID-19 RBD are present in said sample.\nThe detection of a signal at the test site with anti-human IgG is indicative of neutralizing antibodies in the subject.",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 6,
+      "section": "detailed description",
+      "start_char": 0,
+      "end_char": 324,
+      "sub_category": "product composition",
+      "header": "BRIEF DESCRIPTION OF FIGURES",
+      "summary": "Embodiment uses lateral flow to detect binding at test and control regions; anti-human IgG signal indicates neutralizing anti-RBD antibodies. Unlike other embodiments, emphasizes IgG-specific neutralizing detection rather than general IgM or multiplexed options."
+    },
+    {
+      "text": "In another aspect, one or two test regions may be available, wherein one test region comprises anti-human IgG and the other comprises anti-human IgM, and a control region comprises streptavidin or biotin linked to bovine serum albumin; detection and binding occur at both the test regions and the control region.",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 6,
+      "section": "detailed description",
+      "start_char": 325,
+      "end_char": 666,
+      "sub_category": "product composition",
+      "header": "BRIEF DESCRIPTION OF FIGURES",
+      "summary": "One or two lateral flow test regions: anti-human IgG and/or anti-human IgM; control uses streptavidin/biotin-BSA binding. Extends concepts combining dual antibody detection unlike single RBD or antibody-only test embodiments."
+    },
+    {
+      "text": "The detection of\n10 signal at the test site with anti-human IgG is indicative of neutralizing antibodies in the subject.\nIn another aspect, the RBD or its peptide thereof is isolated from a virus and recombinantly\nexpressed in mammalian, insect or bacterial cell.",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 6,
+      "section": "detailed description",
+      "start_char": 667,
+      "end_char": 930,
+      "sub_category": "product composition",
+      "header": "BRIEF DESCRIPTION OF FIGURES",
+      "summary": "The detection of signal via anti-human IgG indicates neutralizing antibodies; RBD is recombinantly expressed in diverse systems. Unique by specifying expression hosts; other embodiments focus on lateral flow device configurations."
+    },
+    {
+      "text": "Furthermore, it is provided that, biotin is attached to the RBD and streptavidin to the bovine serum albumin.",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 6,
+      "section": "detailed description",
+      "start_char": 931,
+      "end_char": 1040,
+      "sub_category": "product composition",
+      "header": "BRIEF DESCRIPTION OF FIGURES",
+      "summary": "This embodiment attaches biotin to RBD and streptavidin to BSA, enhancing signal capture. Unlike other embodiments, it specifies specific biotin-streptavidin pairing rather than generic gold conjugates."
+    },
+    {
+      "text": "15 The invention also provided that for anti-human IgM is substituted with anti-human IgG-Fc fragment or a portion thereof.\nIn another aspect, anti-human IgM is substituted with antibody to human IgM-Fc fragment or a portion thereof.",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 6,
+      "section": "detailed description",
+      "start_char": 1041,
+      "end_char": 1274,
+      "sub_category": "product composition",
+      "header": "BRIEF DESCRIPTION OF FIGURES",
+      "summary": "Anti-human IgM is substituted with anti-human IgG-Fc fragment or anti-human IgM-Fc antibody fragment. Differs by focusing on Fc fragment substitutes rather than full antibodies, expanding detection probe options."
+    },
+    {
+      "text": "Furthermore, the anti-IgG is any IgG from a mammal (goat, sheep, rat, mouse, donkey, horse, etc.) or an IgY from avian (chicken, goose, ostrich, etc.) or a nanobody (NB) from camel or llama or a monoclonal or polyclonal antibody derived from a mammal, avian, camel, or llama.",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 6,
+      "section": "detailed description",
+      "start_char": 1275,
+      "end_char": 1556,
+      "sub_category": "product composition",
+      "header": "BRIEF DESCRIPTION OF FIGURES",
+      "summary": "Embodiment: Anti-IgG includes mammalian IgG, avian IgY, camelid nanobody, monoclonal or polyclonal antibodies. Compared: this broad selection expands reagent options beyond specific formats in other embodiments."
+    },
+    {
+      "text": "In another embodiment, the anti-IgM is an IgG from a mammal (goat, sheep, rat, mouse, donkey, horse, etc.), an IgY from an avian species (chicken, goose, ostrich, etc.), a nanobody (Nb) from a camelid (e.g., camel or llama), or a monoclonal or polyclonal antibody derived from a mammal, an avian species, or a camelid.\n\nIn another aspect, the assays described in the present disclosure detect anti-RBD antibodies in serum, blood, plasma, or mixtures thereof obtained from the subject in whom detection is required.",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 6,
+      "section": "detailed description",
+      "start_char": 1557,
+      "end_char": 2044,
+      "sub_category": "product composition",
+      "header": "BRIEF DESCRIPTION OF FIGURES",
+      "summary": "Specifies anti-IgM variants: mammalian IgG, avian IgY, camelid nanobodies, mono/polyclonals, and accommodates serum, blood or plasma samples. Broader than other embodiments targeting anti-IgG or lateral flow, emphasizing reagent diversity."
+    },
+    {
+      "text": "In another aspect, a kit of the invention includes the assay elements described above with a needle to prick the finger, a buffer solution to facilitate migration of the sample to the test.",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 6,
+      "section": "detailed description",
+      "start_char": 2045,
+      "end_char": 2239,
+      "sub_category": "product composition",
+      "header": "BRIEF DESCRIPTION OF FIGURES",
+      "summary": "Kit includes finger-prick needle and buffer for sample migration with assay kit elements. Enhances user sample acquisition versus other embodiments lacking integrated collection tools."
+    },
+    {
+      "text": "control windows and a capillary to facilitate application of the sample from the subject to the sample window.\nAdditional objects, advantages, and novel features of this invention will become apparent to those skilled in the art.",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 7,
+      "section": "detailed description",
+      "start_char": 0,
+      "end_char": 229,
+      "sub_category": "product composition",
+      "header": "The invention in brief provides the following:",
+      "summary": "Includes capillary and control windows to ease sample application from subject to device. Focuses on user interface, unlike other embodiments centered on RBD-antibody detection chemistry."
+    },
+    {
+      "text": "The invention in brief provides the following:\nA method for detecting the presence of antibodies against COVID-19 RBD in a subject, said method comprising: analyzing a sample obtained from the subject using a COVID-19 RBD and anti-human IgG and anti-human IgM to determine a possible presence of COVID-19 RBD antibody; and wherein the presence of COVID-19 RBD antibody is an indication that neutralizing antibody to COVID-19 is present in the subject.",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 7,
+      "section": "detailed description",
+      "start_char": 230,
+      "end_char": 688,
+      "sub_category": "product composition",
+      "header": "The invention in brief provides the following:",
+      "summary": "Defines dual-target lateral flow assay employing RBD plus anti-IgG/IgM to detect neutralizing COVID-19 antibodies. Unlike other variants, it concurrently measures both IgG and IgM responses in one assay."
+    },
+    {
+      "text": "The above method of claim 1, wherein RBD of COVID-19 S-protein comprises the amino acid sequence provided below as SEQ ID NO: 1:\nHMASVYAWNRKRISNCVADYSVLYNSASFSTFKCYGVSPTKLNDLCFTNVYADSFVIRGDEVRQ\nIAPGQTGKIADYNYKLPDDFTGCVIAWNSNNLDSKVGGNYNYLYRLFRKSNLKPFERDISTEIY\nQAGSTPCNGVEGFNCYFPLQSYGFQPTNGVGYQPYRVVVLSFELLHAPATVCGPKKSTNLVKNK\nCVNFNFNGLTGTGVLTESNKKFLPFQQFGRDIADTTDAVRDPQTLEILDITPCSFGGVSVITPG\nTNTSNQVAVLYQDVNCTEVPVAIHADQLTPTWRVYSTGSNVFQTLE\n• The protein sequence of RBD of COVID-19 S-protein is a subset of protein sequences that are neutralizing epitopes of the COVID-19 S-protein.\n• A method for detecting the presence of antibodies against COVID-19 RBD in a subject, wherein the steps comprise analyzing for the presence of COVID-19 RBD antibodies by the following steps:\n(i) applying said sample to a lateral flow device to flow laterally towards a distal end of the lateral flow device, wherein the lateral flow device sequentially comprises:\n(a) a filter pad;\n(b) a conjugate pad, comprising a mixture of gold colloid having COVID-19 RBD attached thereto and gold colloid having biotin or streptavidin attached thereto;",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 7,
+      "section": "detailed description",
+      "start_char": 689,
+      "end_char": 1815,
+      "sub_category": "product composition",
+      "header": "The invention in brief provides the following:",
+      "summary": "Describes using full-length COVID-19 RBD sequence (SEQ ID NO:1) as lateral flow assay capture, with gold colloid conjugation. Contrasts minimal sequence focus in other embodiments, emphasizing complete neutralizing epitope usage."
+    },
+    {
+      "text": "(c) a sample pad; and\n(d) a membrane comprising:\nOne or two test regions, wherein one test region comprises anti-human\nIgG and the other test region comprises anti-human IgM, and\n5 a control region, comprising streptavidin or biotinylated bovine serum albumin;\n(ii) detecting any binding at both of the test regions and the control region,\nwherein binding at any test region and the control region is an indication that antibody against\nCOVID-19 RBD is present in said sample.\n The method detecting the presence of antibodies against COVID-19 RBD in a subject\n10 wherein said steps comprise analyzing for the presence of COVID-19 RBD antibody by\nfollowing the steps as below:\n(i) applying said sample to a lateral flow device to flow laterally towards a distal end\nof the lateral flow device, wherein the lateral flow device sequentially comprising:\n(a) a filter pad;\n19 (b) a conjugate pad, comprising a mixture of gold colloid having anti-human\nIgG attached thereto and gold colloid having streptavidin or biotin\nattached thereto;\n20 (c) a sample pad; and\n(d) a membrane comprising:\nOne test region, wherein one test region comprises RBD, and\na control region, comprising streptavidin or biotinylated bovine serum albumin;\n(ii) detecting any binding at both of the test regions and the control region,\nwherein binding at any test region and the control region is an indication that antibody\nagainst COVID-19 RBD is present in said sample.",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 8,
+      "section": "detailed description",
+      "start_char": 0,
+      "end_char": 1423,
+      "sub_category": "product composition",
+      "header": "The invention in brief provides the following:",
+      "summary": "Dual-mode lateral flow assay with pads, gold-colloid conjugates and membrane featuring anti-IgG/IgM or RBD test regions plus streptavidin/biotin control. Unlike single-target assays, this embodiment offers both IgG/IgM and direct RBD capture test regions."
+    },
+    {
+      "text": "25. The methods described herein, wherein anti-human IgG is an IgY polyclonal antibody.",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 8,
+      "section": "detailed description",
+      "start_char": 1424,
+      "end_char": 1512,
+      "sub_category": "product composition",
+      "header": "The invention in brief provides the following:",
+      "summary": "Anti-human IgG specified as polyclonal IgY antibody. Unlike monoclonal IgY, nanobody or Fab embodiments, focuses on polyclonal IgY."
+    },
+    {
+      "text": " The methods described herein, wherein anti-human IgG is an IgY monoclonal antibody.\n The methods described herein, wherein anti-human IgG is nanobody (Nb) polyclonal antibody.",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 8,
+      "section": "detailed description",
+      "start_char": 1513,
+      "end_char": 1691,
+      "sub_category": "product composition",
+      "header": "The invention in brief provides the following:",
+      "summary": "Specifies anti-human IgG formats: IgY monoclonal and nanobody polyclonal antibodies. Unlike broader embodiments listing multiple antibody types, this focuses on two specific IgG formats."
+    },
+    {
+      "text": " The methods described herein, wherein anti-human IgG is a nanobody (NB) monoclonal\nantibody.\n The methods described herein, where anti-human IgG is a Fab fragment of IgG, IgY or\nnanobody (NB) antibody.",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 9,
+      "section": "detailed description",
+      "start_char": 0,
+      "end_char": 204,
+      "sub_category": "product composition",
+      "header": "The invention in brief provides the following:",
+      "summary": "Defines anti-human IgG formats as nanobody monoclonal or Fab fragment (IgG, IgY, NB). Broadens scope among embodiments by combining monoclonal NB and fragment options."
+    },
+    {
+      "text": "5. The methods described herein, where anti-human IgM is an IgY polyclonal antibody.",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 9,
+      "section": "detailed description",
+      "start_char": 205,
+      "end_char": 290,
+      "sub_category": "product composition",
+      "header": "The invention in brief provides the following:",
+      "summary": "Uses avian IgY polyclonal antibody for anti-human IgM detection. Unique avian IgY expands beyond mammalian IgG and nanobody variants."
+    },
+    {
+      "text": " The methods described herein, where anti-human IgM is an IgY monoclonal antibody.\n The methods described herein, where anti-human IgM is a nanobody (Nb) polyclonal antibody.",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 9,
+      "section": "detailed description",
+      "start_char": 291,
+      "end_char": 465,
+      "sub_category": "product composition",
+      "header": "The invention in brief provides the following:",
+      "summary": "Specifies anti-human IgM detection via IgY monoclonal or nanobody polyclonal antibodies; unlike broader IgG/IgM formats, focuses on defined monoclonal IgY and polyclonal nanobody IgM alternatives."
+    },
+    {
+      "text": " The methods described herein, wherein anti-human IgM is a nanobody (NB) monoclonal antibody.",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 9,
+      "section": "detailed description",
+      "start_char": 466,
+      "end_char": 561,
+      "sub_category": "product composition",
+      "header": "The invention in brief provides the following:",
+      "summary": "Specifies anti-human IgM as a nanobody monoclonal antibody. Unlike other embodiments using IgY, IgG-Fab, polyclonal NBs, or standard IgG."
+    },
+    {
+      "text": " The methods described herein, where anti-human IgM is a Fab fragment of IgG, IgY or\nnanobody (NB) antibody.\n The methods described herein, where anti-human IgG is an IgY polyclonal antibody.",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 9,
+      "section": "detailed description",
+      "start_char": 562,
+      "end_char": 755,
+      "sub_category": "product composition",
+      "header": "The invention in brief provides the following:",
+      "summary": "Specifies anti-IgM as Fab fragments (IgG/IgY/nanobody) and anti-IgG as a polyclonal IgY antibody. Narrows detection reagents versus broader nanobody, monoclonal, or Fab lists in other embodiments."
+    },
+    {
+      "text": " The methods described herein, where anti-human IgG is an IgY monoclonal antibody.",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 9,
+      "section": "detailed description",
+      "start_char": 756,
+      "end_char": 839,
+      "sub_category": "product composition",
+      "header": "The invention in brief provides the following:",
+      "summary": "Specifies using IgY monoclonal antibody as anti-human IgG in the assay. Differs by offering monoclonal IgY specificity versus polyclonal, nanobody or Fab anti-IgG options."
+    },
+    {
+      "text": "15  The methods described herein, where anti-human IgG is a nanobody (NB) polyclonal\nantibody.\n The methods described herein, where anti-human IgG is a nanobody (NB) monoclonal\nantibody.",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 9,
+      "section": "detailed description",
+      "start_char": 840,
+      "end_char": 1026,
+      "sub_category": "product composition",
+      "header": "The invention in brief provides the following:",
+      "summary": "Employs nanobody-based anti-human IgG in both polyclonal and monoclonal forms. Uniquely uses camelid-derived reagents versus conventional mammalian IgG or IgY formats."
+    },
+    {
+      "text": " The methods described herein, where anti-human IgM is an IgY polyclonal antibody\n The methods described herein, where anti-human IgM is an IgY monoclonal antibody\n The methods described herein, where anti-human IgM is nanobody polyclonal antibody\n The methods described herein, where anti-human IgM is a nanobody (NB) monoclonal antibody",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 9,
+      "section": "detailed description",
+      "start_char": 1135,
+      "end_char": 1482,
+      "sub_category": "product composition",
+      "header": "The invention in brief provides the following:",
+      "summary": "Defines anti-human IgM capture using IgY (poly/monoclonal) or nanobody (poly/monoclonal). Unlike other embodiments focusing on IgG variants, this emphasizes IgM detection versatility."
+    },
+    {
+      "text": " The methods described herein, where anti-human IgM is a Fab fragment of IgG, IgY or nanobody (NB) antibody.\nThe foregoing discussion of the invention has been presented for purposes of illustration and description.",
+      "filename": "COVID-19_NEUTRALIZING_ANTIBODY_DETE.pdf",
+      "page_number": 10,
+      "section": "detailed description",
+      "start_char": 0,
+      "end_char": 218,
+      "sub_category": "product composition",
+      "header": "The invention in brief provides the following:",
+      "summary": "Employs anti-human IgM comprising Fab fragments of IgG, IgY, or nanobody antibodies. Differs by adapting IgM detection; others primarily address anti-IgG reagents."
+    }
+  ],
+  "terms": null
+}

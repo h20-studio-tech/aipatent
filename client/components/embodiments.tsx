@@ -65,8 +65,10 @@ interface Embodiment {
   header?: string;
   headingSummary?: string;
   category?: string;
-  page_number: number
+  page_number: number;
   sentenceSources?: SentenceSource[];
+  start_char?: number;
+  end_char?: number;
 }
 
 // Interface for remixed embodiment objects
@@ -114,6 +116,8 @@ type RawChunk = {
   text: string;
   summary?: string;
   header?: string;
+  start_char?: number;
+  end_char?: number;
 };
 
 type EmbodimentMap = {
@@ -204,7 +208,9 @@ export function transformGroupedEmbodiments(response: any): EmbodimentMap {
             headingSummary: sub.summary,
             header: sub.header ? sub.header : "",
             category: emb.sub_category ? emb.sub_category : "",
-            page_number: emb.page_number
+            page_number: emb.page_number,
+            start_char: emb.start_char,
+            end_char: emb.end_char
           });
         }
       } else {
@@ -220,7 +226,9 @@ export function transformGroupedEmbodiments(response: any): EmbodimentMap {
           headingSummary: sub.summary,
           header: sub.header,
           category: "product composition",
-          page_number: 0
+          page_number: 0,
+          start_char: 0,
+          end_char: 0
         });
       }
     }
@@ -240,7 +248,9 @@ export function transformGroupedEmbodiments(response: any): EmbodimentMap {
       pageNumber: chunk.page_number,
       section: chunk.section,
       summary: chunk.summary || "",
-      page_number: chunk.page_number
+      page_number: chunk.page_number,
+      start_char: chunk.start_char,
+      end_char: chunk.end_char
     });
   }
 
@@ -278,7 +288,9 @@ export function transformApiEmbodiments(data: RawChunk[]): EmbodimentMap {
       section: chunk.section, // ✅
       summary: chunk.summary || "Lorem Ipsum dolor sit amet.",
       header: chunk.header,
-      page_number: chunk.page_number
+      page_number: chunk.page_number,
+      start_char: chunk.start_char,
+      end_char: chunk.end_char
     });
   }
 
@@ -496,14 +508,78 @@ export default function Embodiments({ stage, setStage }: EmbodimentsProps) {
     }
   };
 
-  const scrollToPageSection = (section: string, pageNumber: number) => {
+  const scrollToPageSection = (
+  section: string,
+  pageNumber: number,
+  startChar?: number,
+  endChar?: number
+) => {
   const sectionId = `section-${section.toLowerCase()}_page_number-${pageNumber}`;
-
-  console.log("SectioNId", sectionId)  
   const targetElement = document.getElementById(sectionId);
-  console.log("target", targetElement)  
+
   if (targetElement) {
-    targetElement.scrollIntoView({ behavior: "smooth", block: "start" });
+    targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+
+    if (startChar !== undefined && endChar !== undefined) {
+      // Find the correct page from state
+      let page;
+      if (Array.isArray(embodimentPages)) {
+        page = embodimentPages.find((p: any) => p.page_number === pageNumber);
+      } else {
+        page = embodimentPages[pageNumber] || Object.values(embodimentPages).find((p: any) => p?.page_number === pageNumber);
+      }
+
+      if (page && page.text) {
+        const textToHighlight = page.text.substring(startChar, endChar);
+
+        // Create a TreeWalker to find the correct text node
+        const treeWalker = document.createTreeWalker(targetElement, NodeFilter.SHOW_TEXT);
+        let currentNode;
+        let charCount = 0;
+
+        while ((currentNode = treeWalker.nextNode())) {
+          const nodeText = currentNode.textContent || "";
+          const startNode = Math.max(0, startChar - charCount);
+          const endNode = Math.min(nodeText.length, endChar - charCount);
+
+          if (startNode < nodeText.length) {
+            const range = document.createRange();
+            range.setStart(currentNode, startNode);
+            range.setEnd(currentNode, endNode);
+
+            const mark = document.createElement("mark");
+            mark.className = "bg-yellow-300 embodiment-highlight";
+            range.surroundContents(mark);
+
+            // Clean up previous highlights and scroll the new one into view
+            const oldHighlights = document.querySelectorAll(".embodiment-highlight");
+            oldHighlights.forEach(h => {
+              if (h !== mark) {
+                const parent = h.parentNode;
+                if(parent) {
+                  parent.replaceChild(document.createTextNode(h.textContent || ""), h);
+                  parent.normalize();
+                }
+              }
+            });
+
+            mark.scrollIntoView({ behavior: "smooth", block: "center" });
+
+            // Remove the highlight after 3 seconds
+            setTimeout(() => {
+              const parent = mark.parentNode;
+              if (parent) {
+                parent.replaceChild(document.createTextNode(mark.textContent || ""), mark);
+                parent.normalize();
+              }
+            }, 3000);
+
+            break; // Exit after finding and highlighting the text
+          }
+          charCount += nodeText.length;
+        }
+      }
+    }
   }
 };
 
@@ -1826,7 +1902,7 @@ Object.values(embodiments).flat().forEach((emb) => {
                                   className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
                                 >
                                   <div className="flex justify-between items-center mb-2">
-                                    <h3 className="font-medium" onClick={() => scrollToPageSection("summary of invention", embodiment.page_number)}>
+                                    <h3 className="font-medium" onClick={() => scrollToPageSection("summary of invention", embodiment.page_number, embodiment.start_char, embodiment.end_char)}>
                                       {embodiment.title}
                                     </h3>
                                     <div className="flex items-center gap-2">
