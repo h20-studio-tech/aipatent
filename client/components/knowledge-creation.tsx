@@ -60,11 +60,20 @@ export default function KnowledgeCreation({
   const [approachmetaData, setApproachMetaData] = useState([]);
   const [innovationmetaData, setInnovationMetaData] = useState([]);
   const [technologymetaData, setTechnologyMetaData] = useState([]);
+  const [highlightedChunkId, setHighlightedChunkId] = useState<number | null>(null);
   const approachInsightsRef = useRef<InsightsRef | null>(null);
   const technologyInsightsRef = useRef<InsightsRef | null>(null);
   const innovationInsightsRef = useRef<InsightsRef | null>(null);
   const [selectedPdfIds, setSelectedPdfIds] = useState<string[]>([]);
   const [selectedPdfs, setSelectedPdfs] = useState<PDF[]>([]);
+
+  const handleCitationClick = (chunkId: number) => {
+    setHighlightedChunkId(chunkId);
+    // Clear highlight after 3 seconds
+    setTimeout(() => {
+      setHighlightedChunkId(null);
+    }, 3000);
+  };
 
   const handlePdfUpload = (sectionId: string, file: File) => {
     // In a real app, we would upload the file to a server
@@ -121,6 +130,7 @@ export default function KnowledgeCreation({
               ? technologymetaData
               : innovationmetaData
           }
+          highlightedChunkId={highlightedChunkId}
         />
       </div>
 
@@ -237,6 +247,7 @@ export default function KnowledgeCreation({
               ref={approachInsightsRef}
               lastSaved={lastSavedApproach}
               setLastSaved={setLastSavedApproach}
+              onCitationClick={handleCitationClick}
             />
           )}
           {activeTab === "technology" && (
@@ -248,6 +259,7 @@ export default function KnowledgeCreation({
               ref={technologyInsightsRef}
               lastSaved={lastSavedTechnology}
               setLastSaved={setLastSavedTechnology}
+              onCitationClick={handleCitationClick}
             />
           )}
           {activeTab === "innovation" && (
@@ -259,6 +271,7 @@ export default function KnowledgeCreation({
               ref={innovationInsightsRef}
               lastSaved={lastSavedInnovation}
               setLastSaved={setLastSavedInnovation}
+              onCitationClick={handleCitationClick}
             />
           )}
         </div>

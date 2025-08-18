@@ -23,6 +23,7 @@ import { FileText, Loader2, Save, Edit, X } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { Textarea } from "@/components/ui/textarea";
+import { CitedMessage, Footnotes } from "@/components/citation-link";
 
 interface InnovationInsightsRef {
   generateContent: () => void;
@@ -40,6 +41,7 @@ interface InnovationInsightsProps {
   lastSaved: string;
   patentId: string;
   setLastSaved: Dispatch<SetStateAction<string>>;
+  onCitationClick?: (chunkId: number) => void;
 }
 
 const InnovationInsights = forwardRef<
@@ -47,7 +49,7 @@ const InnovationInsights = forwardRef<
   InnovationInsightsProps
 >(
   (
-    { response, metaData, question, lastSaved, setLastSaved, patentId },
+    { response, metaData, question, lastSaved, setLastSaved, patentId, onCitationClick },
     ref
   ) => {
     const [content, setContent] = useState<string | null>(response);
@@ -270,19 +272,34 @@ This innovation framework demonstrates Apple's commitment to pushing boundaries 
                 />
               ) : (
                 <div className="prose max-w-none">
-                  {content.split("\n").map((line, index) => {
-                    if (line.startsWith("# ")) {
-                      return <h3 key={index}>{line.replace("# ", "")}</h3>;
-                    } else if (line.startsWith("## ")) {
-                      return <h4 key={index}>{line.replace("## ", "")}</h4>;
-                    } else if (line.startsWith("- ")) {
-                      return <li key={index}>{line.replace("- ", "")}</li>;
-                    } else if (line.trim() === "") {
-                      return <br key={index} />;
-                    } else {
-                      return <p key={index}>{line}</p>;
-                    }
-                  })}
+                  {onCitationClick ? (
+                    <>
+                      <CitedMessage 
+                        message={content} 
+                        chunks={metaData} 
+                        onCitationClick={onCitationClick} 
+                      />
+                      <Footnotes 
+                        message={content} 
+                        chunks={metaData} 
+                        onCitationClick={onCitationClick} 
+                      />
+                    </>
+                  ) : (
+                    content.split("\n").map((line, index) => {
+                      if (line.startsWith("# ")) {
+                        return <h3 key={index}>{line.replace("# ", "")}</h3>;
+                      } else if (line.startsWith("## ")) {
+                        return <h4 key={index}>{line.replace("## ", "")}</h4>;
+                      } else if (line.startsWith("- ")) {
+                        return <li key={index}>{line.replace("- ", "")}</li>;
+                      } else if (line.trim() === "") {
+                        return <br key={index} />;
+                      } else {
+                        return <p key={index}>{line}</p>;
+                      }
+                    })
+                  )}
                 </div>
               )
             ) : (

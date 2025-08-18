@@ -1,6 +1,7 @@
 "use client";
 
 import type { FC } from "react";
+import { useEffect, useRef } from "react";
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { metadata } from "@/lib/metadata";
 import { Info } from "lucide-react";
@@ -15,12 +16,23 @@ interface MetadataPanelProps {
         text: string;
       }[]
     | null;
+  highlightedChunkId?: number | null;
 }
 
-const MetadataPanel: FC<MetadataPanelProps> = ({ activeSection, metaData }) => {
+const MetadataPanel: FC<MetadataPanelProps> = ({ activeSection, metaData, highlightedChunkId }) => {
   const sectionMetadata = metadata[activeSection];
+  const chunkRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
 
   const hasMetadata = metaData && metaData.length > 0;
+
+  useEffect(() => {
+    if (highlightedChunkId && chunkRefs.current[highlightedChunkId]) {
+      chunkRefs.current[highlightedChunkId]?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
+      });
+    }
+  }, [highlightedChunkId]);
 
   return (
     <div className="h-full">
@@ -36,7 +48,15 @@ const MetadataPanel: FC<MetadataPanelProps> = ({ activeSection, metaData }) => {
             metaData!.map((item, index) => (
               <div
                 key={`${item.chunk_id}-${index}`}
-                className="border border-border bg-white dark:bg-muted p-4 rounded-lg shadow-sm"
+                ref={(el) => {
+                  if (el) chunkRefs.current[item.chunk_id] = el;
+                }}
+                id={`chunk-${item.chunk_id}`}
+                className={`border p-4 rounded-lg shadow-sm transition-all duration-300 ${
+                  highlightedChunkId === item.chunk_id
+                    ? "border-blue-500 bg-blue-50 dark:bg-blue-950"
+                    : "border-border bg-white dark:bg-muted"
+                }`}
               >
                 <p>
                   <span className="font-semibold">Chunk ID:</span>{" "}
