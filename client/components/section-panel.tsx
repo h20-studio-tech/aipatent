@@ -91,6 +91,8 @@ export default function SectionPanel({
   const [showConfetti, setShowConfetti] = useState(false);
   const [userNotes, setUserNotes] = useState("");
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<string>("");
   const confettiRef = useRef(null);
   const successIconRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -256,6 +258,48 @@ export default function SectionPanel({
 
   const handlePdfRemove = (pdfId: string) => {
     setSelectedPdfIds(selectedPdfIds.filter((id) => id !== pdfId));
+  };
+
+  const handleComprehensiveAnalysis = async () => {
+    if (selectedPdfIds.length === 0) {
+      alert("Please select at least one PDF to analyze.");
+      return;
+    }
+
+    setIsAnalyzing(true);
+
+    try {
+      // Get selected PDF names for validation
+      const selectedPdfNames = pdfList
+        .filter((pdf) => selectedPdfIds.includes(pdf.id))
+        .map((pdf) => pdf.name);
+
+      console.log("Analyzing PDFs:", selectedPdfNames);
+
+      // Mock analysis delay
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      // Mock response
+      const mockAnalysis = `Comprehensive Analysis Results: The selected document(s) [${selectedPdfNames.join(", ")}] contain${selectedPdfNames.length > 1 ? "" : "s"} detailed information about ${title.toLowerCase()} methodologies and approaches. This holistic analysis identified key sections covering theoretical frameworks, practical applications, and innovative techniques relevant to patent development.`;
+
+      setAnalysisResult(mockAnalysis);
+
+      toast({
+        title: "Analysis Complete",
+        description: `Successfully analyzed ${selectedPdfNames.length} document${selectedPdfNames.length > 1 ? "s" : ""}`,
+        duration: 3000,
+      });
+
+    } catch (error) {
+      console.error("Error during comprehensive analysis:", error);
+      toast({
+        title: "Analysis Failed",
+        description: "Error occurred during document analysis",
+        duration: 3000,
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const saveResearchNotes = () => {
