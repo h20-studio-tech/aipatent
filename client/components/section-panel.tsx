@@ -93,7 +93,6 @@ export default function SectionPanel({
   const [userNotes, setUserNotes] = useState("");
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<string>("");
   const confettiRef = useRef(null);
   const successIconRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -269,6 +268,9 @@ export default function SectionPanel({
 
     setIsAnalyzing(true);
 
+    // Add analysis request to chat history
+    setChatHistory((prev) => [...prev, `You: Comprehensive Analysis Request`]);
+
     try {
       // Get selected PDF names for validation
       const selectedPdfNames = pdfList
@@ -277,16 +279,25 @@ export default function SectionPanel({
 
       console.log("Analyzing PDFs:", selectedPdfNames);
 
-      // Mock analysis delay
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // For now, analyze the first selected PDF (can be extended for multiple)
+      const firstPdfName = selectedPdfNames[0];
+      const tablename = firstPdfName.replace('.pdf', '').replace('.PDF', '');
+      
+      console.log("Using tablename:", tablename);
 
-      // Mock response
-      const mockAnalysis = `Comprehensive Analysis Results: The selected document(s) [${selectedPdfNames.join(", ")}] contain${selectedPdfNames.length > 1 ? "" : "s"} detailed information about ${title.toLowerCase()} methodologies and approaches. This holistic analysis identified key sections covering theoretical frameworks, practical applications, and innovative techniques relevant to patent development.`;
+      // Make API request to comprehensive analysis endpoint
+      const url = `${backendUrl}/v1/documents/comprehensive-analysis/lancedb/${tablename}`;
+      const { data } = await axios.post(url);
 
-      setAnalysisResult(mockAnalysis);
+      console.log("Analysis response:", data);
+
+      // Add to chat history and set as insight response
+      setChatHistory((prev) => [...prev, `AI: ${data.gemini_analysis}`]);
+      setInsightResponse(data.gemini_analysis);
+      setQuestion("Comprehensive Document Analysis");
 
       toast({
-        title: "Analysis Complete",
+        title: "Analysis Complete", 
         description: `Successfully analyzed ${selectedPdfNames.length} document${selectedPdfNames.length > 1 ? "s" : ""}`,
         duration: 3000,
       });
@@ -508,20 +519,6 @@ export default function SectionPanel({
           </div>
         )}
 
-        {/* Analysis Results Display */}
-        {analysisResult && (
-          <Card className="border-2 border-green-200 bg-green-50">
-            <CardContent className="p-4">
-              <div className="font-medium mb-2 flex items-center">
-                <Brain className="h-4 w-4 mr-2 text-green-600" />
-                Comprehensive Analysis Results
-              </div>
-              <div className="bg-white rounded-md p-3 text-sm">
-                {analysisResult}
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         <div className="space-y-2">
           <Textarea
