@@ -28,6 +28,7 @@ import {
   CheckCircle,
   Loader2,
   CornerDownLeft,
+  Brain,
 } from "lucide-react";
 import type { PDF } from "@/lib/types";
 import { backendUrl } from "../config/config";
@@ -91,6 +92,7 @@ export default function SectionPanel({
   const [showConfetti, setShowConfetti] = useState(false);
   const [userNotes, setUserNotes] = useState("");
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const confettiRef = useRef(null);
   const successIconRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -258,6 +260,60 @@ export default function SectionPanel({
     setSelectedPdfIds(selectedPdfIds.filter((id) => id !== pdfId));
   };
 
+  const handleComprehensiveAnalysis = async () => {
+    if (selectedPdfIds.length === 0) {
+      alert("Please select at least one PDF to analyze.");
+      return;
+    }
+
+    setIsAnalyzing(true);
+
+    // Add analysis request to chat history
+    setChatHistory((prev) => [...prev, `You: Comprehensive Analysis Request`]);
+
+    try {
+      // Get selected PDF names for validation
+      const selectedPdfNames = pdfList
+        .filter((pdf) => selectedPdfIds.includes(pdf.id))
+        .map((pdf) => pdf.name);
+
+      console.log("Analyzing PDFs:", selectedPdfNames);
+
+      // For now, analyze the first selected PDF (can be extended for multiple)
+      const firstPdfName = selectedPdfNames[0];
+      const tablename = firstPdfName.replace('.pdf', '').replace('.PDF', '');
+      
+      console.log("Using tablename:", tablename);
+
+      // Make API request to comprehensive analysis endpoint
+      const url = `${backendUrl}/v1/documents/comprehensive-analysis/lancedb/${tablename}`;
+      const { data } = await axios.post(url);
+
+      console.log("Analysis response:", data);
+
+      // Add to chat history and set as insight response
+      setChatHistory((prev) => [...prev, `AI: ${data.gemini_analysis}`]);
+      setInsightResponse(data.gemini_analysis);
+      setQuestion("Comprehensive Document Analysis");
+
+      toast({
+        title: "Analysis Complete", 
+        description: `Successfully analyzed ${selectedPdfNames.length} document${selectedPdfNames.length > 1 ? "s" : ""}`,
+        duration: 3000,
+      });
+
+    } catch (error) {
+      console.error("Error during comprehensive analysis:", error);
+      toast({
+        title: "Analysis Failed",
+        description: "Error occurred during document analysis",
+        duration: 3000,
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
   const saveResearchNotes = () => {
     if (!userNotes.trim()) return;
 
@@ -423,6 +479,19 @@ export default function SectionPanel({
               </div>
             </PopoverContent>
           </Popover>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handleComprehensiveAnalysis}
+            disabled={isAnalyzing || selectedPdfIds.length === 0}
+          >
+            {isAnalyzing ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Brain className="h-4 w-4 mr-2" />
+            )}
+            {isAnalyzing ? "Analyzing..." : "Analyze Document"}
+          </Button>
         </div>
 
         {/* Selected PDFs list */}
@@ -449,6 +518,7 @@ export default function SectionPanel({
             ))}
           </div>
         )}
+
 
         <div className="space-y-2">
           <Textarea
