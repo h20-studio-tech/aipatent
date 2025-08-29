@@ -28,6 +28,7 @@ import {
   CheckCircle,
   Loader2,
   CornerDownLeft,
+  Brain,
 } from "lucide-react";
 import type { PDF } from "@/lib/types";
 import { backendUrl } from "../config/config";
@@ -467,6 +468,19 @@ export default function SectionPanel({
               </div>
             </PopoverContent>
           </Popover>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handleComprehensiveAnalysis}
+            disabled={isAnalyzing || selectedPdfIds.length === 0}
+          >
+            {isAnalyzing ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Brain className="h-4 w-4 mr-2" />
+            )}
+            {isAnalyzing ? "Analyzing..." : "Analyze Document"}
+          </Button>
         </div>
 
         {/* Selected PDFs list */}
@@ -492,6 +506,21 @@ export default function SectionPanel({
               </div>
             ))}
           </div>
+        )}
+
+        {/* Analysis Results Display */}
+        {analysisResult && (
+          <Card className="border-2 border-green-200 bg-green-50">
+            <CardContent className="p-4">
+              <div className="font-medium mb-2 flex items-center">
+                <Brain className="h-4 w-4 mr-2 text-green-600" />
+                Comprehensive Analysis Results
+              </div>
+              <div className="bg-white rounded-md p-3 text-sm">
+                {analysisResult}
+              </div>
+            </CardContent>
+          </Card>
         )}
 
         <div className="space-y-2">
