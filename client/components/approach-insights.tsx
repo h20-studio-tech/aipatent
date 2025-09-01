@@ -1,5 +1,4 @@
-// Integrated: edit content feature into response-based ApproachInsights
-
+// path: app/(patents)/components/ApproachInsights.tsx
 "use client";
 
 import {
@@ -18,13 +17,31 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  // DialogTrigger,
 } from "@/components/ui/dialog";
 import { FileText, Loader2, Save, Edit, X } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { Textarea } from "@/components/ui/textarea";
-import { CitedMessage, Footnotes } from "@/components/citation-link";
+import { Footnotes } from "@/components/citation-link";
+
+// Markdown rendering
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { visit } from "unist-util-visit";
+import type { Plugin } from "unified";
+import type { Root, Text, Element, Properties } from "hast";
+
+declare global {
+  interface Window {
+    addKnowledgeEntry?: (
+      section: string,
+      question: string,
+      content: string,
+      patentId: string
+    ) => void;
+  }
+}
 
 interface ApproachInsightsRef {
   generateContent: () => void;
@@ -45,9 +62,71 @@ interface ApproachInsightsProps {
   onCitationClick?: (chunkId: number) => void;
 }
 
+/**
+ * Convert inline tokens like `[44]` into <citation data-citation="44">[44]</citation>.
+ * Why: preserve citation UX while using Markdown.
+ */
+const rehypeCitations: Plugin<[], Root> = () => (tree: Root) => {
+  const CITATION_RE = /\[(\d{1,4})\]/g;
+
+  visit(
+    tree as any,
+    "text",
+    (node: Text, index: number | null, parent: any) => {
+      const value = node.value;
+      if (!value || !parent || typeof index !== "number") return;
+      if (!CITATION_RE.test(value)) return;
+
+      const fragments: (Text | Element)[] = [];
+      let last = 0;
+      CITATION_RE.lastIndex = 0;
+      let match: RegExpExecArray | null;
+
+      while ((match = CITATION_RE.exec(value)) !== null) {
+        const [raw, idStr] = match;
+        const start = match.index;
+        const end = start + raw.length;
+
+        if (start > last)
+          fragments.push({ type: "text", value: value.slice(last, start) });
+
+        const id = Number(idStr);
+        const props: Properties = {
+          "data-citation": id,
+          className:
+            "align-super text-xs px-1 rounded cursor-pointer text-primary hover:underline",
+          title: `Jump to citation ${id}`,
+        };
+
+        fragments.push({
+          type: "element",
+          tagName: "citation",
+          properties: props,
+          children: [{ type: "text", value: `[${id}]` }],
+        });
+
+        last = end;
+      }
+
+      if (last < value.length)
+        fragments.push({ type: "text", value: value.slice(last) });
+
+      parent.children.splice(index, 1, ...fragments);
+    }
+  );
+};
+
 const ApproachInsights = forwardRef<ApproachInsightsRef, ApproachInsightsProps>(
   (
-    { response, metaData, question, lastSaved, setLastSaved, patentId, onCitationClick },
+    {
+      response,
+      metaData,
+      question,
+      lastSaved,
+      setLastSaved,
+      patentId,
+      onCitationClick,
+    },
     ref
   ) => {
     const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -79,16 +158,16 @@ const ApproachInsights = forwardRef<ApproachInsightsRef, ApproachInsightsProps>(
       document.addEventListener("mouseup", handleMouseUp);
     };
 
-    const [content, setContent] = useState<string | null>(response);
-    const [editedContent, setEditedContent] = useState<string>(response);
+    const [content, setContent] = useState<string>(response || "");
+    const [editedContent, setEditedContent] = useState<string>(response || "");
     const [isSaving, setIsSaving] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const { toast } = useToast();
 
     useEffect(() => {
-      setContent(response);
-      setEditedContent(response);
+      setContent(response || "");
+      setEditedContent(response || "");
     }, [response]);
 
     useImperativeHandle(ref, () => ({
@@ -97,9 +176,9 @@ const ApproachInsights = forwardRef<ApproachInsightsRef, ApproachInsightsProps>(
 
     const handleSave = () => {
       if (!editedContent.trim()) return;
-
       setIsSaving(true);
 
+      // persist (host app hook)
       if (typeof window !== "undefined" && window.addKnowledgeEntry) {
         window.addKnowledgeEntry("Approach", question, editedContent, patentId);
       }
@@ -114,7 +193,7 @@ const ApproachInsights = forwardRef<ApproachInsightsRef, ApproachInsightsProps>(
           description: "Your approach insights have been saved to the project.",
           duration: 3000,
         });
-      }, 1000);
+      }, 300);
     };
 
     const handleEdit = () => {
@@ -126,6 +205,74 @@ const ApproachInsights = forwardRef<ApproachInsightsRef, ApproachInsightsProps>(
       setIsEditing(false);
       setEditedContent(content || "");
     };
+
+    // react-markdown component mapping to wire up click handlers
+    const components = {
+      citation: ({ children, ...props }: any) => {
+        const id = Number(props["data-citation"]);
+        return (
+          <sup
+            role="button"
+            tabIndex={0}
+            className="inline align-super relative top-[2px] text-[0.65rem] leading-none mx-0 cursor-pointer text-primary hover:underline focus:outline-none"
+            title={`Jump to citation ${id}`}
+            onClick={() => onCitationClick?.(id)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") onCitationClick?.(id);
+            }}
+            data-citation={id}
+          >
+            {children}
+          </sup>
+        );
+      },
+      h1: (props: any) => (
+        <h2 className="mt-6 scroll-m-20 text-2xl font-semibold" {...props} />
+      ),
+      h2: (props: any) => (
+        <h3 className="mt-6 scroll-m-20 text-xl font-semibold" {...props} />
+      ),
+      h3: (props: any) => (
+        <h4 className="mt-6 scroll-m-20 text-lg font-semibold" {...props} />
+      ),
+      li: (props: any) => <li className="my-1" {...props} />,
+      p: (props: any) => <p className="leading-7" {...props} />,
+      a: (props: any) => (
+        <a
+          className="underline underline-offset-4"
+          target="_blank"
+          rel="noreferrer"
+          {...props}
+        />
+      ),
+      code: (props: any) => (
+        <code className="rounded bg-muted px-1 py-0.5" {...props} />
+      ),
+      pre: (props: any) => (
+        <pre className="rounded bg-muted p-3 overflow-auto" {...props} />
+      ),
+      ul: (props: any) => <ul className="list-disc pl-6" {...props} />,
+      ol: (props: any) => <ol className="list-decimal pl-6" {...props} />,
+      blockquote: (props: any) => (
+        <blockquote
+          className="mt-6 border-l-2 pl-6 italic text-muted-foreground"
+          {...props}
+        />
+      ),
+      table: (props: any) => (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm" {...props} />
+        </div>
+      ),
+      th: (props: any) => (
+        <th className="border-b px-2 py-1 text-left" {...props} />
+      ),
+      td: (props: any) => (
+        <td className="border-b px-2 py-1 align-top" {...props} />
+      ),
+    } as const;
+
+    const isSaved = lastSaved.trim() === content.trim();
 
     return (
       <>
@@ -139,9 +286,7 @@ const ApproachInsights = forwardRef<ApproachInsightsRef, ApproachInsightsProps>(
               <div className="flex items-center gap-2">
                 <Dialog>
                   {/* <DialogTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      Meta-data
-                    </Button>
+                    <Button variant=\"outline\" size=\"sm\">Meta-data</Button>
                   </DialogTrigger> */}
                   <DialogContent className="sm:max-w-[500px]">
                     <DialogHeader>
@@ -188,11 +333,13 @@ const ApproachInsights = forwardRef<ApproachInsightsRef, ApproachInsightsProps>(
                     </div>
                   </DialogContent>
                 </Dialog>
+
                 {content && !isEditing && (
                   <Button size="sm" variant="outline" onClick={handleEdit}>
                     <Edit className="h-4 w-4 mr-2" /> Edit
                   </Button>
                 )}
+
                 {isEditing ? (
                   <>
                     <Button size="sm" onClick={handleSave} disabled={isSaving}>
@@ -212,18 +359,15 @@ const ApproachInsights = forwardRef<ApproachInsightsRef, ApproachInsightsProps>(
                   <Button
                     size="sm"
                     onClick={handleSave}
-                    disabled={!content || isSaving || lastSaved === response}
+                    disabled={!content || isSaving || isSaved}
                   >
-                    {lastSaved === response
-                      ? "Saved"
-                      : isSaving
-                      ? "Saving"
-                      : "Save"}
+                    {isSaved ? "Saved" : isSaving ? "Saving" : "Save"}
                   </Button>
                 )}
               </div>
             </CardTitle>
           </CardHeader>
+
           <CardContent className="p-6 relative">
             {content ? (
               isEditing ? (
@@ -234,33 +378,23 @@ const ApproachInsights = forwardRef<ApproachInsightsRef, ApproachInsightsProps>(
                 />
               ) : (
                 <div className="prose max-w-none">
-                  {onCitationClick ? (
-                    <>
-                      <CitedMessage 
-                        message={content} 
-                        chunks={metaData} 
-                        onCitationClick={onCitationClick} 
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    rehypePlugins={[rehypeCitations]}
+                    components={components as any}
+                  >
+                    {content}
+                  </ReactMarkdown>
+
+                  {/* Keep your existing footnotes list */}
+                  {onCitationClick && (
+                    <div className="mt-8">
+                      <Footnotes
+                        message={content}
+                        chunks={metaData}
+                        onCitationClick={onCitationClick}
                       />
-                      <Footnotes 
-                        message={content} 
-                        chunks={metaData} 
-                        onCitationClick={onCitationClick} 
-                      />
-                    </>
-                  ) : (
-                    content.split("\n").map((line, index) => {
-                      if (line.startsWith("# ")) {
-                        return <h3 key={index}>{line.replace("# ", "")}</h3>;
-                      } else if (line.startsWith("## ")) {
-                        return <h4 key={index}>{line.replace("## ", "")}</h4>;
-                      } else if (line.startsWith("- ")) {
-                        return <li key={index}>{line.replace("- ", "")}</li>;
-                      } else if (line.trim() === "") {
-                        return <br key={index} />;
-                      } else {
-                        return <p key={index}>{line}</p>;
-                      }
-                    })
+                    </div>
                   )}
                 </div>
               )
@@ -277,6 +411,7 @@ const ApproachInsights = forwardRef<ApproachInsightsRef, ApproachInsightsProps>(
                 </div>
               </div>
             )}
+
             {isLoading && (
               <div className="absolute inset-0 bg-background/80 flex items-center justify-center rounded-lg">
                 <div className="text-center">

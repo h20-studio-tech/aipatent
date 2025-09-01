@@ -1,5 +1,4 @@
-// Editable: TechnologyInsights with Edit/Save support
-
+// path: app/(patents)/components/TechnologyInsights.tsx
 "use client";
 
 import {
@@ -17,13 +16,31 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  // DialogTrigger,
 } from "@/components/ui/dialog";
 import { FileText, Loader2, Save, Edit, X } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { Textarea } from "@/components/ui/textarea";
-import { CitedMessage, Footnotes } from "@/components/citation-link";
+import { Footnotes } from "@/components/citation-link";
+
+// Markdown rendering
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { visit } from "unist-util-visit";
+import type { Plugin } from "unified";
+import type { Root, Text, Element, Properties } from "hast";
+
+declare global {
+  interface Window {
+    addKnowledgeEntry?: (
+      section: string,
+      question: string,
+      content: string,
+      patentId: string
+    ) => void;
+  }
+}
 
 interface TechnologyInsightsRef {
   generateContent: () => void;
@@ -44,100 +61,105 @@ interface TechnologyInsightsProps {
   onCitationClick?: (chunkId: number) => void;
 }
 
+/**
+ * Convert inline tokens like `[44]` into <citation data-citation="44">[44]</citation>.
+ * Keeps citation UX while using Markdown.
+ */
+const rehypeCitations: Plugin<[], Root> = () => (tree: Root) => {
+  const CITATION_RE = /\[(\d{1,4})\]/g;
+  visit(
+    tree as any,
+    "text",
+    (node: Text, index: number | null, parent: any) => {
+      const value = node.value;
+      if (!value || !parent || typeof index !== "number") return;
+      if (!CITATION_RE.test(value)) return;
+
+      const fragments: (Text | Element)[] = [];
+      let last = 0;
+      CITATION_RE.lastIndex = 0;
+      let match: RegExpExecArray | null;
+
+      while ((match = CITATION_RE.exec(value)) !== null) {
+        const [raw, idStr] = match;
+        const start = match.index;
+        const end = start + raw.length;
+
+        if (start > last)
+          fragments.push({ type: "text", value: value.slice(last, start) });
+
+        const id = Number(idStr);
+        const props: Properties = {
+          "data-citation": id,
+          className:
+            "inline align-super relative top-[2px] text-[0.65rem] leading-none mx-0 cursor-pointer text-primary hover:underline",
+          title: `Jump to citation ${id}`,
+        };
+
+        fragments.push({
+          type: "element",
+          tagName: "citation",
+          properties: props,
+          children: [{ type: "text", value: `[${id}]` }],
+        });
+
+        last = end;
+      }
+
+      if (last < value.length)
+        fragments.push({ type: "text", value: value.slice(last) });
+
+      parent.children.splice(index, 1, ...fragments);
+    }
+  );
+};
+
 const TechnologyInsights = forwardRef<
   TechnologyInsightsRef,
   TechnologyInsightsProps
 >(
   (
-    { response, metaData, question, lastSaved, setLastSaved, patentId, onCitationClick },
+    {
+      response,
+      metaData,
+      question,
+      lastSaved,
+      setLastSaved,
+      patentId,
+      onCitationClick,
+    },
     ref
   ) => {
-    const [content, setContent] = useState<string | null>(response);
-    const [editedContent, setEditedContent] = useState<string>(response);
+    const [content, setContent] = useState<string>(response || "");
+    const [editedContent, setEditedContent] = useState<string>(response || "");
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const { toast } = useToast();
 
-    useImperativeHandle(ref, () => ({
-      generateContent: () => {
-        generateContent();
-      },
-    }));
-
     useEffect(() => {
-      setContent(response);
-      setEditedContent(response);
+      setContent(response || "");
+      setEditedContent(response || "");
     }, [response]);
+
+    useImperativeHandle(ref, () => ({
+      generateContent: () => generateContent(),
+    }));
 
     const generateContent = () => {
       setIsLoading(true);
       setTimeout(() => {
-        const generated = `# iPhone Technology Framework
-
-Our analysis of the technical specifications and research papers has yielded the following technology framework for the iPhone:
-
-## 1. Core Technologies
-
-The iPhone leverages several cutting-edge technologies:
-
-- **A-series/M-series Chips:** Custom ARM-based processors designed by Apple for optimal performance and energy efficiency
-- **Neural Engine:** Dedicated neural network hardware for AI and ML operations
-- **ProMotion Display:** Adaptive refresh rate technology up to 120Hz
-- **TrueDepth Camera:** Advanced 3D sensing system for Face ID and AR applications
-- **5G Modem:** Advanced cellular connectivity with mmWave support
-
-## 2. Technical Architecture
-
-The system architecture consists of four primary layers:
-
-- **Hardware Layer:** Custom silicon, sensors, and input/output systems
-- **System Software:** iOS core operating system and drivers
-- **Services Layer:** iCloud, App Store, and other platform services
-- **Application Layer:** First-party and third-party applications
-
-## 3. Technical Innovations
-
-Key technological innovations include:
-
-- Custom silicon design with integrated CPU, GPU, and Neural Engine
-- Advanced computational photography using multiple camera systems
-- Secure Enclave for hardware-level security
-- ProRAW image format for professional photography
-- Ceramic Shield display technology for enhanced durability
-
-## 4. Technical Specifications
-
-Current specifications include:
-
-- Display: Super Retina XDR OLED with ProMotion
-- Processor: Latest A-series chip with 6-core CPU
-- Memory: Up to 1TB storage and 6GB RAM
-- Camera System: Triple 48MP, 12MP, 12MP rear cameras
-- Battery: Up to 29 hours video playback
-- Connectivity: 5G, Wi-Fi 6E, Ultra Wideband
-
-## 5. Implementation Technologies
-
-Key implementation technologies include:
-
-- LTPO OLED display technology
-- Advanced machine learning algorithms
-- LiDAR scanning for AR applications
-- MagSafe wireless charging system
-- Ceramic Shield front cover
-
-This technology framework demonstrates Apple's leadership in mobile computing, showcasing innovations in silicon design, display technology, camera systems, and security features.`;
+        const generated = `# iPhone Technology Framework\n\nOur analysis of the technical specifications and research papers has yielded the following technology framework for the iPhone:\n\n## 1. Core Technologies\n\nThe iPhone leverages several cutting-edge technologies:\n\n- **A-series/M-series Chips:** Custom ARM-based processors designed by Apple for optimal performance and energy efficiency\n- **Neural Engine:** Dedicated neural network hardware for AI and ML operations\n- **ProMotion Display:** Adaptive refresh rate technology up to 120Hz\n- **TrueDepth Camera:** Advanced 3D sensing system for Face ID and AR applications\n- **5G Modem:** Advanced cellular connectivity with mmWave support\n\n## 2. Technical Architecture\n\nThe system architecture consists of four primary layers:\n\n- **Hardware Layer:** Custom silicon, sensors, and input/output systems\n- **System Software:** iOS core operating system and drivers\n- **Services Layer:** iCloud, App Store, and other platform services\n- **Application Layer:** First-party and third-party applications\n\n## 3. Technical Innovations\n\nKey technological innovations include:\n\n- Custom silicon design with integrated CPU, GPU, and Neural Engine\n- Advanced computational photography using multiple camera systems\n- Secure Enclave for hardware-level security\n- ProRAW image format for professional photography\n- Ceramic Shield display technology for enhanced durability\n\n## 4. Technical Specifications\n\nCurrent specifications include:\n\n- Display: Super Retina XDR OLED with ProMotion\n- Processor: Latest A-series chip with 6-core CPU\n- Memory: Up to 1TB storage and 6GB RAM\n- Camera System: Triple 48MP, 12MP, 12MP rear cameras\n- Battery: Up to 29 hours video playback\n- Connectivity: 5G, Wi-Fi 6E, Ultra Wideband\n\n## 5. Implementation Technologies\n\nKey implementation technologies include:\n\n- LTPO OLED display technology\n- Advanced machine learning algorithms\n- LiDAR scanning for AR applications\n- MagSafe wireless charging system\n- Ceramic Shield front cover`;
         setContent(generated);
         setEditedContent(generated);
         setIsLoading(false);
-      }, 2000);
+      }, 1000);
     };
 
     const handleSave = () => {
       if (!editedContent.trim()) return;
-
       setIsSaving(true);
+
       if (typeof window !== "undefined" && window.addKnowledgeEntry) {
         window.addKnowledgeEntry(
           "Technology",
@@ -158,7 +180,7 @@ This technology framework demonstrates Apple's leadership in mobile computing, s
             "Your technology insights have been saved to the project.",
           duration: 3000,
         });
-      }, 1000);
+      }, 300);
     };
 
     const handleEdit = () => {
@@ -170,6 +192,74 @@ This technology framework demonstrates Apple's leadership in mobile computing, s
       setIsEditing(false);
       setEditedContent(content || "");
     };
+
+    // react-markdown component mapping (same look as Approach)
+    const components = {
+      citation: ({ children, ...props }: any) => {
+        const id = Number(props["data-citation"]);
+        return (
+          <sup
+            role="button"
+            tabIndex={0}
+            className="inline align-super relative top-[2px] text-[0.65rem] leading-none mx-0 cursor-pointer text-primary hover:underline focus:outline-none"
+            title={`Jump to citation ${id}`}
+            onClick={() => onCitationClick?.(id)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") onCitationClick?.(id);
+            }}
+            data-citation={id}
+          >
+            {children}
+          </sup>
+        );
+      },
+      h1: (props: any) => (
+        <h2 className="mt-6 scroll-m-20 text-2xl font-semibold" {...props} />
+      ),
+      h2: (props: any) => (
+        <h3 className="mt-6 scroll-m-20 text-xl font-semibold" {...props} />
+      ),
+      h3: (props: any) => (
+        <h4 className="mt-6 scroll-m-20 text-lg font-semibold" {...props} />
+      ),
+      li: (props: any) => <li className="my-1" {...props} />,
+      p: (props: any) => <p className="leading-7" {...props} />,
+      a: (props: any) => (
+        <a
+          className="underline underline-offset-4"
+          target="_blank"
+          rel="noreferrer"
+          {...props}
+        />
+      ),
+      code: (props: any) => (
+        <code className="rounded bg-muted px-1 py-0.5" {...props} />
+      ),
+      pre: (props: any) => (
+        <pre className="rounded bg-muted p-3 overflow-auto" {...props} />
+      ),
+      ul: (props: any) => <ul className="list-disc pl-6" {...props} />,
+      ol: (props: any) => <ol className="list-decimal pl-6" {...props} />,
+      blockquote: (props: any) => (
+        <blockquote
+          className="mt-6 border-l-2 pl-6 italic text-muted-foreground"
+          {...props}
+        />
+      ),
+      table: (props: any) => (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm" {...props} />
+        </div>
+      ),
+      th: (props: any) => (
+        <th className="border-b px-2 py-1 text-left" {...props} />
+      ),
+      td: (props: any) => (
+        <td className="border-b px-2 py-1 align-top" {...props} />
+      ),
+    } as const;
+
+    const isSaved = lastSaved.trim() === content.trim();
 
     return (
       <>
@@ -183,8 +273,8 @@ This technology framework demonstrates Apple's leadership in mobile computing, s
               <div className="flex items-center gap-2">
                 <Dialog>
                   {/* <DialogTrigger asChild>
-                    <Button variant="outline" size="sm">Meta-data</Button>
-                  </DialogTrigger> */}
+                  <Button variant=\"outline\" size=\"sm\">Meta-data</Button>
+                </DialogTrigger> */}
                   <DialogContent className="sm:max-w-[500px]">
                     <DialogHeader>
                       <DialogTitle>Approach Meta-data</DialogTitle>
@@ -226,12 +316,13 @@ This technology framework demonstrates Apple's leadership in mobile computing, s
                     </div>
                   </DialogContent>
                 </Dialog>
+
                 {content && !isEditing && (
                   <Button size="sm" variant="outline" onClick={handleEdit}>
-                    <Edit className="h-4 w-4 mr-2" />
-                    Edit
+                    <Edit className="h-4 w-4 mr-2" /> Edit
                   </Button>
                 )}
+
                 {isEditing ? (
                   <>
                     <Button size="sm" onClick={handleSave} disabled={isSaving}>
@@ -244,26 +335,22 @@ This technology framework demonstrates Apple's leadership in mobile computing, s
                       onClick={handleCancelEdit}
                       disabled={isSaving}
                     >
-                      <X className="h-4 w-4 mr-2" />
-                      Cancel
+                      <X className="h-4 w-4 mr-2" /> Cancel
                     </Button>
                   </>
                 ) : (
                   <Button
                     size="sm"
                     onClick={handleSave}
-                    disabled={!content || isSaving || lastSaved === response}
+                    disabled={!content || isSaving || isSaved}
                   >
-                    {lastSaved === response
-                      ? "Saved"
-                      : isSaving
-                      ? "Saving"
-                      : "Save"}
+                    {isSaved ? "Saved" : isSaving ? "Saving" : "Save"}
                   </Button>
                 )}
               </div>
             </CardTitle>
           </CardHeader>
+
           <CardContent className="p-6 relative">
             {content ? (
               isEditing ? (
@@ -274,33 +361,22 @@ This technology framework demonstrates Apple's leadership in mobile computing, s
                 />
               ) : (
                 <div className="prose max-w-none">
-                  {onCitationClick ? (
-                    <>
-                      <CitedMessage 
-                        message={content} 
-                        chunks={metaData} 
-                        onCitationClick={onCitationClick} 
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    rehypePlugins={[rehypeCitations]}
+                    components={components as any}
+                  >
+                    {content}
+                  </ReactMarkdown>
+
+                  {onCitationClick && (
+                    <div className="mt-8">
+                      <Footnotes
+                        message={content}
+                        chunks={metaData}
+                        onCitationClick={onCitationClick}
                       />
-                      <Footnotes 
-                        message={content} 
-                        chunks={metaData} 
-                        onCitationClick={onCitationClick} 
-                      />
-                    </>
-                  ) : (
-                    content.split("\n").map((line, index) => {
-                      if (line.startsWith("# ")) {
-                        return <h3 key={index}>{line.replace("# ", "")}</h3>;
-                      } else if (line.startsWith("## ")) {
-                        return <h4 key={index}>{line.replace("## ", "")}</h4>;
-                      } else if (line.startsWith("- ")) {
-                        return <li key={index}>{line.replace("- ", "")}</li>;
-                      } else if (line.trim() === "") {
-                        return <br key={index} />;
-                      } else {
-                        return <p key={index}>{line}</p>;
-                      }
-                    })
+                    </div>
                   )}
                 </div>
               )
@@ -317,6 +393,7 @@ This technology framework demonstrates Apple's leadership in mobile computing, s
                 </div>
               </div>
             )}
+
             {isLoading && (
               <div className="absolute inset-0 bg-background/80 flex items-center justify-center rounded-lg">
                 <div className="text-center">
@@ -339,5 +416,4 @@ This technology framework demonstrates Apple's leadership in mobile computing, s
 );
 
 TechnologyInsights.displayName = "TechnologyInsights";
-
 export default TechnologyInsights;
