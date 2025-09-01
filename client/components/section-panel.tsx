@@ -281,8 +281,8 @@ export default function SectionPanel({
 
       // For now, analyze the first selected PDF (can be extended for multiple)
       const firstPdfName = selectedPdfNames[0];
-      const tablename = firstPdfName.replace('.pdf', '').replace('.PDF', '');
-      
+      const tablename = firstPdfName.replace(".pdf", "").replace(".PDF", "");
+
       console.log("Using tablename:", tablename);
 
       // Make API request to comprehensive analysis endpoint
@@ -297,11 +297,12 @@ export default function SectionPanel({
       setQuestion("Comprehensive Document Analysis");
 
       toast({
-        title: "Analysis Complete", 
-        description: `Successfully analyzed ${selectedPdfNames.length} document${selectedPdfNames.length > 1 ? "s" : ""}`,
+        title: "Analysis Complete",
+        description: `Successfully analyzed ${
+          selectedPdfNames.length
+        } document${selectedPdfNames.length > 1 ? "s" : ""}`,
         duration: 3000,
       });
-
     } catch (error) {
       console.error("Error during comprehensive analysis:", error);
       toast({
@@ -479,8 +480,8 @@ export default function SectionPanel({
               </div>
             </PopoverContent>
           </Popover>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="sm"
             onClick={handleComprehensiveAnalysis}
             disabled={isAnalyzing || selectedPdfIds.length === 0}
@@ -518,7 +519,6 @@ export default function SectionPanel({
             ))}
           </div>
         )}
-
 
         <div className="space-y-2">
           <Textarea
