@@ -272,7 +272,12 @@ export function ResizableSection({
           />
         ) : (
           <div className="p-3 h-full overflow-y-auto prose prose-sm max-w-none">
-            <ReactMarkdown>{editedContent}</ReactMarkdown>
+            {/* If content has HTML footnote spans, render as HTML, otherwise use Markdown */}
+            {editedContent.includes('class="footnote-ref"') ? (
+              <div dangerouslySetInnerHTML={{ __html: editedContent }} />
+            ) : (
+              <ReactMarkdown>{editedContent}</ReactMarkdown>
+            )}
           </div>
         )}
         <div
@@ -338,7 +343,12 @@ export function ResizableSection({
               />
             ) : (
               <div className="p-3 h-full w-full overflow-y-auto prose prose-sm max-w-none">
-                <ReactMarkdown>{editedContent}</ReactMarkdown>
+                {/* If content has HTML footnote spans, render as HTML, otherwise use Markdown */}
+                {editedContent.includes('class="footnote-ref"') ? (
+                  <div dangerouslySetInnerHTML={{ __html: editedContent }} />
+                ) : (
+                  <ReactMarkdown>{editedContent}</ReactMarkdown>
+                )}
               </div>
             )}
           </div>

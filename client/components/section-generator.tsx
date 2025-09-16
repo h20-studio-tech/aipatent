@@ -40,6 +40,25 @@ interface PatentComponentGeneratorProps {
   setStage: (stage: number) => void;
 }
 
+interface ParsedContent {
+  content: string;
+  footnotes: FootnoteReference[];
+}
+
+interface FootnoteReference {
+  id: string;
+  type: 'disease' | 'antigen' | 'approach' | 'technology' | 'innovation' | 'additional';
+  text: string;
+  position: number;
+  endPosition: number;
+}
+
+interface MetadataSection {
+  type: 'disease' | 'antigen' | 'approach' | 'technology' | 'innovation' | 'additional';
+  content: string;
+  citations: number[];
+}
+
 interface RawData {
   abstract?: string;
   keyterms?: string;
@@ -85,6 +104,91 @@ interface SavedPatentData {
 //   "Formulations & Variations": ["Formulations & Variations"],
 //   Claims: ["Claims"],
 // };
+
+const BACKGROUND_MOCK = `
+COVID-19, caused by the SARS-CoV-2 virus, represents a persistent and significant global health crisis, leading to widespread morbidity, mortality, and substantial economic disruption worldwide. The rapid and unpredictable emergence of new variants continues to pose a formidable challenge to public health, necessitating the development of highly effective and adaptable prophylactic and therapeutic interventions. [disease] Current strategies to combat COVID-19 primarily involve vaccination, with many successful vaccines targeting the SARS-CoV-2 spike protein, particularly its receptor-binding domain (RBD). This region is critical for viral entry into host cells and is a primary target for neutralizing antibodies. [antigen] Despite the success of existing vaccines, significant unmet needs persist, particularly concerning scalability, cost-effectiveness, and clinical adaptability. Many current manufacturing processes face bottlenecks, and the logistical demands, such as stringent cold chain requirements, limit global accessibility, especially in resource-constrained settings. [additional] Furthermore, the continuous evolution of SARS-CoV-2 has led to the emergence of numerous variants with mutations in the spike protein, which can reduce the efficacy of existing vaccines and antibody-based treatments. This necessitates frequent updates to vaccine formulations and a more agile response mechanism to maintain broad-spectrum protection against circulating and emerging strains. [antigen] There is a critical need for next-generation solutions that can overcome these limitations by providing enhanced immunogenicity, improved stability, and the capacity for rapid adaptation to new viral threats. Such solutions must offer a robust and broadly protective immune response while simplifying manufacturing and distribution. [approach] The present invention addresses these challenges through a novel approach utilizing a nanoparticle-based delivery platform. This platform is designed to display multiple copies of the SARS-CoV-2 spike protein receptor-binding domain (RBD) and its engineered variants in a highly ordered structure, thereby enhancing immunogenicity and stability. The technology leverages self-assembling protein nanoparticles combined with mRNA encoding the antigen, further supported by lipid-based adjuvants to boost the immune response. [approach] [technology] Crucially, this system introduces a modular plug-and-play design, allowing for the rapid adaptation of the nanoparticle scaffold to emerging viral variants. This innovative design provides the potential for broad-spectrum protection with fewer manufacturing bottlenecks, offering a significant improvement in the ability to respond to future pandemic threats. [innovation]
+`;
+
+// Function to parse content with footnotes
+const parseContentWithFootnotes = (rawContent: string): ParsedContent => {
+  const footnotePattern = /\[(disease|antigen|approach|technology|innovation|additional)\]/g;
+  const footnotes: FootnoteReference[] = [];
+  let processedContent = rawContent;
+  let match;
+  let footnoteCounter = 1;
+
+  // Store all matches first
+  const matches: Array<{ type: string; index: number; length: number }> = [];
+  while ((match = footnotePattern.exec(rawContent)) !== null) {
+    matches.push({
+      type: match[1],
+      index: match.index,
+      length: match[0].length
+    });
+  }
+
+  // Process matches in reverse order to maintain correct positions
+  for (let i = matches.length - 1; i >= 0; i--) {
+    const { type, index, length } = matches[i];
+    const footnoteId = `fn-${footnoteCounter}`;
+
+    // Get the surrounding text for context (50 chars before and after)
+    const contextStart = Math.max(0, index - 50);
+    const contextEnd = Math.min(rawContent.length, index + length + 50);
+    const contextText = rawContent.substring(contextStart, contextEnd).replace(/\[.*?\]/g, '').trim();
+
+    footnotes.unshift({
+      id: footnoteId,
+      type: type as any,
+      text: contextText,
+      position: index,
+      endPosition: index + length
+    });
+
+    // Keep the original tag but wrap it in a span for styling
+    const replacement = `<span class="footnote-ref" data-footnote-id="${footnoteId}" data-footnote-type="${type}" style="color: #2563eb; cursor: pointer; font-weight: 600;">[${type}]</span>`;
+    processedContent = processedContent.substring(0, index) + replacement + processedContent.substring(index + length);
+    footnoteCounter++;
+  }
+
+  return {
+    content: processedContent,
+    footnotes: footnotes.reverse()
+  };
+};
+
+// Function to extract metadata from stored knowledge
+const extractMetadataFromKnowledge = (
+  innovation: string,
+  approach: string,
+  technology: string,
+  disease: string,
+  antigen: string,
+  additional: string,
+  footnotes: FootnoteReference[]
+): MetadataSection[] => {
+  const metadata: MetadataSection[] = [];
+
+  const typeToContent: Record<string, string> = {
+    innovation,
+    approach,
+    technology,
+    disease,
+    antigen,
+    additional
+  };
+
+  // Create metadata sections without citation counts
+  Object.entries(typeToContent).forEach(([type, content]) => {
+    metadata.push({
+      type: type as any,
+      content: content || `Content for ${type}`,
+      citations: [] // Empty citations array - we don't need to show numbers
+    });
+  });
+
+  return metadata;
+};
 
 const MAIN_SECTIONS = [
   "Background",
@@ -176,6 +280,13 @@ const PatentComponentGenerator: React.FC<PatentComponentGeneratorProps> = ({
   const [expandedSections, setExpandedSections] = useState<
     Record<string, boolean>
   >({});
+  const [parsedSections, setParsedSections] = useState<
+    Record<string, ParsedContent>
+  >({});
+  const [activeFootnote, setActiveFootnote] = useState<string | null>(null);
+  const [sectionMetadataDisplay, setSectionMetadataDisplay] = useState<
+    Record<string, MetadataSection[]>
+  >({});
 
   // Check if we've reached the end of the generation sequence
   const isGenerationComplete = useCallback(() => {
@@ -231,6 +342,46 @@ const PatentComponentGenerator: React.FC<PatentComponentGeneratorProps> = ({
       }, 100);
     }
   }, [generatedContent]);
+
+  // Add click handler for footnotes
+  useEffect(() => {
+    const handleFootnoteClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.classList.contains('footnote-ref')) {
+        const footnoteType = target.getAttribute('data-footnote-type');
+        const footnoteId = target.getAttribute('data-footnote-id');
+
+        if (footnoteType && footnoteId) {
+          // Set active footnote
+          setActiveFootnote(footnoteId);
+
+          // Find the correct metadata element - now we have single cards for each type
+          const metadataElement = document.getElementById(`metadata-${footnoteType}`);
+
+          if (metadataElement) {
+            metadataElement.scrollIntoView({
+              behavior: 'smooth',
+              block: 'center'
+            });
+
+            // Add highlight animation
+            metadataElement.classList.add('ring-2', 'ring-blue-500', 'border-blue-500');
+            setTimeout(() => {
+              metadataElement.classList.remove('ring-2', 'ring-blue-500', 'border-blue-500');
+              setActiveFootnote(null);
+            }, 3000);
+          }
+        }
+      }
+    };
+
+    // Add event listener to the document
+    document.addEventListener('click', handleFootnoteClick);
+
+    return () => {
+      document.removeEventListener('click', handleFootnoteClick);
+    };
+  }, []);
 
   const fetchStoredKnowledge = async () => {
     try {
@@ -451,6 +602,7 @@ This section should be detailed, technically accurate, and formatted appropriate
       if (!antigen || !disease) {
         console.warn("Missing critical data:", { antigen, disease });
       }
+      // Call the actual API - it now returns responses with tags
       const content = await generatePatentContent(
         sectionToGenerate,
         enhancedContext,
@@ -462,9 +614,12 @@ This section should be detailed, technically accurate, and formatted appropriate
         "test",
         "test"
       );
-      setGeneratedContent(content);
+      // Parse the content for footnotes
+      const parsed = parseContentWithFootnotes(content);
+      setGeneratedContent(parsed.content);
 
       console.log("first", content);
+      console.log("parsed", parsed);
 
       // Create a unique key for this section
       const componentKey = `${sectionToGenerate}:${subsectionToGenerate}`;
@@ -479,7 +634,29 @@ This section should be detailed, technically accurate, and formatted appropriate
       // Update our local edited components state
       setEditedComponents((prev) => ({
         ...prev,
-        [componentKey]: content,
+        [componentKey]: parsed.content,
+      }));
+
+      // Store parsed sections
+      setParsedSections((prev) => ({
+        ...prev,
+        [componentKey]: parsed
+      }));
+
+      // Extract and store metadata for display
+      const metadata = extractMetadataFromKnowledge(
+        storedKnowledge?.innovationKnowledge?.answer || "Innovation details not available",
+        storedKnowledge?.approachKnowledge?.answer || "Approach details not available",
+        storedKnowledge?.technologyKnowledge?.answer || "Technology details not available",
+        disease || "Disease information not available",
+        antigen || "Antigen information not available",
+        "Additional context and requirements",
+        parsed.footnotes
+      );
+
+      setSectionMetadataDisplay((prev) => ({
+        ...prev,
+        [componentKey]: metadata
       }));
 
       if (typeof window !== "undefined" && window.setEditComponents) {
@@ -914,56 +1091,114 @@ This section should be detailed, technically accurate, and formatted appropriate
               </div>
               <ScrollArea className="flex-1">
                 <div className="p-4 space-y-4" ref={scrollRef}>
-                  {Object.entries(rawData).map(([section, content]) => (
+                  <h3 className="text-sm font-bold text-gray-800 mb-3">
+                    Source Data
+                  </h3>
+
+                  {/* Single metadata card showing all the input variables */}
+                  <div className="space-y-3">
+                    {/* Innovation */}
                     <div
-                      key={section}
-                      id={`section-${section.toLowerCase()}`}
-                      className="rounded-2xl border border-p200 bg-white shadow-md hover:shadow-lg transition-shadow duration-300 p-6"
+                      id="metadata-innovation"
+                      className={`rounded-lg border bg-white transition-all duration-300 p-4 ${
+                        activeFootnote && activeFootnote.includes('innovation')
+                          ? 'ring-2 ring-blue-500 border-blue-500'
+                          : 'border-gray-200'
+                      }`}
                     >
-                      <div className="flex items-start justify-between mb-3">
-                        <div>
-                          <h3 className="text-lg font-semibold text-n900 capitalize">
-                            {section === "keyterms" ? "Key Terms" : section}
-                          </h3>
-                          <p className="text-xs text-n900 opacity-70">
-                            Section: {section}
-                          </p>
-                        </div>
+                      <h4 className="text-xs font-semibold text-gray-700 uppercase mb-2">Innovation</h4>
+                      <div className="text-sm text-gray-600 leading-relaxed">
+                        {lastGeneratedSection && lastGeneratedSubsection &&
+                         sectionMetadataDisplay[`${lastGeneratedSection}:${lastGeneratedSubsection}`]?.find(m => m.type === 'innovation')?.content ||
+                         'Innovation data will appear here when you generate a section'}
                       </div>
-
-                      <pre className="text-sm text-n900 whitespace-pre-wrap leading-relaxed font-mono border-t border-dashed pt-4 mt-4">
-                        {content}
-                      </pre>
                     </div>
-                  ))}
-                </div>
 
-                <div className="p-4 space-y-4">
-                  {embodimentPages.length > 1 &&
-                    embodimentPages.map((page: any, id: number) => (
-                      <div
-                        key={id}
-                        id={`section-${page.section.toLowerCase()}_page_number-${
-                          page.page_number
-                        }`}
-                        className="rounded-2xl border border-p200 bg-white shadow-md hover:shadow-lg transition-shadow duration-300 p-6"
-                      >
-                        <div className="flex items-start justify-between mb-3">
-                          <div>
-                            <h2 className="text-lg font-semibold text-n900 capitalize">
-                              {page.section}
-                            </h2>
-                            <p className="text-xs text-n900 opacity-70">
-                              Page {page.page_number} – {page.filename}
-                            </p>
-                          </div>
-                        </div>
-
-                        <p className="text-sm text-n900 whitespace-pre-wrap leading-relaxed font-mono border-t border-dashed pt-4 mt-4">
-                          {page.text}
-                        </p>
+                    {/* Approach */}
+                    <div
+                      id="metadata-approach"
+                      className={`rounded-lg border bg-white transition-all duration-300 p-4 ${
+                        activeFootnote && activeFootnote.includes('approach')
+                          ? 'ring-2 ring-blue-500 border-blue-500'
+                          : 'border-gray-200'
+                      }`}
+                    >
+                      <h4 className="text-xs font-semibold text-gray-700 uppercase mb-2">Approach</h4>
+                      <div className="text-sm text-gray-600 leading-relaxed">
+                        {lastGeneratedSection && lastGeneratedSubsection &&
+                         sectionMetadataDisplay[`${lastGeneratedSection}:${lastGeneratedSubsection}`]?.find(m => m.type === 'approach')?.content ||
+                         'Approach data will appear here when you generate a section'}
                       </div>
-                    ))}
+                    </div>
+
+                    {/* Technology */}
+                    <div
+                      id="metadata-technology"
+                      className={`rounded-lg border bg-white transition-all duration-300 p-4 ${
+                        activeFootnote && activeFootnote.includes('technology')
+                          ? 'ring-2 ring-blue-500 border-blue-500'
+                          : 'border-gray-200'
+                      }`}
+                    >
+                      <h4 className="text-xs font-semibold text-gray-700 uppercase mb-2">Technology</h4>
+                      <div className="text-sm text-gray-600 leading-relaxed">
+                        {lastGeneratedSection && lastGeneratedSubsection &&
+                         sectionMetadataDisplay[`${lastGeneratedSection}:${lastGeneratedSubsection}`]?.find(m => m.type === 'technology')?.content ||
+                         'Technology data will appear here when you generate a section'}
+                      </div>
+                    </div>
+
+                    {/* Disease */}
+                    <div
+                      id="metadata-disease"
+                      className={`rounded-lg border bg-white transition-all duration-300 p-4 ${
+                        activeFootnote && activeFootnote.includes('disease')
+                          ? 'ring-2 ring-blue-500 border-blue-500'
+                          : 'border-gray-200'
+                      }`}
+                    >
+                      <h4 className="text-xs font-semibold text-gray-700 uppercase mb-2">Disease</h4>
+                      <div className="text-sm text-gray-600 leading-relaxed">
+                        {lastGeneratedSection && lastGeneratedSubsection &&
+                         sectionMetadataDisplay[`${lastGeneratedSection}:${lastGeneratedSubsection}`]?.find(m => m.type === 'disease')?.content ||
+                         'Disease data will appear here when you generate a section'}
+                      </div>
+                    </div>
+
+                    {/* Antigen */}
+                    <div
+                      id="metadata-antigen"
+                      className={`rounded-lg border bg-white transition-all duration-300 p-4 ${
+                        activeFootnote && activeFootnote.includes('antigen')
+                          ? 'ring-2 ring-blue-500 border-blue-500'
+                          : 'border-gray-200'
+                      }`}
+                    >
+                      <h4 className="text-xs font-semibold text-gray-700 uppercase mb-2">Antigen</h4>
+                      <div className="text-sm text-gray-600 leading-relaxed">
+                        {lastGeneratedSection && lastGeneratedSubsection &&
+                         sectionMetadataDisplay[`${lastGeneratedSection}:${lastGeneratedSubsection}`]?.find(m => m.type === 'antigen')?.content ||
+                         'Antigen data will appear here when you generate a section'}
+                      </div>
+                    </div>
+
+                    {/* Additional */}
+                    <div
+                      id="metadata-additional"
+                      className={`rounded-lg border bg-white transition-all duration-300 p-4 ${
+                        activeFootnote && activeFootnote.includes('additional')
+                          ? 'ring-2 ring-blue-500 border-blue-500'
+                          : 'border-gray-200'
+                      }`}
+                    >
+                      <h4 className="text-xs font-semibold text-gray-700 uppercase mb-2">Additional Input</h4>
+                      <div className="text-sm text-gray-600 leading-relaxed">
+                        {lastGeneratedSection && lastGeneratedSubsection &&
+                         sectionMetadataDisplay[`${lastGeneratedSection}:${lastGeneratedSubsection}`]?.find(m => m.type === 'additional')?.content ||
+                         'Additional input will appear here when you generate a section'}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </ScrollArea>
             </>
