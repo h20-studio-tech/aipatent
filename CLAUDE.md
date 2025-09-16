@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+**IMPORTANT: NEVER COSIGN COMMITS. Do not add "Co-Authored-By: Claude" or any similar attribution to commit messages.**
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview

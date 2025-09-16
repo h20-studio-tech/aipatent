@@ -287,6 +287,17 @@ const PatentComponentGenerator: React.FC<PatentComponentGeneratorProps> = ({
   const [sectionMetadataDisplay, setSectionMetadataDisplay] = useState<
     Record<string, MetadataSection[]>
   >({});
+  const [storedKnowledgeData, setStoredKnowledgeData] = useState<{
+    approachKnowledge: { answer: string };
+    innovationKnowledge: { answer: string };
+    technologyKnowledge: { answer: string };
+    notesKnowledge: { answer: string };
+  }>({
+    approachKnowledge: { answer: "" },
+    innovationKnowledge: { answer: "" },
+    technologyKnowledge: { answer: "" },
+    notesKnowledge: { answer: "" },
+  });
 
   // Check if we've reached the end of the generation sequence
   const isGenerationComplete = useCallback(() => {
@@ -398,48 +409,67 @@ const PatentComponentGenerator: React.FC<PatentComponentGeneratorProps> = ({
         `${backendUrl}/v1/knowledge/research-note/${patentId}`
       );
 
+      // Prepare the knowledge data to return
+      let approachKnowledge = "";
+      let innovationKnowledge = "";
+      let technologyKnowledge = "";
+      let notesKnowledge = "";
+
       if (typeof window !== "undefined" && window.addStoredData) {
         if (approachResponse.data.data.length > 0) {
-          for (const approachKnowledge of approachResponse.data.data) {
+          // Combine all approach answers
+          const approachAnswers = [];
+          for (const approachItem of approachResponse.data.data) {
             const newNote = {
               patentId: patentId,
-              question: approachKnowledge.question,
-              answer: approachKnowledge.answer,
+              question: approachItem.question,
+              answer: approachItem.answer,
               section: "Approach",
-              timestamp: approachKnowledge.created_at,
+              timestamp: approachItem.created_at,
             };
             window.addStoredData("knowledge", newNote);
+            approachAnswers.push(approachItem.answer);
           }
+          approachKnowledge = approachAnswers.join(" ");
         }
 
         if (innovationResponse.data.data.length > 0) {
-          for (const innovationKnowledge of innovationResponse.data.data) {
+          // Combine all innovation answers
+          const innovationAnswers = [];
+          for (const innovationItem of innovationResponse.data.data) {
             const newNote = {
               patentId: patentId,
-              question: innovationKnowledge.question,
-              answer: innovationKnowledge.answer,
+              question: innovationItem.question,
+              answer: innovationItem.answer,
               section: "Innovation",
-              timestamp: innovationKnowledge.created_at,
+              timestamp: innovationItem.created_at,
             };
             window.addStoredData("knowledge", newNote);
+            innovationAnswers.push(innovationItem.answer);
           }
+          innovationKnowledge = innovationAnswers.join(" ");
         }
 
         if (technologyResponse.data.data.length > 0) {
-          for (const technologyKnowledge of technologyResponse.data.data) {
+          // Combine all technology answers
+          const technologyAnswers = [];
+          for (const technologyItem of technologyResponse.data.data) {
             const newNote = {
               patentId: patentId,
-              question: technologyKnowledge.question,
-              answer: technologyKnowledge.answer,
+              question: technologyItem.question,
+              answer: technologyItem.answer,
               section: "Technology",
-              timestamp: technologyKnowledge.created_at,
+              timestamp: technologyItem.created_at,
             };
             window.addStoredData("knowledge", newNote);
+            technologyAnswers.push(technologyItem.answer);
           }
+          technologyKnowledge = technologyAnswers.join(" ");
         }
 
         if (notesResponse.data.data.length > 0) {
           console.log("A");
+          const notesAnswers = [];
           for (const notes of notesResponse.data.data) {
             const newNote = {
               patentId: patentId,
@@ -450,11 +480,28 @@ const PatentComponentGenerator: React.FC<PatentComponentGeneratorProps> = ({
             };
             console.log("B", newNote);
             window.addStoredData("note", newNote);
+            notesAnswers.push(notes.content);
           }
+          notesKnowledge = notesAnswers.join(" ");
         }
       }
+
+      // Return the collected knowledge data
+      return {
+        approachKnowledge: { answer: approachKnowledge },
+        innovationKnowledge: { answer: innovationKnowledge },
+        technologyKnowledge: { answer: technologyKnowledge },
+        notesKnowledge: { answer: notesKnowledge }
+      };
     } catch (err) {
       console.log(err);
+      // Return empty knowledge if there's an error
+      return {
+        approachKnowledge: { answer: "" },
+        innovationKnowledge: { answer: "" },
+        technologyKnowledge: { answer: "" },
+        notesKnowledge: { answer: "" }
+      };
     }
   };
 
@@ -562,7 +609,11 @@ const PatentComponentGenerator: React.FC<PatentComponentGeneratorProps> = ({
   useEffect(() => {
     if (patentId) {
       fetchRawContent();
-      fetchStoredKnowledge();
+      fetchStoredKnowledge().then((knowledge) => {
+        if (knowledge) {
+          setStoredKnowledgeData(knowledge);
+        }
+      });
     }
   }, [patentId]);
 
@@ -593,7 +644,8 @@ const PatentComponentGenerator: React.FC<PatentComponentGeneratorProps> = ({
 
 Please generate the "${sectionToGenerate}" section of the patent.
 This section should be detailed, technically accurate, and formatted appropriately for a patent document.`;
-      const storedKnowledge = await fetchStoredKnowledge();
+      // Use the already fetched stored knowledge from state
+      const storedKnowledge = storedKnowledgeData;
 
       console.log("Stored", storedKnowledge);
       console.log("Antigen", antigen);
@@ -693,7 +745,7 @@ This section should be detailed, technically accurate, and formatted appropriate
       }
       setIsLoading(false);
     }
-  }, [currentSection, currentSubsection, patentContext, toast]);
+  }, [currentSection, currentSubsection, patentContext, toast, storedKnowledgeData, antigen, disease]);
 
   const moveToNextSubsection = () => {
     // Since each section only has one subsection (itself), we always move to the next section
@@ -752,7 +804,8 @@ User guidance: ${correctionText}
 Please regenerate the "${sectionToRegenerate}" section based on this guidance.
 This section should be detailed, technically accurate, and formatted appropriately for a patent document.`;
 
-      const storedKnowledge = await fetchStoredKnowledge();
+      // Use the already fetched stored knowledge from state
+      const storedKnowledge = storedKnowledgeData;
 
       console.log("Stored", storedKnowledge);
       console.log("Antigen", antigen);
@@ -1108,9 +1161,7 @@ This section should be detailed, technically accurate, and formatted appropriate
                     >
                       <h4 className="text-xs font-semibold text-gray-700 uppercase mb-2">Innovation</h4>
                       <div className="text-sm text-gray-600 leading-relaxed">
-                        {lastGeneratedSection && lastGeneratedSubsection &&
-                         sectionMetadataDisplay[`${lastGeneratedSection}:${lastGeneratedSubsection}`]?.find(m => m.type === 'innovation')?.content ||
-                         'Innovation data will appear here when you generate a section'}
+                        {storedKnowledgeData.innovationKnowledge.answer || 'Innovation data will appear here when knowledge is created'}
                       </div>
                     </div>
 
@@ -1125,9 +1176,7 @@ This section should be detailed, technically accurate, and formatted appropriate
                     >
                       <h4 className="text-xs font-semibold text-gray-700 uppercase mb-2">Approach</h4>
                       <div className="text-sm text-gray-600 leading-relaxed">
-                        {lastGeneratedSection && lastGeneratedSubsection &&
-                         sectionMetadataDisplay[`${lastGeneratedSection}:${lastGeneratedSubsection}`]?.find(m => m.type === 'approach')?.content ||
-                         'Approach data will appear here when you generate a section'}
+                        {storedKnowledgeData.approachKnowledge.answer || 'Approach data will appear here when knowledge is created'}
                       </div>
                     </div>
 
@@ -1142,9 +1191,7 @@ This section should be detailed, technically accurate, and formatted appropriate
                     >
                       <h4 className="text-xs font-semibold text-gray-700 uppercase mb-2">Technology</h4>
                       <div className="text-sm text-gray-600 leading-relaxed">
-                        {lastGeneratedSection && lastGeneratedSubsection &&
-                         sectionMetadataDisplay[`${lastGeneratedSection}:${lastGeneratedSubsection}`]?.find(m => m.type === 'technology')?.content ||
-                         'Technology data will appear here when you generate a section'}
+                        {storedKnowledgeData.technologyKnowledge.answer || 'Technology data will appear here when knowledge is created'}
                       </div>
                     </div>
 
@@ -1159,9 +1206,7 @@ This section should be detailed, technically accurate, and formatted appropriate
                     >
                       <h4 className="text-xs font-semibold text-gray-700 uppercase mb-2">Disease</h4>
                       <div className="text-sm text-gray-600 leading-relaxed">
-                        {lastGeneratedSection && lastGeneratedSubsection &&
-                         sectionMetadataDisplay[`${lastGeneratedSection}:${lastGeneratedSubsection}`]?.find(m => m.type === 'disease')?.content ||
-                         'Disease data will appear here when you generate a section'}
+                        {disease || 'Disease information not provided'}
                       </div>
                     </div>
 
@@ -1176,9 +1221,7 @@ This section should be detailed, technically accurate, and formatted appropriate
                     >
                       <h4 className="text-xs font-semibold text-gray-700 uppercase mb-2">Antigen</h4>
                       <div className="text-sm text-gray-600 leading-relaxed">
-                        {lastGeneratedSection && lastGeneratedSubsection &&
-                         sectionMetadataDisplay[`${lastGeneratedSection}:${lastGeneratedSubsection}`]?.find(m => m.type === 'antigen')?.content ||
-                         'Antigen data will appear here when you generate a section'}
+                        {antigen || 'Antigen information not provided'}
                       </div>
                     </div>
 
@@ -1193,9 +1236,7 @@ This section should be detailed, technically accurate, and formatted appropriate
                     >
                       <h4 className="text-xs font-semibold text-gray-700 uppercase mb-2">Additional Input</h4>
                       <div className="text-sm text-gray-600 leading-relaxed">
-                        {lastGeneratedSection && lastGeneratedSubsection &&
-                         sectionMetadataDisplay[`${lastGeneratedSection}:${lastGeneratedSubsection}`]?.find(m => m.type === 'additional')?.content ||
-                         'Additional input will appear here when you generate a section'}
+                        {storedKnowledgeData.notesKnowledge.answer || 'Research notes will appear here when created'}
                       </div>
                     </div>
                   </div>
