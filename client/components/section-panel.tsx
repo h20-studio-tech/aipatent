@@ -62,6 +62,7 @@ interface SectionPanelProps {
     >
   >;
   setInsightResponse: Dispatch<SetStateAction<string>>;
+  suggestedQuestions?: string[];
 }
 
 export default function SectionPanel({
@@ -80,6 +81,7 @@ export default function SectionPanel({
   setSelectedPdfs,
   selectedPdfIds,
   setSelectedPdfIds,
+  suggestedQuestions = [],
 }: SectionPanelProps) {
   const [userInput, setUserInput] = useState("");
   const [chatHistory, setChatHistory] = useState<string[]>([]);
@@ -96,6 +98,8 @@ export default function SectionPanel({
   const confettiRef = useRef(null);
   const successIconRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const [showSuggestions, setShowSuggestions] = useState(true);
+  const [hasGeneratedAnswer, setHasGeneratedAnswer] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -206,6 +210,10 @@ export default function SectionPanel({
         setQuestion(userInput);
 
         setMetaData(data.data);
+        
+        // Hide suggestions permanently after first answer
+        setHasGeneratedAnswer(true);
+        setShowSuggestions(false);
       } else {
         alert("Unexpected API response format.");
       }
@@ -525,8 +533,38 @@ export default function SectionPanel({
             placeholder={`Ask a question about ${title.toLowerCase()}...`}
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
+            onFocus={() => setShowSuggestions(false)}
             className="min-h-[100px]"
           />
+          
+          {/* Suggested Questions */}
+          {showSuggestions && !hasGeneratedAnswer && suggestedQuestions.length > 0 && !userInput && (
+            <div className="space-y-2 p-3 bg-muted/30 rounded-md border border-dashed">
+              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                <Brain className="h-4 w-4" />
+                <span>Suggested Questions:</span>
+              </div>
+              <div className="space-y-2">
+                {suggestedQuestions.map((question, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      setUserInput(question);
+                      setShowSuggestions(false);
+                      // Auto-submit after a brief delay
+                      setTimeout(() => {
+                        handleSubmit();
+                      }, 100);
+                    }}
+                    className="w-full text-left px-3 py-2 text-sm bg-background hover:bg-accent rounded-md transition-colors border border-border hover:border-primary"
+                  >
+                    {question}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <Button
             onClick={handleSubmit}
             disabled={isLoading}

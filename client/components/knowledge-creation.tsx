@@ -66,6 +66,9 @@ export default function KnowledgeCreation({
   const innovationInsightsRef = useRef<InsightsRef | null>(null);
   const [selectedPdfIds, setSelectedPdfIds] = useState<string[]>([]);
   const [selectedPdfs, setSelectedPdfs] = useState<PDF[]>([]);
+  const [approachSuggestions, setApproachSuggestions] = useState<string[]>([]);
+  const [technologySuggestions, setTechnologySuggestions] = useState<string[]>([]);
+  const [innovationSuggestions, setInnovationSuggestions] = useState<string[]>([]);
 
   const handleCitationClick = (chunkId: number) => {
     setHighlightedChunkId(chunkId);
@@ -74,6 +77,64 @@ export default function KnowledgeCreation({
       setHighlightedChunkId(null);
     }, 3000);
   };
+
+  // Generate suggested questions when PDFs are selected
+  useEffect(() => {
+    if (selectedPdfIds.length > 0) {
+      // Large pool of category-specific questions
+      const allApproachQuestions = [
+        "What is the core methodology?",
+        "How does this approach differ?",
+        "What are the key steps?",
+        "What problem does this solve?",
+        "What are the main advantages?",
+        "How is this implemented?",
+        "What are the limitations?",
+        "Who is the target user?",
+        "What inspired this approach?",
+        "How scalable is this method?",
+      ];
+      const allTechnologyQuestions = [
+        "What technologies are used?",
+        "How do components integrate?",
+        "What are the technical specs?",
+        "What platforms are supported?",
+        "What are the dependencies?",
+        "How is data processed?",
+        "What security measures exist?",
+        "What is the architecture?",
+        "How is performance optimized?",
+        "What APIs are available?",
+      ];
+      const allInnovationQuestions = [
+        "What makes this novel?",
+        "What problem wasn't solved before?",
+        "How does this improve existing methods?",
+        "What is the unique value?",
+        "What breakthrough does this enable?",
+        "How does this change the field?",
+        "What new capabilities emerge?",
+        "What gap does this fill?",
+        "What makes this patentable?",
+        "What competitive advantage exists?",
+      ];
+
+      // Randomly select 3 questions from each pool
+      const getRandomQuestions = (pool: string[], count: number) => {
+        const shuffled = [...pool].sort(() => Math.random() - 0.5);
+        return shuffled.slice(0, count);
+      };
+
+      setApproachSuggestions(getRandomQuestions(allApproachQuestions, 3));
+      setTechnologySuggestions(getRandomQuestions(allTechnologyQuestions, 3));
+      setInnovationSuggestions(getRandomQuestions(allInnovationQuestions, 3));
+    } else {
+      // Clear suggestions when no PDFs selected
+      setApproachSuggestions([]);
+      setTechnologySuggestions([]);
+      setInnovationSuggestions([]);
+    }
+  }, [selectedPdfIds]);
 
   const handlePdfUpload = (sectionId: string, file: File) => {
     // In a real app, we would upload the file to a server
@@ -187,6 +248,7 @@ export default function KnowledgeCreation({
                     )}
                     onPdfUpload={handlePdfUpload}
                     hideInsights={true}
+                    suggestedQuestions={approachSuggestions}
                   />
                 </TabsContent>
 
@@ -209,6 +271,7 @@ export default function KnowledgeCreation({
                     )}
                     onPdfUpload={handlePdfUpload}
                     hideInsights={true}
+                    suggestedQuestions={technologySuggestions}
                   />
                 </TabsContent>
 
@@ -231,6 +294,7 @@ export default function KnowledgeCreation({
                     )}
                     onPdfUpload={handlePdfUpload}
                     hideInsights={true}
+                    suggestedQuestions={innovationSuggestions}
                   />
                 </TabsContent>
               </Tabs>
