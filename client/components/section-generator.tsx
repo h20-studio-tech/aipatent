@@ -22,6 +22,7 @@ import {
   ChevronDown,
   ChevronRight,
   ChevronLeft,
+  FileText,
 } from "lucide-react";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "./ui/use-toast";
@@ -76,6 +77,27 @@ interface SavedPatentData {
   lastGeneratedSection: string | null;
   lastGeneratedSubsection: string | null;
   timestamp: number;
+}
+
+interface KnowledgeEntry {
+  id: string;
+  section: string;
+  question: string;
+  answer: string;
+  timestamp: string;
+  saved: boolean;
+  remixed?: boolean;
+}
+
+interface StoredKnowledgeState {
+  approachKnowledge: { answer: string };
+  innovationKnowledge: { answer: string };
+  technologyKnowledge: { answer: string };
+  notesKnowledge: { answer: string };
+  approachEntries: KnowledgeEntry[];
+  innovationEntries: KnowledgeEntry[];
+  technologyEntries: KnowledgeEntry[];
+  notesEntries: KnowledgeEntry[];
 }
 
 // Define the main sections (hardcoded headers)
@@ -287,17 +309,18 @@ const PatentComponentGenerator: React.FC<PatentComponentGeneratorProps> = ({
   const [sectionMetadataDisplay, setSectionMetadataDisplay] = useState<
     Record<string, MetadataSection[]>
   >({});
-  const [storedKnowledgeData, setStoredKnowledgeData] = useState<{
-    approachKnowledge: { answer: string };
-    innovationKnowledge: { answer: string };
-    technologyKnowledge: { answer: string };
-    notesKnowledge: { answer: string };
-  }>({
-    approachKnowledge: { answer: "" },
-    innovationKnowledge: { answer: "" },
-    technologyKnowledge: { answer: "" },
-    notesKnowledge: { answer: "" },
-  });
+  const [storedKnowledgeData, setStoredKnowledgeData] = useState<StoredKnowledgeState>(
+    {
+      approachKnowledge: { answer: "" },
+      innovationKnowledge: { answer: "" },
+      technologyKnowledge: { answer: "" },
+      notesKnowledge: { answer: "" },
+      approachEntries: [],
+      innovationEntries: [],
+      technologyEntries: [],
+      notesEntries: [],
+    }
+  );
 
   // Check if we've reached the end of the generation sequence
   const isGenerationComplete = useCallback(() => {
@@ -414,85 +437,97 @@ const PatentComponentGenerator: React.FC<PatentComponentGeneratorProps> = ({
       let innovationKnowledge = "";
       let technologyKnowledge = "";
       let notesKnowledge = "";
+      const approachEntries: KnowledgeEntry[] = [];
+      const innovationEntries: KnowledgeEntry[] = [];
+      const technologyEntries: KnowledgeEntry[] = [];
+      const notesEntries: KnowledgeEntry[] = [];
 
-      if (typeof window !== "undefined" && window.addStoredData) {
-        if (approachResponse.data.data.length > 0) {
-          // Combine all approach answers
-          const approachAnswers = [];
-          for (const approachItem of approachResponse.data.data) {
-            const newNote = {
-              patentId: patentId,
-              question: approachItem.question,
-              answer: approachItem.answer,
-              section: "Approach",
-              timestamp: approachItem.created_at,
-            };
-            window.addStoredData("knowledge", newNote);
-            approachAnswers.push(approachItem.answer);
-          }
-          approachKnowledge = approachAnswers.join(" ");
-        }
+      const pushToWindow =
+        typeof window !== "undefined" && typeof window.addStoredData === "function"
+          ? (type: string, entry: KnowledgeEntry) => {
+              window.addStoredData?.(type, entry);
+            }
+          : null;
 
-        if (innovationResponse.data.data.length > 0) {
-          // Combine all innovation answers
-          const innovationAnswers = [];
-          for (const innovationItem of innovationResponse.data.data) {
-            const newNote = {
-              patentId: patentId,
-              question: innovationItem.question,
-              answer: innovationItem.answer,
-              section: "Innovation",
-              timestamp: innovationItem.created_at,
-            };
-            window.addStoredData("knowledge", newNote);
-            innovationAnswers.push(innovationItem.answer);
-          }
-          innovationKnowledge = innovationAnswers.join(" ");
-        }
-
-        if (technologyResponse.data.data.length > 0) {
-          // Combine all technology answers
-          const technologyAnswers = [];
-          for (const technologyItem of technologyResponse.data.data) {
-            const newNote = {
-              patentId: patentId,
-              question: technologyItem.question,
-              answer: technologyItem.answer,
-              section: "Technology",
-              timestamp: technologyItem.created_at,
-            };
-            window.addStoredData("knowledge", newNote);
-            technologyAnswers.push(technologyItem.answer);
-          }
-          technologyKnowledge = technologyAnswers.join(" ");
-        }
-
-        if (notesResponse.data.data.length > 0) {
-          console.log("A");
-          const notesAnswers = [];
-          for (const notes of notesResponse.data.data) {
-            const newNote = {
-              patentId: patentId,
-              question: "Research Note",
-              answer: notes.content,
-              section: "Note",
-              timestamp: notes.created_at,
-            };
-            console.log("B", newNote);
-            window.addStoredData("note", newNote);
-            notesAnswers.push(notes.content);
-          }
-          notesKnowledge = notesAnswers.join(" ");
-        }
+      const approachAnswers: string[] = [];
+      for (const approachItem of approachResponse.data.data) {
+        const entry: KnowledgeEntry = {
+          id: `${approachItem.id || approachItem.created_at}-approach`,
+          section: "Approach",
+          question: approachItem.question,
+          answer: approachItem.answer,
+          timestamp: approachItem.created_at,
+          saved: true,
+          remixed: approachItem.remixed ?? false,
+        };
+        pushToWindow?.("knowledge", entry);
+        approachEntries.push(entry);
+        approachAnswers.push(approachItem.answer);
       }
+      approachKnowledge = approachAnswers.join(" ");
+
+      const innovationAnswers: string[] = [];
+      for (const innovationItem of innovationResponse.data.data) {
+        const entry: KnowledgeEntry = {
+          id: `${innovationItem.id || innovationItem.created_at}-innovation`,
+          section: "Innovation",
+          question: innovationItem.question,
+          answer: innovationItem.answer,
+          timestamp: innovationItem.created_at,
+          saved: true,
+          remixed: innovationItem.remixed ?? false,
+        };
+        pushToWindow?.("knowledge", entry);
+        innovationEntries.push(entry);
+        innovationAnswers.push(innovationItem.answer);
+      }
+      innovationKnowledge = innovationAnswers.join(" ");
+
+      const technologyAnswers: string[] = [];
+      for (const technologyItem of technologyResponse.data.data) {
+        const entry: KnowledgeEntry = {
+          id: `${technologyItem.id || technologyItem.created_at}-technology`,
+          section: "Technology",
+          question: technologyItem.question,
+          answer: technologyItem.answer,
+          timestamp: technologyItem.created_at,
+          saved: true,
+          remixed: technologyItem.remixed ?? false,
+        };
+        pushToWindow?.("knowledge", entry);
+        technologyEntries.push(entry);
+        technologyAnswers.push(technologyItem.answer);
+      }
+      technologyKnowledge = technologyAnswers.join(" ");
+
+      const notesAnswers: string[] = [];
+      for (const notes of notesResponse.data.data) {
+        const entry: KnowledgeEntry = {
+          id: `${notes.id || notes.created_at}-note`,
+          section: "Research Note",
+          question: "Research Note",
+          answer: notes.content,
+          timestamp: notes.created_at,
+          saved: true,
+          remixed: notes.remixed ?? false,
+        };
+        pushToWindow?.("note", entry);
+        notesEntries.push(entry);
+        notesAnswers.push(notes.content);
+      }
+      notesKnowledge = notesAnswers.join(" ");
 
       // Return the collected knowledge data
       return {
         approachKnowledge: { answer: approachKnowledge },
         innovationKnowledge: { answer: innovationKnowledge },
         technologyKnowledge: { answer: technologyKnowledge },
-        notesKnowledge: { answer: notesKnowledge }
-      };
+        notesKnowledge: { answer: notesKnowledge },
+        approachEntries,
+        innovationEntries,
+        technologyEntries,
+        notesEntries,
+      } satisfies StoredKnowledgeState;
     } catch (err) {
       console.log(err);
       // Return empty knowledge if there's an error
@@ -500,9 +535,62 @@ const PatentComponentGenerator: React.FC<PatentComponentGeneratorProps> = ({
         approachKnowledge: { answer: "" },
         innovationKnowledge: { answer: "" },
         technologyKnowledge: { answer: "" },
-        notesKnowledge: { answer: "" }
-      };
+        notesKnowledge: { answer: "" },
+        approachEntries: [],
+        innovationEntries: [],
+        technologyEntries: [],
+        notesEntries: [],
+      } satisfies StoredKnowledgeState;
     }
+  };
+
+  const renderKnowledgeCards = (
+    entries: KnowledgeEntry[],
+    emptyMessage: string
+  ) => {
+    if (!entries || entries.length === 0) {
+      return (
+        <div className="text-sm text-muted-foreground bg-muted/30 rounded-md p-3">
+          {emptyMessage}
+        </div>
+      );
+    }
+
+    return entries.map((entry) => (
+      <div key={entry.id} className="border rounded-lg overflow-hidden">
+        <div className="bg-muted px-4 py-2 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="font-medium">{entry.section}</span>
+            <span className="text-muted-foreground text-xs">
+              {new Date(entry.timestamp).toLocaleString()}
+            </span>
+          </div>
+          <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+            {entry.saved && entry.remixed ? "Remixed" : entry.saved ? "Saved" : "Draft"}
+          </span>
+        </div>
+        <div className="p-4 space-y-3">
+          {entry.question === "Research Note" ? (
+            <div className="bg-primary/5 p-3 rounded-md">
+              <div className="flex items-center gap-2 mb-2">
+                <FileText className="h-4 w-4 text-primary" />
+                <p className="font-medium text-sm">Research Note</p>
+              </div>
+              <p className="text-sm whitespace-pre-wrap">{entry.answer}</p>
+            </div>
+          ) : (
+            <>
+              <div className="bg-accent/30 p-3 rounded-md">
+                <p className="font-medium text-sm">Q: {entry.question}</p>
+              </div>
+              <div className="bg-primary/5 p-3 rounded-md">
+                <p className="text-sm">A: {entry.answer}</p>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    ));
   };
 
   // Save current progress
@@ -1153,46 +1241,49 @@ This section should be detailed, technically accurate, and formatted appropriate
                     {/* Innovation */}
                     <div
                       id="metadata-innovation"
-                      className={`rounded-lg border bg-white transition-all duration-300 p-4 ${
+                      className={`rounded-lg border bg-white transition-all duration-300 p-4 space-y-4 ${
                         activeFootnote && activeFootnote.includes('innovation')
                           ? 'ring-2 ring-blue-500 border-blue-500'
                           : 'border-gray-200'
                       }`}
                     >
-                      <h4 className="text-xs font-semibold text-gray-700 uppercase mb-2">Innovation</h4>
-                      <div className="text-sm text-gray-600 leading-relaxed">
-                        {storedKnowledgeData.innovationKnowledge.answer || 'Innovation data will appear here when knowledge is created'}
-                      </div>
+                      <h4 className="text-xs font-semibold text-gray-700 uppercase">Innovation</h4>
+                      {renderKnowledgeCards(
+                        storedKnowledgeData.innovationEntries,
+                        'Innovation knowledge will appear here when entries are saved.'
+                      )}
                     </div>
 
                     {/* Approach */}
                     <div
                       id="metadata-approach"
-                      className={`rounded-lg border bg-white transition-all duration-300 p-4 ${
+                      className={`rounded-lg border bg-white transition-all duration-300 p-4 space-y-4 ${
                         activeFootnote && activeFootnote.includes('approach')
                           ? 'ring-2 ring-blue-500 border-blue-500'
                           : 'border-gray-200'
                       }`}
                     >
-                      <h4 className="text-xs font-semibold text-gray-700 uppercase mb-2">Approach</h4>
-                      <div className="text-sm text-gray-600 leading-relaxed">
-                        {storedKnowledgeData.approachKnowledge.answer || 'Approach data will appear here when knowledge is created'}
-                      </div>
+                      <h4 className="text-xs font-semibold text-gray-700 uppercase">Approach</h4>
+                      {renderKnowledgeCards(
+                        storedKnowledgeData.approachEntries,
+                        'Approach knowledge will appear here when entries are saved.'
+                      )}
                     </div>
 
                     {/* Technology */}
                     <div
                       id="metadata-technology"
-                      className={`rounded-lg border bg-white transition-all duration-300 p-4 ${
+                      className={`rounded-lg border bg-white transition-all duration-300 p-4 space-y-4 ${
                         activeFootnote && activeFootnote.includes('technology')
                           ? 'ring-2 ring-blue-500 border-blue-500'
                           : 'border-gray-200'
                       }`}
                     >
-                      <h4 className="text-xs font-semibold text-gray-700 uppercase mb-2">Technology</h4>
-                      <div className="text-sm text-gray-600 leading-relaxed">
-                        {storedKnowledgeData.technologyKnowledge.answer || 'Technology data will appear here when knowledge is created'}
-                      </div>
+                      <h4 className="text-xs font-semibold text-gray-700 uppercase">Technology</h4>
+                      {renderKnowledgeCards(
+                        storedKnowledgeData.technologyEntries,
+                        'Technology knowledge will appear here when entries are saved.'
+                      )}
                     </div>
 
                     {/* Disease */}
@@ -1228,16 +1319,17 @@ This section should be detailed, technically accurate, and formatted appropriate
                     {/* Additional */}
                     <div
                       id="metadata-additional"
-                      className={`rounded-lg border bg-white transition-all duration-300 p-4 ${
+                      className={`rounded-lg border bg-white transition-all duration-300 p-4 space-y-4 ${
                         activeFootnote && activeFootnote.includes('additional')
                           ? 'ring-2 ring-blue-500 border-blue-500'
                           : 'border-gray-200'
                       }`}
                     >
-                      <h4 className="text-xs font-semibold text-gray-700 uppercase mb-2">Additional Input</h4>
-                      <div className="text-sm text-gray-600 leading-relaxed">
-                        {storedKnowledgeData.notesKnowledge.answer || 'Research notes will appear here when created'}
-                      </div>
+                      <h4 className="text-xs font-semibold text-gray-700 uppercase">Research Notes</h4>
+                      {renderKnowledgeCards(
+                        storedKnowledgeData.notesEntries,
+                        'Research notes will appear here when created.'
+                      )}
                     </div>
                   </div>
                 </div>
