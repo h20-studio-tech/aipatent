@@ -25,6 +25,8 @@ interface DBData {
   timestamp: string;
   saved: boolean;
   remixed?: boolean;
+  sourceChunkIds?: number[]; // IDs of document chunks used to generate this answer
+  sourceDocuments?: string[]; // Filenames of source documents
 }
 
 interface SectionMetadata {}
@@ -57,6 +59,9 @@ export default function StoredKnowledge({
   const [isGeneratingPDF, setIsGeneratingPDF] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [chunkModalOpen, setChunkModalOpen] = useState(false);
+  const [selectedChunk, setSelectedChunk] = useState<any>(null);
+  const [loadingChunk, setLoadingChunk] = useState(false);
   const [editedComponents, setEditedComponents] = useState<
     Record<string, string>
   >({});
@@ -164,7 +169,9 @@ export default function StoredKnowledge({
       question: string,
       answer: string,
       patentId?: string,
-      remixed?: boolean
+      remixed?: boolean,
+      sourceChunkIds?: number[],
+      sourceDocuments?: string[]
     ) => {
       const payload = {
         patent_id: patentId,
@@ -195,6 +202,8 @@ export default function StoredKnowledge({
         timestamp: new Date().toISOString(),
         saved: true,
         remixed: remixed ?? false,
+        sourceChunkIds: sourceChunkIds || [],
+        sourceDocuments: sourceDocuments || [],
       };
 
       setLocalChats((prev) => [newEntry, ...prev]);
@@ -212,19 +221,91 @@ export default function StoredKnowledge({
       return window.__globalKnowledgeCache || [];
     };
   }, []);
-
   const getFilteredKnowledge = (section: string) => {
     const mainSections = ["approach", "technology", "innovation"];
     if (section === "other") {
       return localChats.filter(
-        (item) => !mainSections.includes(item.section.toLowerCase())
+        (item) =>
+          !mainSections.some(
+            (s) => item.section.toLowerCase() === s.toLowerCase()
+          )
       );
     }
-    return localChats.filter((item) => item.section.toLowerCase() === section);
+    return localChats.filter(
+      (item) => item.section.toLowerCase() === section.toLowerCase()
+    );
+  };
+
+  const handleCitationClick = async (chunkId: number, sourceDocuments: string[]) => {
+    setLoadingChunk(true);
+    setChunkModalOpen(true);
+    
+    try {
+      // Fetch the specific chunk from the backend
+      const response = await axios.post(`${backendUrl}/v1/rag/chunks-by-ids/`, {
+        chunk_ids: [chunkId],
+        document_names: sourceDocuments
+      });
+      
+      if (response.data.chunks && response.data.chunks.length > 0) {
+        setSelectedChunk(response.data.chunks[0]);
+      } else {
+        toast({
+          title: "Chunk not found",
+          description: `Could not find chunk ${chunkId} in the source documents.`,
+          variant: "destructive",
+          duration: 3000,
+        });
+        setChunkModalOpen(false);
+      }
+    } catch (error) {
+      console.error("Error fetching chunk:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch source chunk.",
+        variant: "destructive",
+        duration: 3000,
+      });
+      setChunkModalOpen(false);
+    } finally {
+      setLoadingChunk(false);
+    }
+  };
+
+  const renderAnswerWithCitations = (answer: string, sourceDocuments: string[]) => {
+    // Convert [12] style citations into clickable elements
+    const parts = answer.split(/(\[\d+\])/);
+    
+    return parts.map((part, index) => {
+      const match = part.match(/\[(\d+)\]/);
+      if (match) {
+        const chunkId = parseInt(match[1]);
+        return (
+          <span
+            key={index}
+            className="inline-block align-super text-xs px-1 rounded cursor-pointer text-primary hover:underline"
+            onClick={() => handleCitationClick(chunkId, sourceDocuments)}
+            title={`View source chunk ${chunkId}`}
+          >
+            {part}
+          </span>
+        );
+      }
+      return <span key={index}>{part}</span>;
+    });
   };
 
   useEffect(() => {
-    const handleNewItem = () => setHasNewItems(true);
+    const handleNewItem = (e: any) => {
+      const newItem = e.detail;
+      setLocalChats((prev) => {
+        const exists = prev.some((item) => item.id === newItem.id);
+        if (exists) return prev;
+        return [newItem, ...prev];
+      });
+      setHasNewItems(true);
+    };
+
     window.addEventListener("researchNoteAdded", handleNewItem);
     window.addEventListener("knowledgeEntryAdded", handleNewItem);
     return () => {
@@ -436,7 +517,9 @@ export default function StoredKnowledge({
                                   </p>
                                 </div>
                                 <div className="bg-primary/5 p-3 rounded-md">
-                                  <p className="text-sm">A: {item.answer}</p>
+                                  <p className="text-sm">
+                                    A: {renderAnswerWithCitations(item.answer, item.sourceDocuments || [])}
+                                  </p>
                                 </div>
                               </>
                             )}
@@ -453,6 +536,45 @@ export default function StoredKnowledge({
               </TabsContent>
             ))}
           </Tabs>
+        </DialogContent>
+      </Dialog>
+
+      {/* Chunk Source Modal */}
+      <Dialog open={chunkModalOpen} onOpenChange={setChunkModalOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Source Chunk</DialogTitle>
+          </DialogHeader>
+          {loadingChunk ? (
+            <div className="flex items-center justify-center py-8">
+              <span className="animate-spin mr-2">⏳</span>
+              Loading chunk...
+            </div>
+          ) : selectedChunk ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="font-semibold">Chunk ID:</span> {selectedChunk.chunk_id}
+                </div>
+                <div>
+                  <span className="font-semibold">Page:</span> {selectedChunk.page_number}
+                </div>
+                <div className="col-span-2">
+                  <span className="font-semibold">Document:</span> {selectedChunk.filename}
+                </div>
+              </div>
+              <div className="border-t pt-4">
+                <p className="font-semibold text-sm mb-2">Text:</p>
+                <div className="bg-muted p-4 rounded-md max-h-[400px] overflow-y-auto">
+                  <p className="text-sm whitespace-pre-wrap">{selectedChunk.text}</p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              No chunk data available
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </>

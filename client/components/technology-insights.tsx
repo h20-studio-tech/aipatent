@@ -161,11 +161,18 @@ const TechnologyInsights = forwardRef<
       setIsSaving(true);
 
       if (typeof window !== "undefined" && window.addKnowledgeEntry) {
+        // Extract chunk IDs and document names from metadata
+        const chunkIds = metaData.map((item) => item.chunk_id);
+        const docNames = [...new Set(metaData.map((item) => item.filename.replace(/\.pdf$/i, '')))];
+        
         window.addKnowledgeEntry(
           "Technology",
           question,
           editedContent,
-          patentId
+          patentId,
+          false,
+          chunkIds,
+          docNames
         );
       }
 

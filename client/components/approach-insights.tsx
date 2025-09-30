@@ -38,7 +38,10 @@ declare global {
       section: string,
       question: string,
       content: string,
-      patentId: string
+      patentId?: string,
+      remixed?: boolean,
+      sourceChunkIds?: number[],
+      sourceDocuments?: string[]
     ) => void;
   }
 }
@@ -180,7 +183,19 @@ const ApproachInsights = forwardRef<ApproachInsightsRef, ApproachInsightsProps>(
 
       // persist (host app hook)
       if (typeof window !== "undefined" && window.addKnowledgeEntry) {
-        window.addKnowledgeEntry("Approach", question, editedContent, patentId);
+        // Extract chunk IDs and document names from metadata
+        const chunkIds = metaData.map((item) => item.chunk_id);
+        const docNames = [...new Set(metaData.map((item) => item.filename.replace(/\.pdf$/i, '')))];
+        
+        window.addKnowledgeEntry(
+          "Approach",
+          question,
+          editedContent,
+          patentId,
+          false,
+          chunkIds,
+          docNames
+        );
       }
 
       setTimeout(() => {
